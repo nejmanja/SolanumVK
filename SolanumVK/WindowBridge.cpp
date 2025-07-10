@@ -29,6 +29,14 @@ WindowBridge::~WindowBridge()
 	SDL_DestroyWindow(window);
 }
 
+VkSurfaceKHR WindowBridge::createSurface(VkInstance instance)
+{
+	VkSurfaceKHR surface;
+	SDL_Vulkan_CreateSurface(window, instance, &surface);
+
+	return surface;
+}
+
 void WindowBridge::handleEvents()
 {
 	SDL_Event e;

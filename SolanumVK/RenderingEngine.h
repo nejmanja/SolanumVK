@@ -1,5 +1,7 @@
 #pragma once
+
 #include "WindowBridge.h"
+#include "VulkanContext.h"
 
 class RenderingEngine
 {
@@ -9,5 +11,6 @@ public:
 	~RenderingEngine();
 private:
 	WindowBridge window;
+	VulkanContext vulkanContext;
 };
 

@@ -112,6 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,6 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,11 +141,16 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RenderingEngine.cpp" />
+    <ClCompile Include="VkBootstrap\VkBootstrap.cpp" />
+    <ClCompile Include="VulkanContext.cpp" />
     <ClCompile Include="WindowBridge.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RenderingEngine.h" />
     <ClInclude Include="SolanumConstants.h" />
+    <ClInclude Include="VkBootstrap\VkBootstrap.h" />
+    <ClInclude Include="VkBootstrap\VkBootstrapDispatch.h" />
+    <ClInclude Include="VulkanContext.h" />
     <ClInclude Include="WindowBridge.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

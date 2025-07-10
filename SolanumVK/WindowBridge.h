@@ -1,10 +1,14 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
+
 class WindowBridge
 {
 public:
 	WindowBridge(bool resizeable);
 	~WindowBridge();
+
+	VkSurfaceKHR createSurface(VkInstance instance);
 
 	void handleEvents();
 	bool quitRequested() { return wantsQuit; }

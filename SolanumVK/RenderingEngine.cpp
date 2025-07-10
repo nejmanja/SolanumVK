@@ -4,7 +4,7 @@
 
 
 RenderingEngine::RenderingEngine()
-	: window(false)
+	: window(false), vulkanContext(window)
 {
 
 }
