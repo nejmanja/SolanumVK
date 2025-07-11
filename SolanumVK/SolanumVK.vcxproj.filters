@@ -53,5 +53,8 @@
     <ClInclude Include="VkBootstrap\VkBootstrapDispatch.h">
       <Filter>VkBootstrap</Filter>
     </ClInclude>
+    <ClInclude Include="Swapchain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

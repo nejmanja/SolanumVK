@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="RenderingEngine.h" />
     <ClInclude Include="SolanumConstants.h" />
+    <ClInclude Include="Swapchain.h" />
     <ClInclude Include="VkBootstrap\VkBootstrap.h" />
     <ClInclude Include="VkBootstrap\VkBootstrapDispatch.h" />
     <ClInclude Include="VulkanContext.h" />

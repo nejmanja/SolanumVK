@@ -5,7 +5,8 @@
 
 #include "SolanumConstants.h"
 
-WindowBridge::WindowBridge(bool resizeable)
+WindowBridge::WindowBridge(bool resizeable):
+	windowExtent(SolVK::windowWidth, SolVK::windowHeight)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -18,8 +19,8 @@ WindowBridge::WindowBridge(bool resizeable)
 		SolVK::AppName.c_str(),
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		800,
-		600,
+		windowExtent.width,
+		windowExtent.height,
 		windowFlags
 	);
 }

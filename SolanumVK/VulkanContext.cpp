@@ -13,12 +13,19 @@ VulkanContext::VulkanContext(WindowBridge& window)
 	auto vkbInstance = createInstance();
 	surface = window.createSurface(instance);
 	createDevice(vkbInstance);
+	createSwapchain(window.getExtent());
 }
 
 VulkanContext::~VulkanContext()
 {
-	vkb::destroy_debug_utils_messenger(instance, debugMessenger);
+	vkDestroySwapchainKHR(device, swapchain.swapchain, nullptr);
+	// Swapchain images get destroyed automatically with the swapchain.
+	// Only destroy the image views here.
+	for (auto& imageView : swapchain.imageViews)
+		vkDestroyImageView(device, imageView, nullptr);
 
+	vkb::destroy_debug_utils_messenger(instance, debugMessenger);
+	
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyDevice(device, nullptr);
 	vkDestroyInstance(instance, nullptr);
@@ -69,4 +76,22 @@ void VulkanContext::createDevice(vkb::Instance vkbInstance)
 	vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
 
 	device = deviceBuilder.build().value();
+}
+
+void VulkanContext::createSwapchain(VkExtent2D windowExtent)
+{
+	vkb::SwapchainBuilder builder{ physicalDevice, device, surface };
+
+	vkb::Swapchain vkbSwapchain = builder.set_desired_format(VkSurfaceFormatKHR{ .format = VK_FORMAT_R8G8B8A8_UNORM, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
+		.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+		.set_desired_extent(windowExtent.width, windowExtent.height)
+		.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+		.build()
+		.value();
+
+	swapchain.swapchain = vkbSwapchain.swapchain;
+	// The actual extent may not be the same as the one passed in, so we take this one.
+	swapchain.extent = vkbSwapchain.extent;
+	swapchain.images = vkbSwapchain.get_images().value();
+	swapchain.imageViews = vkbSwapchain.get_image_views().value();
 }
