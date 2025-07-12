@@ -4,7 +4,7 @@ int main()
 {
 	RenderingEngine engine;
 
-	engine.draw();
+	engine.exec();
 
 	return 0;
 }

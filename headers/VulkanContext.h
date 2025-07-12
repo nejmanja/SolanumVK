@@ -17,10 +17,10 @@ public:
 		Compute
 	};
 
-	VulkanContext(WindowBridge& window);
+	VulkanContext(WindowBridge &window);
 	~VulkanContext();
 
-	Swapchain& getSwapchain() { return swapchain; }
+	Swapchain &getSwapchain() { return swapchain; }
 	VkDevice getDevice() { return device; }
 	uint32_t getQueueFamily(QueueType type);
 	VkQueue getQueue(QueueType type);
@@ -44,4 +44,3 @@ private:
 
 	VkDebugUtilsMessengerEXT debugMessenger;
 };
-
