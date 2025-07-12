@@ -1,5 +1,7 @@
 #pragma once
 
+#include <exception>
+
 #include <vulkan/vulkan.h>
 #include "VkBootstrap/VkBootstrap.h"
 
@@ -9,8 +11,20 @@
 class VulkanContext
 {
 public:
+	enum class QueueType
+	{
+		Graphics,
+		Compute
+	};
+
 	VulkanContext(WindowBridge& window);
 	~VulkanContext();
+
+	Swapchain& getSwapchain() { return swapchain; }
+	VkDevice getDevice() { return device; }
+	uint32_t getQueueFamily(QueueType type);
+	VkQueue getQueue(QueueType type);
+
 private:
 	vkb::Instance createInstance();
 	void createDevice(vkb::Instance vkbInstance);
@@ -20,6 +34,11 @@ private:
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
+
+	uint32_t computeFamily;
+	VkQueue computeQueue;
+	uint32_t graphicsFamily;
+	VkQueue graphicsQueue;
 
 	Swapchain swapchain;
 

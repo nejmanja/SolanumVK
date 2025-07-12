@@ -2,6 +2,7 @@
 
 #include "WindowBridge.h"
 #include "VulkanContext.h"
+#include "CommandManager.h"
 
 class RenderingEngine
 {
@@ -12,5 +13,6 @@ public:
 private:
 	WindowBridge window;
 	VulkanContext vulkanContext;
+	CommandManager commandManager;
 };
 

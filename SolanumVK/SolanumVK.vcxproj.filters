@@ -33,6 +33,9 @@
     <ClCompile Include="VkBootstrap\VkBootstrap.cpp">
       <Filter>VkBootstrap</Filter>
     </ClCompile>
+    <ClCompile Include="CommandManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowBridge.h">
@@ -54,6 +57,12 @@
       <Filter>VkBootstrap</Filter>
     </ClInclude>
     <ClInclude Include="Swapchain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

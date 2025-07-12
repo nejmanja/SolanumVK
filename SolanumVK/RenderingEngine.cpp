@@ -4,9 +4,10 @@
 
 
 RenderingEngine::RenderingEngine()
-	: window(false), vulkanContext(window)
+	: window(false), 
+	vulkanContext(window), 
+	commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), 2)
 {
-
 }
 
 void RenderingEngine::draw()

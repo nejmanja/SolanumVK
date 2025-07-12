@@ -31,6 +31,32 @@ VulkanContext::~VulkanContext()
 	vkDestroyInstance(instance, nullptr);
 }
 
+uint32_t VulkanContext::getQueueFamily(QueueType type)
+{
+	switch (type)
+	{
+	case QueueType::Compute:
+		return computeFamily;
+	case QueueType::Graphics:
+		return graphicsFamily;
+	}
+
+	throw std::exception("Invalid queue type requested!");
+}
+
+VkQueue VulkanContext::getQueue(QueueType type)
+{
+	switch (type)
+	{
+	case QueueType::Compute:
+		return computeQueue;
+	case QueueType::Graphics:
+		return graphicsQueue;
+	}
+
+	throw std::exception("Invalid queue type requested!");
+}
+
 vkb::Instance VulkanContext::createInstance()
 {
 	vkb::InstanceBuilder builder;
@@ -74,8 +100,13 @@ void VulkanContext::createDevice(vkb::Instance vkbInstance)
 	physicalDevice = vkbPhysicalDevice.physical_device;
 
 	vkb::DeviceBuilder deviceBuilder{ vkbPhysicalDevice };
+	vkb::Device vkbDevice = deviceBuilder.build().value();
 
-	device = deviceBuilder.build().value();
+	device = vkbDevice.device;
+	graphicsFamily = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+	graphicsQueue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+	computeFamily = vkbDevice.get_queue_index(vkb::QueueType::compute).value();
+	computeQueue = vkbDevice.get_queue(vkb::QueueType::compute).value();
 }
 
 void VulkanContext::createSwapchain(VkExtent2D windowExtent)
