@@ -3,7 +3,7 @@
 #include <exception>
 
 #include <vulkan/vulkan.h>
-#include "VkBootstrap/VkBootstrap.h"
+#include <vk-bootstrap/VkBootstrap.h>
 
 #include "WindowBridge.h"
 #include "Swapchain.h"
