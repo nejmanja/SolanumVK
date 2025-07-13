@@ -8,6 +8,7 @@ RenderingEngine::RenderingEngine()
 	  vulkanContext(window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight)
+// computePipeline(vulkanContext.getDevice())
 {
 }
 
