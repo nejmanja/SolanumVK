@@ -30,16 +30,16 @@ CommandManager::~CommandManager()
 	}
 }
 
-void CommandManager::begin(uint32_t index)
+void CommandManager::begin()
 {
 	// begin cmd buffer
 	VkCommandBufferBeginInfo beginInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, .pNext = nullptr};
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	beginInfo.pInheritanceInfo = nullptr;
-	vkBeginCommandBuffer(get(index), &beginInfo);
+	vkBeginCommandBuffer(get(), &beginInfo);
 }
 
-void CommandManager::transitionImage(uint32_t cmdIndex, VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout)
+void CommandManager::transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout)
 {
 	VkImageMemoryBarrier2 imageBarrier{.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, .pNext = nullptr};
 	imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
@@ -64,5 +64,46 @@ void CommandManager::transitionImage(uint32_t cmdIndex, VkImage image, VkImageLa
 	depInfo.imageMemoryBarrierCount = 1;
 	depInfo.pImageMemoryBarriers = &imageBarrier;
 
-	vkCmdPipelineBarrier2(get(cmdIndex), &depInfo);
+	vkCmdPipelineBarrier2(get(), &depInfo);
+}
+
+void CommandManager::submit(VkQueue queue, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence)
+{
+	VkCommandBufferSubmitInfo cmdSubmitInfo{.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO, .pNext = nullptr};
+	cmdSubmitInfo.commandBuffer = get();
+	cmdSubmitInfo.deviceMask = 0;
+	VkSemaphoreSubmitInfo semaphoreWaitInfo{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO, .pNext = nullptr};
+	semaphoreWaitInfo.deviceIndex = 0;
+	semaphoreWaitInfo.semaphore = waitSemaphore;
+	semaphoreWaitInfo.stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+	semaphoreWaitInfo.value = 1;
+	VkSemaphoreSubmitInfo semaphoreSignalInfo{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO, .pNext = nullptr};
+	semaphoreSignalInfo.deviceIndex = 0;
+	semaphoreSignalInfo.semaphore = signalSemaphore;
+	semaphoreSignalInfo.stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
+	semaphoreSignalInfo.value = 1;
+
+	VkSubmitInfo2 submitInfo{.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2, .pNext = nullptr};
+	submitInfo.flags = 0;
+	submitInfo.commandBufferInfoCount = 1;
+	submitInfo.pCommandBufferInfos = &cmdSubmitInfo;
+
+	submitInfo.waitSemaphoreInfoCount = 1;
+	submitInfo.pWaitSemaphoreInfos = &semaphoreWaitInfo;
+	submitInfo.signalSemaphoreInfoCount = 1;
+	submitInfo.pSignalSemaphoreInfos = &semaphoreSignalInfo;
+
+	vkQueueSubmit2(queue, 1, &submitInfo, signalFence);
+}
+
+void CommandManager::clearImage(VkImage image, VkClearColorValue clearValue)
+{
+	VkImageSubresourceRange clearRange{};
+	clearRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	clearRange.baseArrayLayer = 0;
+	clearRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+	clearRange.baseMipLevel = 0;
+	clearRange.levelCount = VK_REMAINING_MIP_LEVELS;
+
+	vkCmdClearColorImage(get(), image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 }
