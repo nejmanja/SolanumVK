@@ -1,6 +1,8 @@
 #include "ComputePipeline.h"
 
-ComputePipeline::ComputePipeline(VkDevice device)
+#include "ShaderLoader.h"
+
+ComputePipeline::ComputePipeline(VkDevice device, VkDescriptorSetLayout descriptorSetLayout)
     : IPipeline(device)
 {
     VkPipelineLayoutCreateInfo layoutCreateInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, .pNext = nullptr};
@@ -9,15 +11,17 @@ ComputePipeline::ComputePipeline(VkDevice device)
     layoutCreateInfo.pushConstantRangeCount = 0;
     layoutCreateInfo.pPushConstantRanges = nullptr;
     // descriptor sets
-    layoutCreateInfo.setLayoutCount = 0;
-    layoutCreateInfo.pSetLayouts = nullptr;
+    layoutCreateInfo.setLayoutCount = 1;
+    layoutCreateInfo.pSetLayouts = &descriptorSetLayout;
 
     vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &layout);
+
+    auto shaderModule = ShaderLoader::loadModule(device, "../SolanumVK/shaders/gradient.comp.spv");
 
     VkPipelineShaderStageCreateInfo shaderCreateInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .pNext = nullptr};
     shaderCreateInfo.pSpecializationInfo = nullptr;
     shaderCreateInfo.flags = 0;
-    shaderCreateInfo.module = nullptr; // TODO shader
+    shaderCreateInfo.module = shaderModule;
     shaderCreateInfo.pName = "main";
     shaderCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 
@@ -29,6 +33,8 @@ ComputePipeline::ComputePipeline(VkDevice device)
     pipelineCreateInfo.stage = shaderCreateInfo;
 
     vkCreateComputePipelines(device, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline);
+
+    vkDestroyShaderModule(device, shaderModule, nullptr);
 }
 
 ComputePipeline::~ComputePipeline()
@@ -37,12 +43,23 @@ ComputePipeline::~ComputePipeline()
     vkDestroyPipeline(device, pipeline, nullptr);
 }
 
-void ComputePipeline::execute(VkCommandBuffer cmd)
+void ComputePipeline::execute()
 {
-    bind(cmd);
+    // TODO: pass some info about the target of the pipeline as pipeline state when binding
+    vkCmdDispatch(boundCommandBuffer, std::ceil(800 / 16.0), std::ceil(600 / 16.0), 1);
+}
+
+void ComputePipeline::bindPushConstants(void *pushConstantData)
+{
+    vkCmdPushConstants(boundCommandBuffer, layout, VK_PIPELINE_BIND_POINT_COMPUTE, 0, sizeof(pushConstantData), pushConstantData);
+}
+
+void ComputePipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets)
+{
+    vkCmdBindDescriptorSets(boundCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, layout, 0, setCount, sets, 0, nullptr);
 }
 
 void ComputePipeline::bind(VkCommandBuffer cmd)
 {
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+    IPipeline::bind(cmd, VK_PIPELINE_BIND_POINT_COMPUTE);
 }

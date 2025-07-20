@@ -8,8 +8,14 @@ RenderingEngine::RenderingEngine()
 	  vulkanContext(window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight)
-// computePipeline(vulkanContext.getDevice())
 {
+	descriptorLayoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+	auto device = vulkanContext.getDevice();
+
+	VkDescriptorSetLayout descriptorSetLayout = descriptorLayoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	computePipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
+
+	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
 void RenderingEngine::exec()
@@ -69,11 +75,13 @@ void RenderingEngine::draw()
 	auto image = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-	VkClearColorValue clearValue;
-	float flash = std::abs(std::sin(frameCounter / 120.f));
-	clearValue = {{0.0f, 0.0f, flash, 1.0f}};
+	// VkClearColorValue clearValue;
+	// float flash = std::abs(std::sin(frameCounter / 120.f));
+	// clearValue = {{0.0f, 0.0f, flash, 1.0f}};
 
-	commandManager.clearImage(image, clearValue);
+	// commandManager.clearImage(image, clearValue);
+
+	computePipeline->execute(commandManager.get());
 
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 

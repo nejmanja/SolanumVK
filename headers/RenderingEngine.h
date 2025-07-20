@@ -1,10 +1,13 @@
 #pragma once
 
+#include <memory>
+
 #include "WindowBridge.h"
 #include "VulkanContext.h"
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
 #include "ComputePipeline.h"
+#include "DescriptorLayoutBuilder.h"
 
 class RenderingEngine
 {
@@ -23,7 +26,10 @@ private:
 	PresentSyncManager syncManager;
 
 	// pipelines
-	//ComputePipeline computePipeline;
+	std::unique_ptr<ComputePipeline> computePipeline;
+
+	// Builders
+	DescriptorLayoutBuilder descriptorLayoutBuilder;
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

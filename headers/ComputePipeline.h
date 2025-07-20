@@ -5,9 +5,11 @@
 class ComputePipeline : public IPipeline
 {
 public:
-    ComputePipeline(VkDevice device);
+    ComputePipeline(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
     ~ComputePipeline() override;
-    void execute(VkCommandBuffer cmd) override;
+    void execute();
+    void bindPushConstants(void *pushConstantData) override;
+    void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) override;
 
 private:
     void bind(VkCommandBuffer cmd) override;
