@@ -1,6 +1,10 @@
 #include "VulkanContext.h"
 
+#include "VulkanUtils.h"
 #include "SolanumConstants.h"
+
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 
 #if _DEBUG
 constexpr bool useValidationLayers = true;
@@ -18,6 +22,8 @@ VulkanContext::VulkanContext(WindowBridge &window)
 
 VulkanContext::~VulkanContext()
 {
+	vmaDestroyAllocator(vmaAllocator);
+
 	vkDestroySwapchainKHR(device, swapchain.swapchain, nullptr);
 	// Swapchain images get destroyed automatically with the swapchain.
 	// Only destroy the image views here.
@@ -117,6 +123,8 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 									  .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
 									  .set_desired_extent(windowExtent.width, windowExtent.height)
 									  .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+									  .add_image_usage_flags(VK_IMAGE_USAGE_STORAGE_BIT)
+									  .set_required_min_image_count(2)
 									  .build()
 									  .value();
 
@@ -126,4 +134,15 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 	swapchain.images = vkbSwapchain.get_images().value();
 	swapchain.imageViews = vkbSwapchain.get_image_views().value();
 	swapchain.framesInFlight = 2;
+}
+
+void VulkanContext::createVmaAllocator()
+{
+	VmaAllocatorCreateInfo allocatorInfo{};
+	allocatorInfo.instance = instance;
+	allocatorInfo.physicalDevice = physicalDevice;
+	allocatorInfo.device = device;
+
+	auto result = vmaCreateAllocator(&allocatorInfo, &vmaAllocator);
+	VulkanUtils::CheckVkResult(result);
 }
