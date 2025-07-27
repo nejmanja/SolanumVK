@@ -10,6 +10,11 @@ class VulkanUtils
 public:
     static void CheckVkResult(VkResult result)
     {
+#if !_DEBUG
+        // No need for these logs in release.
+        return;
+#endif
+
         if (result == VK_SUCCESS)
             return;
 
