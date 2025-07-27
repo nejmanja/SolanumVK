@@ -1,4 +1,5 @@
 #include "ShaderLoader.h"
+#include "VulkanUtils.h"
 
 VkShaderModule ShaderLoader::loadModule(VkDevice device, std::string path)
 {
@@ -10,7 +11,8 @@ VkShaderModule ShaderLoader::loadModule(VkDevice device, std::string path)
     createInfo.pCode = shaderCode.data();
 
     VkShaderModule shaderModule{};
-    vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule);
+    auto result = vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule);
+    VulkanUtils::CheckVkResult(result);
 
     return shaderModule;
 }
@@ -24,7 +26,8 @@ std::vector<uint32_t> ShaderLoader::readModuleFromFile(std::string path)
     if (!file.is_open())
     {
         auto msg = std::string("Failed to read shader from file with path") + path;
-        throw std::exception(msg.c_str());
+        std::cout << msg << std::endl;
+        abort();
     }
 
     // find what the size of the file is by looking up the location of the cursor

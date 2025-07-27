@@ -1,5 +1,7 @@
 #include "DescriptorSetAllocator.h"
 
+#include "VulkanUtils.h"
+
 DescriptorSetAllocator::DescriptorSetAllocator(const VkDevice device, const std::vector<PoolResourceSizePerSet> &resourceSizes)
     : device(device)
 {
@@ -55,7 +57,8 @@ VkDescriptorSet DescriptorSetAllocator::allocate(const VkDescriptorSetLayout lay
         fullPools.push_back(allocInfo.descriptorPool);
         allocInfo.descriptorPool = getPool();
 
-        vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet);
+        auto result = vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet);
+        VulkanUtils::CheckVkResult(result);
     }
 
     freePools.push_back(allocInfo.descriptorPool);
@@ -72,7 +75,8 @@ void DescriptorSetAllocator::allocateNewFreePool()
     createInfo.pPoolSizes = poolSizes.data();
 
     VkDescriptorPool descriptorPool;
-    vkCreateDescriptorPool(device, &createInfo, nullptr, &descriptorPool);
+    auto result = vkCreateDescriptorPool(device, &createInfo, nullptr, &descriptorPool);
+    VulkanUtils::CheckVkResult(result);
 
     freePools.push_back(descriptorPool);
 }

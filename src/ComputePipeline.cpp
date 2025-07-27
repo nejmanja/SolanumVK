@@ -1,6 +1,7 @@
 #include "ComputePipeline.h"
 
 #include "ShaderLoader.h"
+#include "VulkanUtils.h"
 
 ComputePipeline::ComputePipeline(VkDevice device, VkDescriptorSetLayout descriptorSetLayout)
     : IPipeline(device)
@@ -14,10 +15,10 @@ ComputePipeline::ComputePipeline(VkDevice device, VkDescriptorSetLayout descript
     layoutCreateInfo.setLayoutCount = 1;
     layoutCreateInfo.pSetLayouts = &descriptorSetLayout;
 
-    vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &layout);
+    auto result = vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &layout);
+    VulkanUtils::CheckVkResult(result);
 
-    auto shaderModule = ShaderLoader::loadModule(device, "../SolanumVK/shaders/gradient.comp.spv");
-
+    auto shaderModule = ShaderLoader::loadModule(device, "./shaders/gradient.comp.spv");
     VkPipelineShaderStageCreateInfo shaderCreateInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .pNext = nullptr};
     shaderCreateInfo.pSpecializationInfo = nullptr;
     shaderCreateInfo.flags = 0;
@@ -32,8 +33,8 @@ ComputePipeline::ComputePipeline(VkDevice device, VkDescriptorSetLayout descript
     pipelineCreateInfo.layout = layout;
     pipelineCreateInfo.stage = shaderCreateInfo;
 
-    vkCreateComputePipelines(device, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline);
-
+    result = vkCreateComputePipelines(device, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline);
+    VulkanUtils::CheckVkResult(result);
     vkDestroyShaderModule(device, shaderModule, nullptr);
 }
 

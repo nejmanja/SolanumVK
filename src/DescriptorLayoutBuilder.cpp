@@ -1,5 +1,7 @@
 #include "DescriptorLayoutBuilder.h"
 
+#include "VulkanUtils.h"
+
 void DescriptorLayoutBuilder::addBinding(uint32_t bindingIdx, VkDescriptorType descriptorType, uint32_t descriptorCount, VkShaderStageFlags stageFlags)
 {
     VkDescriptorSetLayoutBinding binding{};
@@ -26,7 +28,8 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::build(VkDevice device, VkShaderSt
 
     VkDescriptorSetLayout layout;
 
-    vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &layout);
+    auto result = vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &layout);
+    VulkanUtils::CheckVkResult(result);
 
     return layout;
 }
