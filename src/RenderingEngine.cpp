@@ -7,15 +7,37 @@ RenderingEngine::RenderingEngine()
 	: window(false),
 	  vulkanContext(window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
-	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight)
+	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
+	  descriptorSetAllocator(vulkanContext.getDevice(), std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
+															{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}})
 {
 	descriptorLayoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 	auto device = vulkanContext.getDevice();
 
-	VkDescriptorSetLayout descriptorSetLayout = descriptorLayoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+	descriptorSetLayout = descriptorLayoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 	computePipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
 
-	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+	descriptorSets[0] = descriptorSetAllocator.allocate(descriptorSetLayout);
+	descriptorSets[1] = descriptorSetAllocator.allocate(descriptorSetLayout);
+
+	VkWriteDescriptorSet descriptorWrites[2];
+	VkDescriptorImageInfo imageInfos[2];
+
+	for (int i = 0; i < 2; i++)
+	{
+		imageInfos[i] = {.sampler = nullptr,
+						 .imageView = vulkanContext.getSwapchain().imageViews[i],
+						 .imageLayout = VK_IMAGE_LAYOUT_GENERAL};
+
+		descriptorWrites[i] = {.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, .pNext = nullptr};
+		descriptorWrites[i].descriptorCount = 1;
+		descriptorWrites[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		descriptorWrites[i].dstBinding = 0;
+		descriptorWrites[i].dstSet = descriptorSets[i];
+		descriptorWrites[i].pImageInfo = &imageInfos[i];
+	}
+
+	vkUpdateDescriptorSets(device, 2, descriptorWrites, 0, nullptr);
 }
 
 void RenderingEngine::exec()
@@ -41,6 +63,8 @@ RenderingEngine::~RenderingEngine()
 {
 	// Wait for device to finish all the commands before command buffers get deallocated!
 	vkDeviceWaitIdle(vulkanContext.getDevice());
+
+	vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorSetLayout, nullptr);
 }
 
 void RenderingEngine::draw()
@@ -81,7 +105,9 @@ void RenderingEngine::draw()
 
 	commandManager.clearImage(image, clearValue);
 
-	// computePipeline->execute();
+	computePipeline->bind(commandManager.get());
+	computePipeline->bindDescriptorSets(1, &descriptorSets[swapchainImageIndex]);
+	computePipeline->execute();
 
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 

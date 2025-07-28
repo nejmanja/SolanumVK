@@ -8,6 +8,7 @@
 #include "PresentSyncManager.h"
 #include "ComputePipeline.h"
 #include "DescriptorLayoutBuilder.h"
+#include "DescriptorSetAllocator.h"
 
 class RenderingEngine
 {
@@ -30,6 +31,9 @@ private:
 
 	// Builders
 	DescriptorLayoutBuilder descriptorLayoutBuilder;
+	DescriptorSetAllocator descriptorSetAllocator;
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorSet descriptorSets[2];
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
