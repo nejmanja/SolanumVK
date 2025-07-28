@@ -33,7 +33,7 @@ private:
 	DescriptorLayoutBuilder descriptorLayoutBuilder;
 	DescriptorSetAllocator descriptorSetAllocator;
 	VkDescriptorSetLayout descriptorSetLayout;
-	VkDescriptorSet descriptorSets[2];
+	std::vector<VkDescriptorSet> descriptorSets;
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

@@ -17,14 +17,13 @@ RenderingEngine::RenderingEngine()
 	descriptorSetLayout = descriptorLayoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 	computePipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
 
-	descriptorSets[0] = descriptorSetAllocator.allocate(descriptorSetLayout);
-	descriptorSets[1] = descriptorSetAllocator.allocate(descriptorSetLayout);
-
-	VkWriteDescriptorSet descriptorWrites[2];
-	VkDescriptorImageInfo imageInfos[2];
-
-	for (int i = 0; i < 2; i++)
+	auto framesInFlight = vulkanContext.getSwapchain().framesInFlight;
+	VkWriteDescriptorSet *descriptorWrites = new VkWriteDescriptorSet[framesInFlight];
+	VkDescriptorImageInfo *imageInfos = new VkDescriptorImageInfo[framesInFlight];
+	for (int i = 0; i < framesInFlight; i++)
 	{
+		descriptorSets.push_back(descriptorSetAllocator.allocate(descriptorSetLayout));
+
 		imageInfos[i] = {.sampler = nullptr,
 						 .imageView = vulkanContext.getSwapchain().imageViews[i],
 						 .imageLayout = VK_IMAGE_LAYOUT_GENERAL};
@@ -37,7 +36,9 @@ RenderingEngine::RenderingEngine()
 		descriptorWrites[i].pImageInfo = &imageInfos[i];
 	}
 
-	vkUpdateDescriptorSets(device, 2, descriptorWrites, 0, nullptr);
+	vkUpdateDescriptorSets(device, framesInFlight, descriptorWrites, 0, nullptr);
+	delete[] (descriptorWrites);
+	delete[] (imageInfos);
 }
 
 void RenderingEngine::exec()
