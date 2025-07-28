@@ -18,7 +18,7 @@ ComputePipeline::ComputePipeline(VkDevice device, VkDescriptorSetLayout descript
     auto result = vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &layout);
     VulkanUtils::CheckVkResult(result);
 
-    auto shaderModule = ShaderLoader::loadModule(device, "./shaders/gradient.comp.spv");
+    auto shaderModule = ShaderLoader::loadModule(device, "../shaders/gradient.comp.spv");
     VkPipelineShaderStageCreateInfo shaderCreateInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .pNext = nullptr};
     shaderCreateInfo.pSpecializationInfo = nullptr;
     shaderCreateInfo.flags = 0;

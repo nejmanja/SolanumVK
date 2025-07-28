@@ -18,6 +18,7 @@ VulkanContext::VulkanContext(WindowBridge &window)
 	surface = window.createSurface(instance);
 	createDevice(vkbInstance);
 	createSwapchain(window.getExtent());
+	createVmaAllocator();
 }
 
 VulkanContext::~VulkanContext()
