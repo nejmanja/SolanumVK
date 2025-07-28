@@ -38,4 +38,9 @@ if (WIN32)
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${SDL2_DLL}" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
         VERBATIM
     )
+
+    add_custom_command(
+        TARGET SolanumVK POST_BUILD
+        COMMAND "${CMAKE_SOURCE_DIR}/compile_shaders.bat"
+    )
 endif()
