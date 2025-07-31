@@ -22,11 +22,11 @@ public:
 	~VulkanContext();
 
 	VmaAllocator &getVmaAllocator() { return vmaAllocator; }
-	Swapchain &getSwapchain() { return swapchain; }
-	VkDevice getDevice() { return device; }
-	VkPhysicalDevice getPhysicalDevice() { return physicalDevice; }
-	uint32_t getQueueFamily(QueueType type);
-	VkQueue getQueue(QueueType type);
+	const Swapchain &getSwapchain() const { return swapchain; }
+	const VkDevice getDevice() const { return device; }
+	const VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
+	const uint32_t getQueueFamily(QueueType type) const;
+	const VkQueue getQueue(QueueType type) const;
 
 private:
 	vkb::Instance createInstance();

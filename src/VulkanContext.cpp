@@ -38,7 +38,7 @@ VulkanContext::~VulkanContext()
 	vkDestroyInstance(instance, nullptr);
 }
 
-uint32_t VulkanContext::getQueueFamily(QueueType type)
+const uint32_t VulkanContext::getQueueFamily(QueueType type) const
 {
 	switch (type)
 	{
@@ -51,7 +51,7 @@ uint32_t VulkanContext::getQueueFamily(QueueType type)
 	throw std::exception("Invalid queue type requested!");
 }
 
-VkQueue VulkanContext::getQueue(QueueType type)
+const VkQueue VulkanContext::getQueue(QueueType type) const
 {
 	switch (type)
 	{

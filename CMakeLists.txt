@@ -26,7 +26,9 @@ file(GLOB_RECURSE HEADER_FILES
 	${CMAKE_SOURCE_DIR}/headers/*.h
 	${CMAKE_SOURCE_DIR}/headers/*.hpp)
 
+    
 include_directories(${CMAKE_SOURCE_DIR}/headers)
+include_directories(${CMAKE_SOURCE_DIR}/headers/renderers)
 
 add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES})
 

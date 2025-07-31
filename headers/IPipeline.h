@@ -13,6 +13,8 @@ public:
     // Binds the pipeline to a command buffer.
     virtual void bind(VkCommandBuffer cmd) = 0;
 
+    virtual void execute() = 0;
+
     virtual ~IPipeline() {};
 
 protected:
