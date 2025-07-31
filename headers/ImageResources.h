@@ -9,6 +9,12 @@ struct ImageResource
     VkImageView imageView;
 };
 
+struct SwapchainImageResource
+{
+    ImageResource resource;
+    uint32_t swapchainIndex;
+};
+
 struct AllocatedImageResource
 {
     ImageResource resource;

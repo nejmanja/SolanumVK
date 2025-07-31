@@ -6,7 +6,7 @@
 #include "VulkanContext.h"
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
-#include "ComputePipeline.h"
+#include "ComputeRenderer.h"
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
 
@@ -26,14 +26,8 @@ private:
 	CommandManager commandManager;
 	PresentSyncManager syncManager;
 
-	// pipelines
-	std::unique_ptr<ComputePipeline> computePipeline;
-
-	// Builders
-	DescriptorLayoutBuilder descriptorLayoutBuilder;
-	DescriptorSetAllocator descriptorSetAllocator;
-	VkDescriptorSetLayout descriptorSetLayout;
-	std::vector<VkDescriptorSet> descriptorSets;
+	// Renderers
+	ComputeRenderer computeRenderer;
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

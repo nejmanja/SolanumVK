@@ -125,6 +125,7 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 									  .set_desired_extent(windowExtent.width, windowExtent.height)
 									  .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
 									  .add_image_usage_flags(VK_IMAGE_USAGE_STORAGE_BIT)
+									  .set_required_min_image_count(2)
 									  .build()
 									  .value();
 

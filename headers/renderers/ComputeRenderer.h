@@ -10,10 +10,10 @@ public:
     ComputeRenderer(const VulkanContext &vulkanContext);
     ~ComputeRenderer();
 
-    void setup(ImageResource finalTarget) override;
+    void setup(SwapchainImageResource finalTarget) override;
     void exec(VkCommandBuffer cmd) override;
 
 private:
-    VkDescriptorSet descriptorSet;
+    std::vector<VkDescriptorSet> descriptorSets;
     VkDevice device;
 };
