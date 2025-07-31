@@ -10,7 +10,7 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext)
 
     DescriptorLayoutBuilder layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-    auto descriptorSetLayout = layoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+    descriptorSetLayout = layoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 
     pipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
     auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}};
@@ -23,13 +23,13 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext)
 ComputeRenderer::~ComputeRenderer()
 {
     rendererDescriptorAllocator->resetPools();
+
+    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
 void ComputeRenderer::setup(SwapchainImageResource finalTarget)
 {
     IRenderer::setup(finalTarget);
-
-    std::cout << "Swapchain index: " << finalTarget.swapchainIndex << std::endl;
 
     VkDescriptorImageInfo imageInfo{.sampler = nullptr,
                                     .imageView = finalTarget.resource.imageView,

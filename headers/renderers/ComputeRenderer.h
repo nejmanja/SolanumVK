@@ -14,6 +14,7 @@ public:
     void exec(VkCommandBuffer cmd) override;
 
 private:
+    VkDescriptorSetLayout descriptorSetLayout;
     std::vector<VkDescriptorSet> descriptorSets;
     VkDevice device;
 };
