@@ -45,7 +45,7 @@ void ComputeRenderer::setup(SwapchainImageResource finalTarget)
     vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 }
 
-void ComputeRenderer::exec(VkCommandBuffer cmd)
+void ComputeRenderer::execute(VkCommandBuffer cmd)
 {
     pipeline->bind(cmd);
     pipeline->bindDescriptorSets(1, &descriptorSets[finalTarget.swapchainIndex]);

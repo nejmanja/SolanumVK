@@ -11,7 +11,7 @@ public:
     ~ComputeRenderer();
 
     void setup(SwapchainImageResource finalTarget) override;
-    void exec(VkCommandBuffer cmd) override;
+    void execute(VkCommandBuffer cmd) override;
 
 private:
     VkDescriptorSetLayout descriptorSetLayout;

@@ -16,7 +16,7 @@ public:
     // Sets the final render target to which the renderer should write.
     virtual void setup(SwapchainImageResource finalTarget) { this->finalTarget = finalTarget; }
     // Records and submits commands to the GPU using the pipeline.
-    virtual void exec(VkCommandBuffer cmd) = 0;
+    virtual void execute(VkCommandBuffer cmd) = 0;
 
 protected:
     SwapchainImageResource finalTarget;

@@ -74,7 +74,7 @@ void RenderingEngine::draw()
 	commandManager.begin();
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-	computeRenderer.exec(commandManager.get());
+	computeRenderer.execute(commandManager.get());
 
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
