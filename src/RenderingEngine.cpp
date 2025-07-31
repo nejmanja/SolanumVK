@@ -69,7 +69,7 @@ void RenderingEngine::draw()
 
 	commandManager.reset();
 
-	computeRenderer.setup(SwapchainImageResource{{.image = image, .imageView = imageView}, swapchainImageIndex});
+	computeRenderer.setup(SwapchainImageResource{{.image = image, .imageView = imageView}, frameIdx});
 
 	commandManager.begin();
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
