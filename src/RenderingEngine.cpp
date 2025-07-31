@@ -8,7 +8,7 @@ RenderingEngine::RenderingEngine()
 	  vulkanContext(window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
-	  computeRenderer(vulkanContext)
+	  renderer(std::make_unique<ComputeRenderer>(vulkanContext))
 {
 }
 
@@ -69,12 +69,12 @@ void RenderingEngine::draw()
 
 	commandManager.reset();
 
-	computeRenderer.setup(SwapchainImageResource{{.image = image, .imageView = imageView}, frameIdx});
+	renderer->setup(SwapchainImageResource{{.image = image, .imageView = imageView}, frameIdx});
 
 	commandManager.begin();
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-	computeRenderer.execute(commandManager.get());
+	renderer->execute(commandManager.get());
 
 	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 

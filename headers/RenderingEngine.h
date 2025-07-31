@@ -27,7 +27,7 @@ private:
 	PresentSyncManager syncManager;
 
 	// Renderers
-	ComputeRenderer computeRenderer;
+	std::unique_ptr<IRenderer> renderer;
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
