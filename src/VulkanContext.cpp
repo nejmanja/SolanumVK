@@ -3,7 +3,6 @@
 #include "VulkanUtils.h"
 #include "SolanumConstants.h"
 
-#define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
 #if _DEBUG

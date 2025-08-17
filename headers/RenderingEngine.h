@@ -25,8 +25,9 @@ private:
 	VulkanContext vulkanContext;
 	CommandManager commandManager;
 	PresentSyncManager syncManager;
+	AllocatedImageResource renderTarget;
 
-	// Renderers
+	// Renderer
 	std::unique_ptr<IRenderer> renderer;
 
 	uint32_t frameCounter{0};
