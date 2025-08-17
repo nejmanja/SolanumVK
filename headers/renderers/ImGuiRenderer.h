@@ -15,7 +15,6 @@ public:
     ImGuiRenderer(const VulkanContext &vulkanContext);
     ~ImGuiRenderer();
 
-    void prepareNewFrame();
     void setup(ImageResource finalTarget) override;
     void execute(VkCommandBuffer cmd) override;
 

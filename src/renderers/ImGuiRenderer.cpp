@@ -58,19 +58,16 @@ ImGuiRenderer::~ImGuiRenderer()
     vkDestroyDescriptorPool(device, imguiPool, nullptr);
 }
 
-void ImGuiRenderer::prepareNewFrame()
+void ImGuiRenderer::setup(ImageResource finalTarget)
 {
+    IRenderer::setup(finalTarget);
+
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
     ImGui::ShowDemoWindow();
     ImGui::Render();
-}
-
-void ImGuiRenderer::setup(ImageResource finalTarget)
-{
-    IRenderer::setup(finalTarget);
 }
 
 void ImGuiRenderer::execute(VkCommandBuffer cmd)
