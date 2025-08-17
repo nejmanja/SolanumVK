@@ -19,16 +19,22 @@ include_directories(
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp)
+	${CMAKE_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_SOURCE_DIR}/imgui/*.c
+    ${CMAKE_SOURCE_DIR}/imgui/*.cpp)
 	
 # Add header files
 file(GLOB_RECURSE HEADER_FILES 
 	${CMAKE_SOURCE_DIR}/headers/*.h
-	${CMAKE_SOURCE_DIR}/headers/*.hpp)
-
+	${CMAKE_SOURCE_DIR}/headers/*.hpp
+    ${CMAKE_SOURCE_DIR}/imgui/*.h)
+    
     
 include_directories(${CMAKE_SOURCE_DIR}/headers)
 include_directories(${CMAKE_SOURCE_DIR}/headers/renderers)
+
+include_directories(${CMAKE_SOURCE_DIR}/imgui)
+
 
 add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES})
 
