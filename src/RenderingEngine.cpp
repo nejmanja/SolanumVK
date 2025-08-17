@@ -67,19 +67,25 @@ void RenderingEngine::draw()
 		nullptr,
 		&swapchainImageIndex);
 
-	auto image = vulkanContext.getSwapchain().images[swapchainImageIndex];
-	auto imageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
+	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
+	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
 
 	commandManager.reset();
 
-	renderer->setup(SwapchainImageResource{{.image = image, .imageView = imageView}, frameIdx});
+	renderer->setup(SwapchainImageResource{renderTarget.resource, frameIdx});
 
 	commandManager.begin();
-	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 	renderer->execute(commandManager.get());
 
-	commandManager.transitionImage(image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+	auto swapchainExtent = vulkanContext.getSwapchain().extent;
+	commandManager.copyImage(renderTarget.resource.image, swapchainImage, swapchainExtent, swapchainExtent);
+
+	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 	commandManager.end();
 

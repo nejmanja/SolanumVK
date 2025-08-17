@@ -16,6 +16,7 @@ public:
 	void begin();
 	void reset() { vkResetCommandBuffer(get(), 0); }
 	void end() { vkEndCommandBuffer(get()); }
+	void copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize);
 	void transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout);
 	void nextFrame() { frameIdx = (frameIdx + 1) % buffers.size(); }
 

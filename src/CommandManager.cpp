@@ -39,6 +39,28 @@ void CommandManager::begin()
 	vkBeginCommandBuffer(get(), &beginInfo);
 }
 
+void CommandManager::copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize)
+{
+	VkImageBlit2 blit{.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2, .pNext = nullptr};
+	blit.srcOffsets[1] = {(int32_t)srcSize.width, (int32_t)srcSize.height, 1};
+	blit.dstOffsets[1] = {(int32_t)dstSize.width, (int32_t)dstSize.height, 1};
+	blit.srcSubresource = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = 0, .baseArrayLayer = 0, .layerCount = 1};
+	blit.dstSubresource = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = 0, .baseArrayLayer = 0, .layerCount = 1};
+
+	VkBlitImageInfo2 blitInfo{.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2, .pNext = nullptr};
+	blitInfo.srcImage = src;
+	blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+	blitInfo.dstImage = dst;
+	blitInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+	blitInfo.filter = VK_FILTER_LINEAR;
+	blitInfo.regionCount = 1;
+	blitInfo.pRegions = &blit;
+
+	vkCmdBlitImage2(get(), &blitInfo);
+}
+
 void CommandManager::transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout)
 {
 	VkImageMemoryBarrier2 imageBarrier{.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, .pNext = nullptr};
