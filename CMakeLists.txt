@@ -19,15 +19,18 @@ include_directories(
 # Add source files
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_SOURCE_DIR}/imgui/*.c
-    ${CMAKE_SOURCE_DIR}/imgui/*.cpp)
+	${CMAKE_SOURCE_DIR}/src/*.cpp)
 	
 # Add header files
 file(GLOB_RECURSE HEADER_FILES 
 	${CMAKE_SOURCE_DIR}/headers/*.h
 	${CMAKE_SOURCE_DIR}/headers/*.hpp
     ${CMAKE_SOURCE_DIR}/imgui/*.h)
+
+file(GLOB IMGUI_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/imgui/*.cpp
+    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
+    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp)
     
     
 include_directories(${CMAKE_SOURCE_DIR}/headers)
@@ -36,7 +39,7 @@ include_directories(${CMAKE_SOURCE_DIR}/headers/renderers)
 include_directories(${CMAKE_SOURCE_DIR}/imgui)
 
 
-add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBootstrap_LIBRARY})
 
