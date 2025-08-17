@@ -12,6 +12,7 @@ AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulk
                                                        const VmaMemoryUsage memoryUsage)
 {
     AllocatedImageResource allocatedImage{};
+    allocatedImage.resource.imageExtent = extent;
 
     VkImageCreateInfo imageCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

@@ -7,6 +7,7 @@ struct ImageResource
 {
     VkImage image;
     VkImageView imageView;
+    VkExtent3D imageExtent;
 };
 
 struct SwapchainImageResource
