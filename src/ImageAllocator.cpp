@@ -2,7 +2,9 @@
 
 #include <vma/vk_mem_alloc.h>
 
-AllocatedImageResource ImageAllocator::AllocateImage2D(const VmaAllocator &allocator,
+#include "VulkanUtils.h"
+
+AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulkanContext,
                                                        const VkFormat format,
                                                        const VkImageUsageFlags usageFlags,
                                                        const VkExtent3D extent,
@@ -18,8 +20,8 @@ AllocatedImageResource ImageAllocator::AllocateImage2D(const VmaAllocator &alloc
         .imageType = VK_IMAGE_TYPE_2D,
         .format = format,
         .extent = extent,
-        .mipLevels = 0,                    // no mipmapping for now
-        .arrayLayers = 0,                  // no image arrays here
+        .mipLevels = 1,                    // no mipmapping for now
+        .arrayLayers = 1,                  // no image arrays here
         .samples = VK_SAMPLE_COUNT_1_BIT,  // no msaa
         .tiling = VK_IMAGE_TILING_OPTIMAL, // optimal memory tiling
         .usage = usageFlags,
@@ -33,13 +35,37 @@ AllocatedImageResource ImageAllocator::AllocateImage2D(const VmaAllocator &alloc
     VmaAllocationCreateInfo allocationCreateInfo{
         .flags = 0,
         .usage = memoryUsage,
-        .requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT), // GPU-only
+        .requiredFlags = memoryFlags,
         .preferredFlags = 0,
         // everything else is default
     };
-    allocationCreateInfo.usage = memoryUsage;
 
-    vmaCreateImage(allocator, &imageCreateInfo, &allocationCreateInfo, &allocatedImage.resource.image, &allocatedImage.allocation, nullptr);
+    auto imgCreateResult = vmaCreateImage(vulkanContext.getVmaAllocator(), &imageCreateInfo, &allocationCreateInfo, &allocatedImage.resource.image, &allocatedImage.allocation, nullptr);
+    VulkanUtils::CheckVkResult(imgCreateResult);
+
+    VkImageViewCreateInfo imageViewCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = allocatedImage.resource.image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .components = {},
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .baseMipLevel = 0,
+            .levelCount = VK_REMAINING_MIP_LEVELS,
+            .baseArrayLayer = 0,
+            .layerCount = VK_REMAINING_ARRAY_LAYERS}};
+
+    auto viewCreateResult = vkCreateImageView(vulkanContext.getDevice(), &imageViewCreateInfo, nullptr, &allocatedImage.resource.imageView);
+    VulkanUtils::CheckVkResult(viewCreateResult);
 
     return allocatedImage;
+}
+
+void ImageAllocator::freeImage(const VulkanContext &vulkanContext, const AllocatedImageResource &imageResource)
+{
+    vkDestroyImageView(vulkanContext.getDevice(), imageResource.resource.imageView, nullptr);
+    vmaDestroyImage(vulkanContext.getVmaAllocator(), imageResource.resource.image, imageResource.allocation);
 }

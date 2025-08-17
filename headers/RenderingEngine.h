@@ -9,6 +9,7 @@
 #include "ComputeRenderer.h"
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
+#include "ImageAllocator.h"
 
 class RenderingEngine
 {
@@ -32,4 +33,6 @@ private:
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
+
+	static AllocatedImageResource CreateRenderTarget(const VulkanContext &vulkanContext);
 };
