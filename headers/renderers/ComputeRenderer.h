@@ -7,14 +7,14 @@
 class ComputeRenderer : public IRenderer
 {
 public:
-    ComputeRenderer(const VulkanContext &vulkanContext);
+    ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget);
     ~ComputeRenderer();
 
-    void setup(SwapchainImageResource finalTarget) override;
+    void setup(ImageResource finalTarget) override;
     void execute(VkCommandBuffer cmd) override;
 
 private:
     VkDescriptorSetLayout descriptorSetLayout;
-    std::vector<VkDescriptorSet> descriptorSets;
+    VkDescriptorSet descriptorSet;
     VkDevice device;
 };
