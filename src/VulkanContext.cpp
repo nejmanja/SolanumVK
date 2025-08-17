@@ -119,7 +119,9 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 {
 	vkb::SwapchainBuilder builder{physicalDevice, device, surface};
 
-	vkb::Swapchain vkbSwapchain = builder.set_desired_format(VkSurfaceFormatKHR{.format = VK_FORMAT_R8G8B8A8_UNORM, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
+	auto imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
+	vkb::Swapchain vkbSwapchain = builder.set_desired_format(VkSurfaceFormatKHR{.format = imageFormat, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR})
 									  .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
 									  .set_desired_extent(windowExtent.width, windowExtent.height)
 									  .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
@@ -133,6 +135,7 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 	swapchain.images = vkbSwapchain.get_images().value();
 	swapchain.imageViews = vkbSwapchain.get_image_views().value();
 	swapchain.framesInFlight = swapchain.images.size();
+	swapchain.imageFormat = imageFormat;
 }
 
 void VulkanContext::createVmaAllocator()

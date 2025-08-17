@@ -7,6 +7,7 @@
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
 #include "ComputeRenderer.h"
+#include "ImGuiRenderer.h"
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
 #include "ImageAllocator.h"
@@ -28,8 +29,9 @@ private:
 	PresentSyncManager syncManager;
 	AllocatedImageResource renderTarget;
 
-	// Renderer
+	// Renderers
 	std::unique_ptr<IRenderer> renderer;
+	std::unique_ptr<ImGuiRenderer> imGuiRenderer;
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

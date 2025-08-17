@@ -10,5 +10,6 @@ struct Swapchain
 	VkExtent2D extent;
 	std::vector<VkImage> images;
 	std::vector<VkImageView> imageViews;
+	VkFormat imageFormat;
 	uint32_t framesInFlight;
 };

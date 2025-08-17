@@ -21,6 +21,7 @@ public:
 	VulkanContext(WindowBridge &window);
 	~VulkanContext();
 
+	const VkInstance &getInstance() const { return instance; }
 	const VmaAllocator &getVmaAllocator() const { return vmaAllocator; }
 	const Swapchain &getSwapchain() const { return swapchain; }
 	const VkDevice getDevice() const { return device; }

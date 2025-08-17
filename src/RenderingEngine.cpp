@@ -9,7 +9,8 @@ RenderingEngine::RenderingEngine()
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
 	  renderTarget(CreateRenderTarget(vulkanContext)),
-	  renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource))
+	  renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource)),
+	  imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext))
 {
 }
 
@@ -24,6 +25,8 @@ void RenderingEngine::exec()
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;
 		}
+
+		imGuiRenderer->prepareNewFrame();
 
 		draw();
 
@@ -73,6 +76,8 @@ void RenderingEngine::draw()
 	commandManager.reset();
 
 	renderer->setup(renderTarget.resource);
+	auto swapchainExtent = vulkanContext.getSwapchain().extent;
+	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}});
 
 	commandManager.begin();
 	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
@@ -82,10 +87,13 @@ void RenderingEngine::draw()
 	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-	auto swapchainExtent = vulkanContext.getSwapchain().extent;
 	commandManager.copyImage(renderTarget.resource.image, swapchainImage, swapchainExtent, swapchainExtent);
 
-	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	imGuiRenderer->execute(commandManager.get());
+
+	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 	commandManager.end();
 

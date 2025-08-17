@@ -3,17 +3,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
+#include "backends/imgui_impl_sdl2.h"
+
 #include "SolanumConstants.h"
 
-WindowBridge::WindowBridge(bool resizeable):
-	windowExtent(SolVK::windowWidth, SolVK::windowHeight)
+WindowBridge::WindowBridge(bool resizeable) : windowExtent(SolVK::windowWidth, SolVK::windowHeight)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
-	SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
-		SDL_WindowFlags::SDL_WINDOW_VULKAN 
-		| (resizeable ? SDL_WindowFlags::SDL_WINDOW_RESIZABLE : 0)
-	);
+	SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WindowFlags::SDL_WINDOW_VULKAN | (resizeable ? SDL_WindowFlags::SDL_WINDOW_RESIZABLE : 0));
 
 	window = SDL_CreateWindow(
 		SolVK::AppName.c_str(),
@@ -21,8 +19,20 @@ WindowBridge::WindowBridge(bool resizeable):
 		SDL_WINDOWPOS_UNDEFINED,
 		windowExtent.width,
 		windowExtent.height,
-		windowFlags
-	);
+		windowFlags);
+
+	// Also yoinked from example, main function
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	// there's also gamepad input lol
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	ImGui::StyleColorsDark();
+	ImGuiStyle &style = ImGui::GetStyle();
+	auto mainScale = ImGui_ImplSDL2_GetContentScaleForDisplay(0);
+	style.ScaleAllSizes(mainScale);
+	style.FontScaleDpi = mainScale;
+
+	ImGui_ImplSDL2_InitForVulkan(window);
 }
 
 WindowBridge::~WindowBridge()
@@ -58,5 +68,7 @@ void WindowBridge::handleEvents()
 				minimized = false;
 			}
 		}
+
+		ImGui_ImplSDL2_ProcessEvent(&e);
 	}
 }
