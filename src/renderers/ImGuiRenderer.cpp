@@ -50,6 +50,21 @@ ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
     ImGui_ImplVulkan_Init(&imguiVkInitInfo);
     // no longer needed, a default font is magically provided now
     // ImGui_ImplVulkan_CreateFontsTexture();
+
+    colorAttachment = {.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO, .pNext = nullptr};
+    colorAttachment.clearValue = {};
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.imageView = VK_NULL_HANDLE;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+    renderingInfo = {.sType = VK_STRUCTURE_TYPE_RENDERING_INFO, .pNext = nullptr};
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
+    renderingInfo.pDepthAttachment = nullptr;
+    renderingInfo.pStencilAttachment = nullptr;
+    renderingInfo.layerCount = 1;
+    renderingInfo.renderArea = {};
 }
 
 ImGuiRenderer::~ImGuiRenderer()
@@ -72,20 +87,7 @@ void ImGuiRenderer::setup(ImageResource finalTarget)
 
 void ImGuiRenderer::execute(VkCommandBuffer cmd)
 {
-    VkRenderingAttachmentInfo colorAttachment{.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO, .pNext = nullptr};
-
-    colorAttachment.clearValue = {};
-    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     colorAttachment.imageView = finalTarget.imageView;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-    VkRenderingInfo renderingInfo{.sType = VK_STRUCTURE_TYPE_RENDERING_INFO, .pNext = nullptr};
-    renderingInfo.colorAttachmentCount = 1;
-    renderingInfo.pColorAttachments = &colorAttachment;
-    renderingInfo.pDepthAttachment = nullptr;
-    renderingInfo.pStencilAttachment = nullptr;
-    renderingInfo.layerCount = 1;
     renderingInfo.renderArea = VkRect2D{VkOffset2D{0, 0}, {finalTarget.imageExtent.width, finalTarget.imageExtent.height}};
 
     vkCmdBeginRendering(cmd, &renderingInfo);

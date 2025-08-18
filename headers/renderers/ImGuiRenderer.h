@@ -23,5 +23,10 @@ private:
     VkDescriptorSet descriptorSet;
     VkDevice device;
 
+    // This info remains the same between frames
+    // Only the actual render target might change
+    VkRenderingInfo renderingInfo;
+    VkRenderingAttachmentInfo colorAttachment;
+
     VkDescriptorPool imguiPool;
 };
