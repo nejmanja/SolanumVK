@@ -77,6 +77,10 @@ void RenderingEngine::draw()
 	auto swapchainExtent = vulkanContext.getSwapchain().extent;
 	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}});
 
+	// ===============================================================================================================
+	// Begin Command Recording
+	// ===============================================================================================================
+
 	commandManager.begin();
 	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -94,6 +98,10 @@ void RenderingEngine::draw()
 	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 	commandManager.end();
+
+	// ===============================================================================================================
+	// End Command Recording
+	// ===============================================================================================================
 
 	commandManager.submit(
 		vulkanContext.getQueue(VulkanContext::QueueType::Graphics),
