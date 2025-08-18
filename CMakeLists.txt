@@ -13,6 +13,7 @@ find_package(VkBootstrap REQUIRED)
 include_directories(
     ${GLM_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}/SDL2 # so that ImGui won't complain...
     ${VkBootstrap_INCLUDE_DIR}
 )
 
