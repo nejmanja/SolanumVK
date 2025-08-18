@@ -26,8 +26,6 @@ void RenderingEngine::exec()
 			continue;
 		}
 
-		imGuiRenderer->prepareNewFrame();
-
 		draw();
 
 		++frameCounter;
