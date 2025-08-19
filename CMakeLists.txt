@@ -37,6 +37,7 @@ file(GLOB IMGUI_SOURCE_FILES
 include_directories(${CMAKE_SOURCE_DIR}/headers)
 include_directories(${CMAKE_SOURCE_DIR}/headers/renderers)
 include_directories(${CMAKE_SOURCE_DIR}/headers/pipelines)
+include_directories(${CMAKE_SOURCE_DIR}/headers/windowing)
 
 include_directories(${CMAKE_SOURCE_DIR}/imgui)
 

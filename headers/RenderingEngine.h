@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "WindowBridge.h"
+#include "IWindowBridge.h"
 #include "VulkanContext.h"
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
@@ -23,7 +23,7 @@ private:
 	void draw();
 
 	// basic drawing context
-	WindowBridge window;
+	IWindowBridge window;
 	VulkanContext vulkanContext;
 	CommandManager commandManager;
 	PresentSyncManager syncManager;

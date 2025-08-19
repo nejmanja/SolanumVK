@@ -11,7 +11,7 @@ constexpr bool useValidationLayers = true;
 constexpr bool useValidationLayers = false;
 #endif
 
-VulkanContext::VulkanContext(WindowBridge &window)
+VulkanContext::VulkanContext(IWindowBridge &window)
 {
 	auto vkbInstance = createInstance();
 	surface = window.createSurface(instance);

@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
-#include "WindowBridge.h"
+#include "IWindowBridge.h"
 #include "Swapchain.h"
 
 class VulkanContext
@@ -18,7 +18,7 @@ public:
 		Compute
 	};
 
-	VulkanContext(WindowBridge &window);
+	VulkanContext(IWindowBridge &window);
 	~VulkanContext();
 
 	const VkInstance &getInstance() const { return instance; }

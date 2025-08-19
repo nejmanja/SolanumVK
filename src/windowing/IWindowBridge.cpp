@@ -1,4 +1,4 @@
-#include "WindowBridge.h"
+#include "IWindowBridge.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
@@ -7,7 +7,7 @@
 
 #include "SolanumConstants.h"
 
-WindowBridge::WindowBridge(bool resizeable) : windowExtent(SolVK::windowWidth, SolVK::windowHeight)
+IWindowBridge::IWindowBridge(bool resizeable) : windowExtent(SolVK::windowWidth, SolVK::windowHeight)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -35,12 +35,12 @@ WindowBridge::WindowBridge(bool resizeable) : windowExtent(SolVK::windowWidth, S
 	ImGui_ImplSDL2_InitForVulkan(window);
 }
 
-WindowBridge::~WindowBridge()
+IWindowBridge::~IWindowBridge()
 {
 	SDL_DestroyWindow(window);
 }
 
-VkSurfaceKHR WindowBridge::createSurface(VkInstance instance)
+VkSurfaceKHR IWindowBridge::createSurface(VkInstance instance)
 {
 	VkSurfaceKHR surface;
 	SDL_Vulkan_CreateSurface(window, instance, &surface);
@@ -48,7 +48,7 @@ VkSurfaceKHR WindowBridge::createSurface(VkInstance instance)
 	return surface;
 }
 
-void WindowBridge::handleEvents()
+void IWindowBridge::handleEvents()
 {
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
