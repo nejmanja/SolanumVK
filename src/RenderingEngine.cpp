@@ -1,11 +1,13 @@
 #include "RenderingEngine.h"
 
+#include "WindowBridgeSDL.h"
+
 #include <thread>
 #include <cmath>
 
 RenderingEngine::RenderingEngine()
-	: window(false),
-	  vulkanContext(window),
+	: window(std::make_unique<WindowBridgeSDL>(false)),
+	  vulkanContext(*window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
 	  renderTarget(CreateRenderTarget(vulkanContext)),
@@ -16,11 +18,11 @@ RenderingEngine::RenderingEngine()
 
 void RenderingEngine::exec()
 {
-	while (!window.quitRequested())
+	while (!window->quitRequested())
 	{
-		window.handleEvents();
+		window->handleEvents();
 
-		if (window.isHidden())
+		if (window->isHidden())
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			continue;

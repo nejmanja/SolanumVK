@@ -5,20 +5,14 @@
 class IWindowBridge
 {
 public:
-	IWindowBridge(bool resizeable);
-	~IWindowBridge();
+	IWindowBridge() {};
+	virtual ~IWindowBridge() {};
 
-	VkSurfaceKHR createSurface(VkInstance instance);
-	VkExtent2D getExtent() { return windowExtent; }
+	virtual VkSurfaceKHR createSurface(VkInstance instance) = 0;
+	virtual void handleEvents() = 0;
 
-	void handleEvents();
-	bool quitRequested() { return wantsQuit; }
-	bool isHidden() { return minimized; }
+	virtual VkExtent2D getExtent() = 0; // { return windowExtent; }
 
-private:
-	VkExtent2D windowExtent;
-
-	struct SDL_Window *window{nullptr};
-	bool wantsQuit = false;
-	bool minimized = false;
+	virtual bool quitRequested() = 0; // { return wantsQuit; }
+	virtual bool isHidden() = 0;	  // { return minimized; }
 };

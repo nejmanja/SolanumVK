@@ -23,7 +23,7 @@ private:
 	void draw();
 
 	// basic drawing context
-	IWindowBridge window;
+	std::unique_ptr<IWindowBridge> window;
 	VulkanContext vulkanContext;
 	CommandManager commandManager;
 	PresentSyncManager syncManager;
