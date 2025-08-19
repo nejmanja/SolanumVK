@@ -30,7 +30,7 @@ public:
 	const VkQueue getQueue(QueueType type) const;
 
 private:
-	vkb::Instance createInstance();
+	vkb::Instance createInstance(std::vector<const char *> windowExtensions);
 	void createDevice(vkb::Instance vkbInstance);
 	void createSwapchain(VkExtent2D windowExtent);
 	void createVmaAllocator();

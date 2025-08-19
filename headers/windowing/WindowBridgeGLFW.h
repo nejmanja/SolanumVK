@@ -2,11 +2,11 @@
 
 #include "IWindowBridge.h"
 
-class WindowBridgeSDL : public IWindowBridge
+class WindowBridgeGLFW : IWindowBridge
 {
 public:
-    WindowBridgeSDL(bool resizeable);
-    ~WindowBridgeSDL();
+    WindowBridgeGLFW(bool resizeable);
+    ~WindowBridgeGLFW();
 
     VkSurfaceKHR createSurface(VkInstance instance);
     void handleEvents();
@@ -16,12 +16,13 @@ public:
     bool quitRequested() { return wantsQuit; }
     bool isHidden() { return minimized; }
 
-    std::vector<const char *> getWindowInstanceExtensions() { return {}; }
+    std::vector<const char *> getWindowInstanceExtensions() { return instanceExtensions; };
 
 private:
+    std::vector<const char *> instanceExtensions{};
+
     VkExtent2D windowExtent;
 
-    struct SDL_Window *window{nullptr};
-    bool wantsQuit = false;
-    bool minimized = false;
+    bool wantsQuit;
+    bool minimized;
 };

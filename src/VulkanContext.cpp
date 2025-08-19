@@ -13,7 +13,8 @@ constexpr bool useValidationLayers = false;
 
 VulkanContext::VulkanContext(IWindowBridge &window)
 {
-	auto vkbInstance = createInstance();
+	auto windowExtensions = window.getWindowInstanceExtensions();
+	auto vkbInstance = createInstance(windowExtensions);
 	surface = window.createSurface(instance);
 	createDevice(vkbInstance);
 	createSwapchain(window.getExtent());
@@ -63,7 +64,7 @@ const VkQueue VulkanContext::getQueue(QueueType type) const
 	throw std::exception("Invalid queue type requested!");
 }
 
-vkb::Instance VulkanContext::createInstance()
+vkb::Instance VulkanContext::createInstance(std::vector<const char *> windowExtensions)
 {
 	vkb::InstanceBuilder builder;
 	auto builderResult = builder
@@ -71,6 +72,7 @@ vkb::Instance VulkanContext::createInstance()
 							 .request_validation_layers(useValidationLayers)
 							 .use_default_debug_messenger()
 							 .require_api_version(1, 3, 0)
+							 .enable_extensions(windowExtensions)
 							 .build();
 
 	vkb::Instance vkbInstance = builderResult.value();

@@ -9,12 +9,14 @@ find_package(Vulkan REQUIRED)
 find_package(GLM REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(VkBootstrap REQUIRED)
+find_package(GLFW REQUIRED)
 
 include_directories(
     ${GLM_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}/SDL2 # so that ImGui won't complain...
     ${VkBootstrap_INCLUDE_DIR}
+    ${GLFW_INCLUDE_DIR}
 )
 
 # Add source files
@@ -31,7 +33,9 @@ file(GLOB_RECURSE HEADER_FILES
 file(GLOB IMGUI_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/imgui/*.cpp
     ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
-    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp)
+    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
+    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
+    )
     
     
 include_directories(${CMAKE_SOURCE_DIR}/headers)
@@ -44,7 +48,7 @@ include_directories(${CMAKE_SOURCE_DIR}/imgui)
 
 add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBootstrap_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBootstrap_LIBRARY} ${GLFW_LIBRARY})
 
 if (WIN32)
     add_custom_command(

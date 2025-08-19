@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vector>
 
 class IWindowBridge
 {
@@ -11,8 +12,10 @@ public:
 	virtual VkSurfaceKHR createSurface(VkInstance instance) = 0;
 	virtual void handleEvents() = 0;
 
-	virtual VkExtent2D getExtent() = 0; // { return windowExtent; }
+	virtual VkExtent2D getExtent() = 0;
 
-	virtual bool quitRequested() = 0; // { return wantsQuit; }
-	virtual bool isHidden() = 0;	  // { return minimized; }
+	virtual bool quitRequested() = 0;
+	virtual bool isHidden() = 0;
+
+	virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
 };
