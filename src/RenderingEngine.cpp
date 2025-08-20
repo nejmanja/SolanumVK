@@ -74,8 +74,6 @@ void RenderingEngine::draw()
 		nullptr,
 		&swapchainImageIndex);
 
-	printf("%d\n", swapchainImageIndex);
-
 	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
 
