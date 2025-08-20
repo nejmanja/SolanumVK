@@ -7,6 +7,7 @@
 
 #include "backends/imgui_impl_vulkan.h"
 #include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_glfw.h"
 #include "imgui.h"
 
 class ImGuiRenderer : public IRenderer

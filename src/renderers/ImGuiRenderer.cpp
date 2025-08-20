@@ -78,7 +78,6 @@ void ImGuiRenderer::setup(ImageResource finalTarget)
     IRenderer::setup(finalTarget);
 
     ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
     ImGui::ShowDemoWindow();

@@ -3,8 +3,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
-#include "backends/imgui_impl_sdl2.h"
-
 #include "SolanumConstants.h"
 
 WindowBridgeSDL::WindowBridgeSDL(bool resizeable) : windowExtent(SolVK::windowWidth, SolVK::windowHeight)

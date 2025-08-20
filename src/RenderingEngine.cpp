@@ -1,12 +1,14 @@
 #include "RenderingEngine.h"
 
 #include "WindowBridgeSDL.h"
+#include "WindowBridgeGLFW.h"
 
 #include <thread>
 #include <cmath>
+#include <cstdio>
 
 RenderingEngine::RenderingEngine()
-	: window(std::make_unique<WindowBridgeSDL>(false)),
+	: window(std::make_unique<WindowBridgeGLFW>(false)),
 	  vulkanContext(*window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
@@ -20,6 +22,8 @@ void RenderingEngine::exec()
 {
 	while (!window->quitRequested())
 	{
+		window->newFrame();
+
 		window->handleEvents();
 
 		if (window->isHidden())
@@ -69,6 +73,8 @@ void RenderingEngine::draw()
 		// No fences needed to signal, the CPU waits for the render commands to get issued.
 		nullptr,
 		&swapchainImageIndex);
+
+	printf("%d\n", swapchainImageIndex);
 
 	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];

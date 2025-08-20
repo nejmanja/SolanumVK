@@ -2,6 +2,8 @@
 
 #include "IWindowBridge.h"
 
+#include "backends/imgui_impl_sdl2.h"
+
 class WindowBridgeSDL : public IWindowBridge
 {
 public:
@@ -15,6 +17,7 @@ public:
 
     bool quitRequested() { return wantsQuit; }
     bool isHidden() { return minimized; }
+    void newFrame() override { ImGui_ImplSDL2_NewFrame(); }
 
     std::vector<const char *> getWindowInstanceExtensions() { return {}; }
 
