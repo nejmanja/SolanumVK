@@ -21,8 +21,6 @@ public:
 protected:
     ImageResource finalTarget;
 
-    // Pipeline with which rendering will happen
-    std::unique_ptr<IPipeline> pipeline;
     // For pipeline-specific descriptors
     std::unique_ptr<DescriptorSetAllocator> rendererDescriptorAllocator;
 };

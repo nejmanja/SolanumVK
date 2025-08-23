@@ -14,6 +14,9 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    // Pipeline with which rendering will happen
+    std::unique_ptr<ComputePipeline> pipeline;
+
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorSet descriptorSet;
     VkDevice device;

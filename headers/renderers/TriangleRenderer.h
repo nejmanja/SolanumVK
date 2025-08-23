@@ -14,4 +14,6 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    // Pipeline with which rendering will happen
+    std::unique_ptr<GraphicsPipeline> pipeline;
 };
