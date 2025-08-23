@@ -23,7 +23,18 @@ protected:
     {
         boundCommandBuffer = cmd;
         vkCmdBindPipeline(boundCommandBuffer, bindPoint, pipeline);
-    };
+    }
+
+    void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets, VkPipelineBindPoint bindPoint)
+    {
+        vkCmdBindDescriptorSets(boundCommandBuffer, bindPoint, layout, 0, setCount, sets, 0, nullptr);
+    }
+
+    void bindPushConstants(void *pushConstantData, VkShaderStageFlags stageFlags)
+    {
+        vkCmdPushConstants(boundCommandBuffer, layout, stageFlags, 0, sizeof(pushConstantData), pushConstantData);
+    }
+
     // The command buffer to which the pipeline has been bound to.
     VkCommandBuffer boundCommandBuffer;
     // The layout for the pipeline, since it has to be destroyed separately

@@ -52,12 +52,12 @@ void ComputePipeline::execute()
 
 void ComputePipeline::bindPushConstants(void *pushConstantData)
 {
-    vkCmdPushConstants(boundCommandBuffer, layout, VK_PIPELINE_BIND_POINT_COMPUTE, 0, sizeof(pushConstantData), pushConstantData);
+    IPipeline::bindPushConstants(pushConstantData, VK_SHADER_STAGE_COMPUTE_BIT);
 }
 
 void ComputePipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets)
 {
-    vkCmdBindDescriptorSets(boundCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, layout, 0, setCount, sets, 0, nullptr);
+    IPipeline::bindDescriptorSets(setCount, sets, VK_PIPELINE_BIND_POINT_COMPUTE);
 }
 
 void ComputePipeline::bind(VkCommandBuffer cmd)

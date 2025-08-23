@@ -157,14 +157,17 @@ GraphicsPipeline::~GraphicsPipeline()
 
 void GraphicsPipeline::bindPushConstants(void *pushConstantData)
 {
+    IPipeline::bindPushConstants(pushConstantData, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 }
 
 void GraphicsPipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets)
 {
+    IPipeline::bindDescriptorSets(setCount, sets, VK_PIPELINE_BIND_POINT_GRAPHICS);
 }
 
 void GraphicsPipeline::bind(VkCommandBuffer cmd)
 {
+    IPipeline::bind(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS);
 }
 
 void GraphicsPipeline::execute()
