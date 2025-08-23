@@ -52,27 +52,11 @@ void RenderingEngine::draw()
 	auto device = vulkanContext.getDevice();
 
 	// Get the swapchain image index.
-	auto swapchainImageAcquiredSemaphore = syncManager.getRecycledSemaphore();
-	uint32_t swapchainImageIndex;
-	vkAcquireNextImageKHR(
-		device,
-		vulkanContext.getSwapchain().swapchain,
-		UINT64_MAX,
-		// Signal the present semaphore, so that drawing commands know that an image was acquired.
-		swapchainImageAcquiredSemaphore,
-		// No fences needed to signal, the CPU waits for the render commands to get issued.
-		nullptr,
-		&swapchainImageIndex);
-
-	auto oldImageAcquiredSemaphore = syncManager.getSwapchainImageAcuqiredSemaphore(swapchainImageIndex);
-	if (oldImageAcquiredSemaphore != VK_NULL_HANDLE)
-	{
-		syncManager.emplaceRecycledSemaphore(oldImageAcquiredSemaphore);
-	}
-	syncManager.setSwapchainImageAcuqiredSemaphore(swapchainImageIndex, swapchainImageAcquiredSemaphore);
+	auto swapchainImageIndex = getSwapchainImageIndex(device);
 
 	auto renderFence = syncManager.getRenderFence(swapchainImageIndex);
 	auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
+	auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcuqiredSemaphore(swapchainImageIndex);
 
 	// Wait for previous render to finish
 	vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
@@ -82,8 +66,6 @@ void RenderingEngine::draw()
 	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
 
-	commandManager.reset();
-
 	renderer->setup(renderTarget.resource);
 	auto swapchainExtent = vulkanContext.getSwapchain().extent;
 	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}});
@@ -91,6 +73,7 @@ void RenderingEngine::draw()
 	// ===============================================================================================================
 	// Begin Command Recording
 	// ===============================================================================================================
+	commandManager.reset();
 
 	commandManager.begin();
 	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
@@ -129,6 +112,30 @@ void RenderingEngine::draw()
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
 	vkQueuePresentKHR(vulkanContext.getQueue(VulkanContext::QueueType::Graphics), &presentInfo);
+}
+
+uint32_t RenderingEngine::getSwapchainImageIndex(VkDevice device)
+{
+	auto swapchainImageAcquiredSemaphore = syncManager.getRecycledSemaphore();
+	uint32_t swapchainImageIndex;
+	vkAcquireNextImageKHR(
+		device,
+		vulkanContext.getSwapchain().swapchain,
+		UINT64_MAX,
+		// Signal the present semaphore, so that drawing commands know that an image was acquired.
+		swapchainImageAcquiredSemaphore,
+		// No fences needed to signal, the CPU waits for the render commands to get issued.
+		nullptr,
+		&swapchainImageIndex);
+
+	auto oldImageAcquiredSemaphore = syncManager.getSwapchainImageAcuqiredSemaphore(swapchainImageIndex);
+	if (oldImageAcquiredSemaphore != VK_NULL_HANDLE)
+	{
+		syncManager.emplaceRecycledSemaphore(oldImageAcquiredSemaphore);
+	}
+	syncManager.setSwapchainImageAcuqiredSemaphore(swapchainImageIndex, swapchainImageAcquiredSemaphore);
+
+	return swapchainImageIndex;
 }
 
 AllocatedImageResource RenderingEngine::CreateRenderTarget(const VulkanContext &vulkanContext)

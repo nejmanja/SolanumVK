@@ -20,9 +20,9 @@ public:
 	~RenderingEngine();
 
 private:
-	void draw();
+    void draw();
 
-	// basic drawing context
+    // basic drawing context
 	std::unique_ptr<IWindowBridge> window;
 	VulkanContext vulkanContext;
 	CommandManager commandManager;
@@ -35,6 +35,7 @@ private:
 
 	uint32_t frameCounter{0};
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
+	uint32_t getSwapchainImageIndex(VkDevice device);
 
 	static AllocatedImageResource CreateRenderTarget(const VulkanContext &vulkanContext);
 };
