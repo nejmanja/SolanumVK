@@ -122,6 +122,18 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descri
     renderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED; // no stencil
     renderingCreateInfo.viewMask = 0;                                  // no multiview chicanery
 
+    VkDynamicState dynamicStates[] = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR,
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0, // reserved for future use
+        .dynamicStateCount = 2,
+        .pDynamicStates = dynamicStates};
+
     VkGraphicsPipelineCreateInfo pipelineCreateInfo{
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         .pNext = &renderingCreateInfo, // for dynamic rendering
@@ -136,7 +148,7 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descri
         .pMultisampleState = &multisampleInfo,
         .pDepthStencilState = VK_NULL_HANDLE, // no depth/stencil for now
         .pColorBlendState = &colorBlendInfo,
-        .pDynamicState = VK_NULL_HANDLE, // TODO: put viewport/scissor here
+        .pDynamicState = &dynamicStateInfo,
         .layout = layout,
         // Unused, we're using dynamic rendering
         .renderPass = VK_NULL_HANDLE,
@@ -163,6 +175,16 @@ void GraphicsPipeline::bindPushConstants(void *pushConstantData)
 void GraphicsPipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets)
 {
     IPipeline::bindDescriptorSets(setCount, sets, VK_PIPELINE_BIND_POINT_GRAPHICS);
+}
+
+void GraphicsPipeline::setViewport(VkViewport *viewport)
+{
+    vkCmdSetViewport(boundCommandBuffer, 0, 1, viewport);
+}
+
+void GraphicsPipeline::setScissor(VkRect2D *scissor)
+{
+    vkCmdSetScissor(boundCommandBuffer, 0, 1, scissor);
 }
 
 void GraphicsPipeline::bind(VkCommandBuffer cmd)
