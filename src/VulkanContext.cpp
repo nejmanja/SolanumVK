@@ -136,10 +136,7 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent)
 	swapchain.extent = vkbSwapchain.extent;
 	swapchain.images = vkbSwapchain.get_images().value();
 	swapchain.imageViews = vkbSwapchain.get_image_views().value();
-	// This is okay! We can have more than 2 images in the swapchain
-	// while also having 2 frames in flight! We're just guaranteed to have an "extra"
-	// image to render to.
-	swapchain.framesInFlight = 2; // swapchain.images.size();
+	swapchain.framesInFlight = swapchain.images.size();
 	swapchain.imageFormat = imageFormat;
 }
 

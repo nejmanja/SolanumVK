@@ -28,4 +28,31 @@ PresentSyncManager::~PresentSyncManager()
         vkDestroySemaphore(device, primitives.renderSemaphore, nullptr);
         vkDestroyFence(device, primitives.renderFence, nullptr);
     }
+
+    for (auto &&recycledSemaphore : recycledSemaphores)
+    {
+        vkDestroySemaphore(device, recycledSemaphore, nullptr);
+    }
+}
+
+const VkSemaphore PresentSyncManager::getRecycledSemaphore()
+{
+    VkSemaphore recycledSemaphore;
+
+    // If there are no ready semaphores, create a new one
+    if (recycledSemaphores.empty())
+    {
+        VkSemaphoreCreateInfo semaphoreInfo{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr};
+        semaphoreInfo.flags = 0;
+
+        vkCreateSemaphore(device, &semaphoreInfo, nullptr, &recycledSemaphore);
+    }
+    // otherwise, just get an already created one
+    else
+    {
+        recycledSemaphore = recycledSemaphores.back();
+        recycledSemaphores.pop_back();
+    }
+
+    return recycledSemaphore;
 }

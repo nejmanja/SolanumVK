@@ -49,20 +49,10 @@ RenderingEngine::~RenderingEngine()
 
 void RenderingEngine::draw()
 {
-	auto frameIdx = getFrameIndex();
 	auto device = vulkanContext.getDevice();
-	auto renderFence = syncManager.getRenderFence(frameIdx);
-	auto renderSemaphore = syncManager.getRenderSemaphore(frameIdx);
-	auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcuqiredSemaphore(frameIdx);
 
-	// Wait for previous render to finish
-	vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
-	// Reset the render fence, we're beginning to render a new frame
-	vkResetFences(device, 1, &renderFence);
-
-	// Get the swapchain image index. While the range of this and frameIdx are the same,
-	// they're not neccesarily in sync (i.e. frameIdx may be 0, and swapchainIdx may be 1)
-	// Everything other than the swapchain indices is indexed via frameIdx!
+	// Get the swapchain image index.
+	auto swapchainImageAcquiredSemaphore = syncManager.getRecycledSemaphore();
 	uint32_t swapchainImageIndex;
 	vkAcquireNextImageKHR(
 		device,
@@ -73,6 +63,21 @@ void RenderingEngine::draw()
 		// No fences needed to signal, the CPU waits for the render commands to get issued.
 		nullptr,
 		&swapchainImageIndex);
+
+	auto oldImageAcquiredSemaphore = syncManager.getSwapchainImageAcuqiredSemaphore(swapchainImageIndex);
+	if (oldImageAcquiredSemaphore != VK_NULL_HANDLE)
+	{
+		syncManager.emplaceRecycledSemaphore(oldImageAcquiredSemaphore);
+	}
+	syncManager.setSwapchainImageAcuqiredSemaphore(swapchainImageIndex, swapchainImageAcquiredSemaphore);
+
+	auto renderFence = syncManager.getRenderFence(swapchainImageIndex);
+	auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
+
+	// Wait for previous render to finish
+	vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
+	// Reset the render fence, we're beginning to render a new frame
+	vkResetFences(device, 1, &renderFence);
 
 	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
