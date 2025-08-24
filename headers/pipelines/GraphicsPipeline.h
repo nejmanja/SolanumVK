@@ -2,10 +2,13 @@
 
 #include "IPipeline.h"
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 class GraphicsPipeline : public IPipeline
 {
 public:
-    GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
+    GraphicsPipeline(VkDevice device, VkDescriptorSetLayout *descriptorSetLayout);
     ~GraphicsPipeline();
 
     void bindPushConstants(void *pushConstantData) override;
@@ -20,4 +23,9 @@ public:
     void execute() override;
 
 private:
+    struct Vertex
+    {
+        glm::vec2 pos;
+        glm::vec3 color;
+    };
 };

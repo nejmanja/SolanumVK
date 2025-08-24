@@ -3,7 +3,7 @@
 #include "VulkanUtils.h"
 #include "ShaderLoader.h"
 
-GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descriptorSetLayout)
+GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout *descriptorSetLayout)
     : IPipeline(device)
 {
     VkPipelineLayoutCreateInfo layoutCreateInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, .pNext = nullptr};
@@ -12,32 +12,58 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descri
     layoutCreateInfo.pushConstantRangeCount = 0;
     layoutCreateInfo.pPushConstantRanges = nullptr;
     // descriptor sets
-    layoutCreateInfo.setLayoutCount = 1;
-    layoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+    layoutCreateInfo.setLayoutCount = descriptorSetLayout != nullptr ? 1 : 0;
+    layoutCreateInfo.pSetLayouts = descriptorSetLayout;
 
     auto result = vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &layout);
     VulkanUtils::CheckVkResult(result);
 
-    // TODO: Shaders...
-    auto vertexShaderModule = ShaderLoader::loadModule(device, "../shaders/gradient.comp.spv");
-    VkPipelineShaderStageCreateInfo vertexShaderInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .pNext = nullptr};
-    vertexShaderInfo.pSpecializationInfo = nullptr;
-    vertexShaderInfo.flags = 0;
-    vertexShaderInfo.module = vertexShaderModule;
-    vertexShaderInfo.pName = "main";
-    vertexShaderInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    auto vertexShaderModule = ShaderLoader::loadModule(device, "../../shaders/triangle.vert.spv");
+    VkPipelineShaderStageCreateInfo vertexShaderInfo{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_VERTEX_BIT,
+        .module = vertexShaderModule,
+        .pName = "main"};
 
-    VkPipelineShaderStageCreateInfo fragmentShaderInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .pNext = nullptr};
+    auto fragmentShaderModule = ShaderLoader::loadModule(device, "../../shaders/triangle.frag.spv");
+    VkPipelineShaderStageCreateInfo fragmentShaderInfo{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+        .module = fragmentShaderModule,
+        .pName = "main",
+    };
 
     VkPipelineShaderStageCreateInfo stages[2] = {vertexShaderInfo, fragmentShaderInfo};
 
+    VkVertexInputBindingDescription bindingDescription = {
+        .binding = 0,
+        .stride = sizeof(Vertex),
+        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
+
+    VkVertexInputAttributeDescription attributeDescriptions[] = {
+        // Position, float2
+        {
+            .location = 0,
+            .binding = bindingDescription.binding,
+            .format = VK_FORMAT_R32G32_SFLOAT,
+            .offset = 0},
+        // Color, float3
+        {
+            .location = 1,
+            .binding = bindingDescription.binding,
+            .format = VK_FORMAT_R32G32B32_SFLOAT,
+            .offset = 2 * sizeof(float)}};
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO, .pNext = nullptr};
     vertexInputInfo.flags = 0; // reserved for future use
-    // Vertices will be hard-coded in the shader, these will be null
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = VK_NULL_HANDLE;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = VK_NULL_HANDLE;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.vertexAttributeDescriptionCount = 2;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO, .pNext = nullptr};
     inputAssemblyInfo.flags = 0; // reserved for future use
@@ -161,10 +187,13 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout descri
     VulkanUtils::CheckVkResult(result);
 
     vkDestroyShaderModule(device, vertexShaderModule, nullptr);
+    vkDestroyShaderModule(device, fragmentShaderModule, nullptr);
 }
 
 GraphicsPipeline::~GraphicsPipeline()
 {
+    vkDestroyPipeline(device, pipeline, nullptr);
+    vkDestroyPipelineLayout(device, layout, nullptr);
 }
 
 void GraphicsPipeline::bindPushConstants(void *pushConstantData)

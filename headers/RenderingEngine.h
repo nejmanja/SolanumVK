@@ -7,6 +7,7 @@
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
 #include "ComputeRenderer.h"
+#include "TriangleRenderer.h"
 #include "ImGuiRenderer.h"
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
@@ -20,9 +21,9 @@ public:
 	~RenderingEngine();
 
 private:
-    void draw();
+	void draw();
 
-    // basic drawing context
+	// basic drawing context
 	std::unique_ptr<IWindowBridge> window;
 	VulkanContext vulkanContext;
 	CommandManager commandManager;
@@ -31,6 +32,7 @@ private:
 
 	// Renderers
 	std::unique_ptr<IRenderer> renderer;
+	std::unique_ptr<IRenderer> triangleRenderer;
 	std::unique_ptr<ImGuiRenderer> imGuiRenderer;
 
 	uint32_t frameCounter{0};

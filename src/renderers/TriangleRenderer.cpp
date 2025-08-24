@@ -5,7 +5,7 @@
 TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
 {
     // TODO: actual descriptor layout
-    pipeline = std::make_unique<GraphicsPipeline>(vulkanContext.getDevice(), VkDescriptorSetLayout{});
+    pipeline = std::make_unique<GraphicsPipeline>(vulkanContext.getDevice(), nullptr);
 }
 
 TriangleRenderer::~TriangleRenderer()
@@ -39,7 +39,10 @@ void TriangleRenderer::execute(VkCommandBuffer cmd)
     vkCmdBeginRendering(cmd, &renderingInfo);
     pipeline->bind(cmd);
 
-    // do the actual rendering...
+    VkDeviceSize offset{0};
+    // vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer, &offset);
+
+    vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRendering(cmd);
 }

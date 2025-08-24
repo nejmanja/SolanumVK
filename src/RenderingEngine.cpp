@@ -14,6 +14,7 @@ RenderingEngine::RenderingEngine()
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
 	  renderTarget(CreateRenderTarget(vulkanContext)),
 	  renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource)),
+	  triangleRenderer(std::make_unique<TriangleRenderer>(vulkanContext)),
 	  imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext))
 {
 }
