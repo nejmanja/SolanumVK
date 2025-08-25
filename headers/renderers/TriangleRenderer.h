@@ -14,6 +14,14 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    VkViewport viewport;
+    VkRect2D scissor;
+
+    VmaAllocator vmaAllocator;
+
+    VkBuffer vertexBuffer;
+    VmaAllocation vertexBufferAllocation;
+
     // Pipeline with which rendering will happen
     std::unique_ptr<GraphicsPipeline> pipeline;
 };

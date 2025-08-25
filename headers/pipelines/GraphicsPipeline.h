@@ -22,10 +22,11 @@ public:
 
     void execute() override;
 
-private:
     struct Vertex
     {
         glm::vec2 pos;
         glm::vec3 color;
     };
+
+private:
 };

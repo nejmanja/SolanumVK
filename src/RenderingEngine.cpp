@@ -70,7 +70,7 @@ void RenderingEngine::draw()
 	renderer->setup(renderTarget.resource);
 	auto swapchainExtent = vulkanContext.getSwapchain().extent;
 	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}});
-
+	triangleRenderer->setup(renderTarget.resource);
 	// ===============================================================================================================
 	// Begin Command Recording
 	// ===============================================================================================================
@@ -81,7 +81,11 @@ void RenderingEngine::draw()
 
 	renderer->execute(commandManager.get());
 
-	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	triangleRenderer->execute(commandManager.get());
+
+	commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 	commandManager.copyImage(renderTarget.resource.image, swapchainImage, swapchainExtent, swapchainExtent);

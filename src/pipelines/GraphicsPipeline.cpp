@@ -73,15 +73,14 @@ GraphicsPipeline::GraphicsPipeline(VkDevice device, VkDescriptorSetLayout *descr
     VkViewport viewport{
         .x = 0.0f,
         .y = 0.0f,
-        .width = 800.0f, // TODO: propagate viewport size to here (or just use dynamic viewport teehee)
+        .width = 800.0f,
         .height = 600.0f,
         .minDepth = 0.0f,
         .maxDepth = 1.0f};
 
     VkRect2D scissor{
         .offset = {0, 0},
-        .extent = {800, 600} // TODO: propagate viewport size to here (or just use dynamic viewport teehee)
-    };
+        .extent = {800, 600}};
 
     VkPipelineViewportStateCreateInfo viewportInfo{.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO, .pNext = nullptr};
     viewportInfo.flags = 0; // reserved for future use
