@@ -3,6 +3,7 @@
         "GLM_ROOT_DIR": "C:/Users/Nemanja/Documents/_Dev/VulkanSDK/Include",
         "SDL2_ROOT_DIR": "C:/Users/Nemanja/Documents/_Dev/_Libs/Include",
         "GLFW_ROOT_DIR": "C:/Users/Nemanja/Documents/_Dev/_Libs/Include",
+        "FastGLTF_ROOT_DIR": "C:/Users/Nemanja/Documents/_Dev/_Libs/Include",
         "LIB_ROOT_DIR": "C:/Users/Nemanja/Documents/_Dev/_Libs/lib",
         "CMAKE_BUILD_TYPE": "DEBUG"
     },

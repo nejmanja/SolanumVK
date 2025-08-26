@@ -10,6 +10,7 @@ find_package(GLM REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(VkBootstrap REQUIRED)
 find_package(GLFW REQUIRED)
+find_package(FastGLTF REQUIRED)
 
 include_directories(
     ${GLM_INCLUDE_DIR}
@@ -17,6 +18,7 @@ include_directories(
     ${SDL2_INCLUDE_DIR}/SDL2 # so that ImGui won't complain...
     ${VkBootstrap_INCLUDE_DIR}
     ${GLFW_INCLUDE_DIR}
+    ${FastGLTF_INCLUDE_DIR}
 )
 
 # Add source files
@@ -48,7 +50,7 @@ include_directories(${CMAKE_SOURCE_DIR}/imgui)
 
 add_executable(SolanumVK ${HEADER_FILES} ${SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBootstrap_LIBRARY} ${GLFW_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBootstrap_LIBRARY} ${GLFW_LIBRARY} ${FastGLTF_LIBRARY})
 
 if (WIN32)
     add_custom_command(
