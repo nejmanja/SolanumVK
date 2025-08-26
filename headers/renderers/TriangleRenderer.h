@@ -14,6 +14,8 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    void buildPipeline(const VulkanContext &vulkanContext);
+
     VkViewport viewport;
     VkRect2D scissor;
 

@@ -44,7 +44,7 @@ inline void GraphicsPipelineBuilder::resetVertexBindings()
     attributeDescriptions.clear();
 }
 
-void GraphicsPipelineBuilder::addShaderModule(std::string shaderPath, std::string entryPointName, VkShaderStageFlagBits stage)
+void GraphicsPipelineBuilder::addShaderModule(const char *shaderPath, const char *entryPointName, VkShaderStageFlagBits stage)
 {
     auto shaderModule = ShaderLoader::loadModule(device, shaderPath);
     VkPipelineShaderStageCreateInfo stageInfo{
@@ -53,7 +53,7 @@ void GraphicsPipelineBuilder::addShaderModule(std::string shaderPath, std::strin
         .flags = 0,
         .stage = stage,
         .module = shaderModule,
-        .pName = entryPointName.c_str(),
+        .pName = entryPointName,
     };
 
     shaderStages.push_back(stageInfo);
@@ -94,7 +94,7 @@ void GraphicsPipelineBuilder::setAlphaBlendFunction(VkBlendFactor src, VkBlendFa
     colorBlendState.alphaBlendOp = op;
 }
 
-GraphicsPipeline GraphicsPipelineBuilder::build()
+std::unique_ptr<GraphicsPipeline> GraphicsPipelineBuilder::build()
 {
     // Assign intermediary state to the layout
     layoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
@@ -102,9 +102,11 @@ GraphicsPipeline GraphicsPipelineBuilder::build()
     layoutCreateInfo.pushConstantRangeCount = pushConstantRanges.size();
     layoutCreateInfo.pPushConstantRanges = layoutCreateInfo.pushConstantRangeCount > 0 ? pushConstantRanges.data() : VK_NULL_HANDLE;
 
-    // Build the layout
-    VkPipelineLayout pipelineLayout;
+    // Build the layout...
+    VkPipelineLayout pipelineLayout{};
     vkCreatePipelineLayout(device, &layoutCreateInfo, nullptr, &pipelineLayout);
+    // ...and actually assign it!
+    pipelineCreateInfo.layout = pipelineLayout;
 
     // Assign intermediary state to pipeline accordingly
     vertexInputInfo.vertexBindingDescriptionCount = bindingDescriptions.size();
@@ -122,11 +124,11 @@ GraphicsPipeline GraphicsPipelineBuilder::build()
                                                 : VK_NULL_HANDLE;
 
     dynamicStateInfo.dynamicStateCount = dynamicState.size();
-    dynamicStateInfo.pDynamicStates = dynamicState.data();
+    dynamicStateInfo.pDynamicStates = dynamicStateInfo.dynamicStateCount > 0 ? dynamicState.data() : VK_NULL_HANDLE;
 
-    VkPipeline pipeline;
+    VkPipeline pipeline{};
     auto result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline);
     VulkanUtils::CheckVkResult(result);
 
-    return GraphicsPipeline(device, pipelineLayout, pipeline);
+    return std::make_unique<GraphicsPipeline>(device, pipelineLayout, pipeline);
 }

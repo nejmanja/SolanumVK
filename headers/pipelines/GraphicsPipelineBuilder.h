@@ -5,12 +5,13 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 class GraphicsPipelineBuilder
 {
 public:
     GraphicsPipelineBuilder(const VulkanContext &vulkanContext);
-    ~GraphicsPipelineBuilder();
+    ~GraphicsPipelineBuilder() {}
 
     // Descriptor set layouts
     void addDescriptorSetLayout(VkDescriptorSetLayout layout) { descriptorSetLayouts.push_back(layout); }
@@ -31,7 +32,7 @@ public:
     void setStencilAttachmentFormat(VkFormat format) { stencilFormat = format; }
 
     // Shader modules
-    void addShaderModule(std::string shaderName, std::string entryPointName, VkShaderStageFlagBits stage);
+    void addShaderModule(const char *shaderName, const char *entryPointName, VkShaderStageFlagBits stage);
     void resetShaderModules();
 
     // Rasterization state
@@ -50,7 +51,7 @@ public:
     void addDynamicState(VkDynamicState state) { dynamicState.push_back(state); }
     void resetDynamicState() { dynamicState.clear(); }
 
-    GraphicsPipeline build();
+    std::unique_ptr<GraphicsPipeline> build();
 
     void reset();
 

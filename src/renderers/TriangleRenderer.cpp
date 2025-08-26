@@ -3,6 +3,8 @@
 #include "SolanumConstants.h"
 #include "VulkanUtils.h"
 
+#include "GraphicsPipelineBuilder.h"
+
 TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
     : viewport{
           .x = 0,
@@ -13,8 +15,7 @@ TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
           .maxDepth = 1.0f},
       scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}
 {
-    // TODO: actual descriptor layout
-    pipeline = std::make_unique<GraphicsPipeline>(vulkanContext.getDevice(), nullptr);
+    buildPipeline(vulkanContext);
 
     // TODO: move this into a buffer allocator class
     VkBufferCreateInfo bufferCreateInfo{
@@ -105,4 +106,36 @@ void TriangleRenderer::execute(VkCommandBuffer cmd)
     vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRendering(cmd);
+}
+
+void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
+{
+    GraphicsPipelineBuilder builder{vulkanContext};
+
+    // TODO create a Vertex descriptor that can spit out attribute descriptions dynamically...
+    builder.addVertexBinding(0, sizeof(GraphicsPipeline::Vertex),
+                             std::vector<VkVertexInputAttributeDescription>{
+                                 // Position
+                                 VkVertexInputAttributeDescription{
+                                     .location = 0,
+                                     .format = VK_FORMAT_R32G32_SFLOAT,
+                                     .offset = 0},
+                                 // Color
+                                 VkVertexInputAttributeDescription{
+                                     .location = 1,
+                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                     .offset = 2 * sizeof(float)},
+                             });
+
+    builder.addColorAttachmentFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
+    builder.addShaderModule("../../shaders/triangle.vert.spv", "main", VK_SHADER_STAGE_VERTEX_BIT);
+    builder.addShaderModule("../../shaders/triangle.frag.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT);
+    builder.setCullMode(VK_CULL_MODE_BACK_BIT);
+    builder.setFrontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
+    builder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
+    builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
+
+    pipeline = builder.build();
+
+    builder.reset();
 }
