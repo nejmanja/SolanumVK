@@ -6,6 +6,8 @@ class IPipeline
 {
 public:
     IPipeline(VkDevice device) { this->device = device; }
+    IPipeline(VkDevice device, VkPipelineLayout layout, VkPipeline pipeline)
+        : device(device), layout(layout), pipeline(pipeline) {}
 
     virtual void bindPushConstants(void *pushConstantData) = 0;
     virtual void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) = 0;

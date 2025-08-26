@@ -9,6 +9,8 @@ class GraphicsPipeline : public IPipeline
 {
 public:
     GraphicsPipeline(VkDevice device, VkDescriptorSetLayout *descriptorSetLayout);
+    GraphicsPipeline(VkDevice device, VkPipelineLayout layout, VkPipeline pipeline)
+        : IPipeline(device, layout, pipeline) {}
     ~GraphicsPipeline();
 
     void bindPushConstants(void *pushConstantData) override;
