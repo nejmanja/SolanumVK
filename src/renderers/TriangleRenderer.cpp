@@ -136,6 +136,4 @@ void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
 
     pipeline = builder.build();
-
-    builder.reset();
 }

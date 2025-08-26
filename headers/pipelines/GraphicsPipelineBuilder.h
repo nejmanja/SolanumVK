@@ -11,7 +11,10 @@ class GraphicsPipelineBuilder
 {
 public:
     GraphicsPipelineBuilder(const VulkanContext &vulkanContext);
-    ~GraphicsPipelineBuilder() {}
+    ~GraphicsPipelineBuilder()
+    {
+        reset();
+    }
 
     // Descriptor set layouts
     void addDescriptorSetLayout(VkDescriptorSetLayout layout) { descriptorSetLayouts.push_back(layout); }
