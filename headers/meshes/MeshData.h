@@ -18,6 +18,8 @@ public:
     virtual const size_t getVertexSize() = 0;
     virtual void setVertexCount(size_t vertexCount) { this->vertexCount = vertexCount; }
 
+    virtual const void *getRawVertexData() const = 0;
+
 protected:
     size_t vertexCount;
 

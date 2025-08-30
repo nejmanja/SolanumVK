@@ -40,3 +40,8 @@ void SimpleMeshData::setColors(const std::vector<glm::vec3> &colors)
         vertices[i].color = colors[i];
     }
 }
+
+const void *SimpleMeshData::getRawVertexData() const
+{
+    return vertices.data();
+}

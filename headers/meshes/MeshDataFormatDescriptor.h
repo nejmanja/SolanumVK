@@ -36,8 +36,8 @@ public:
 private:
     void updateStride(VkFormat format);
 
-    uint32_t totalStride;
-    uint32_t index;
+    uint32_t totalStride{0};
+    uint32_t index{0};
     std::vector<VertexAttribute> attributes{};
 };
 

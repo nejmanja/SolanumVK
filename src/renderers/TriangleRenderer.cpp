@@ -5,6 +5,8 @@
 
 #include "GraphicsPipelineBuilder.h"
 
+#include "MeshLoader.h"
+
 TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
     : viewport{
           .x = 0,
@@ -15,45 +17,16 @@ TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
           .maxDepth = 1.0f},
       scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}
 {
+    meshData = MeshLoader::loadSimpleMesh("../../assets/vertexColorCube.glb");
+
     buildPipeline(vulkanContext);
-
-    // TODO: move this into a buffer allocator class
-    VkBufferCreateInfo bufferCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .size = 3 * sizeof(GraphicsPipeline::Vertex),
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 0,
-        .pQueueFamilyIndices = VK_NULL_HANDLE};
-    VmaAllocationCreateInfo vmaInfo{
-        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU};
-
-    vmaAllocator = vulkanContext.getVmaAllocator();
-
-    auto result = vmaCreateBuffer(vmaAllocator, &bufferCreateInfo, &vmaInfo, &vertexBuffer, &vertexBufferAllocation, nullptr);
-    VulkanUtils::CheckVkResult(result);
-
-    // Y-axis goes top (-1) to bottom (+1)!
-    std::vector<GraphicsPipeline::Vertex> vertices{};
-    vertices.push_back({.pos = glm::vec2{-0.5f, 0.5f},
-                        .color = glm::vec3{1, 0, 0}});
-    vertices.push_back({.pos = glm::vec2{0.5f, 0.5f},
-                        .color = glm::vec3{0, 1, 0}});
-    vertices.push_back({.pos = glm::vec2{0.0f, -0.5f},
-                        .color = glm::vec3{0, 0, 1}});
-
-    // Map the memory and copy the vertex data
-    void *data;
-    result = vmaMapMemory(vmaAllocator, vertexBufferAllocation, &data);
-    memcpy(data, vertices.data(), static_cast<size_t>(vertices.size() * sizeof(GraphicsPipeline::Vertex)));
-    vmaUnmapMemory(vmaAllocator, vertexBufferAllocation);
+    createMeshBuffers(vulkanContext);
 }
 
 TriangleRenderer::~TriangleRenderer()
 {
     vmaDestroyBuffer(vmaAllocator, vertexBuffer, vertexBufferAllocation);
+    vmaDestroyBuffer(vmaAllocator, indexBuffer, indexBufferAllocation);
 }
 
 void TriangleRenderer::setup(ImageResource finalTarget)
@@ -102,8 +75,9 @@ void TriangleRenderer::execute(VkCommandBuffer cmd)
 
     VkDeviceSize offset{0};
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer, &offset);
+    vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdDraw(cmd, 3, 1, 0, 0);
+    vkCmdDrawIndexed(cmd, meshData.getIndices().size(), 1, 0, 0, 0);
 
     vkCmdEndRendering(cmd);
 }
@@ -111,21 +85,7 @@ void TriangleRenderer::execute(VkCommandBuffer cmd)
 void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
 {
     GraphicsPipelineBuilder builder{vulkanContext};
-
-    // TODO create a Vertex descriptor that can spit out attribute descriptions dynamically...
-    builder.addVertexBinding(0, sizeof(GraphicsPipeline::Vertex),
-                             std::vector<VkVertexInputAttributeDescription>{
-                                 // Position
-                                 VkVertexInputAttributeDescription{
-                                     .location = 0,
-                                     .format = VK_FORMAT_R32G32_SFLOAT,
-                                     .offset = 0},
-                                 // Color
-                                 VkVertexInputAttributeDescription{
-                                     .location = 1,
-                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                     .offset = 2 * sizeof(float)},
-                             });
+    builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
 
     builder.addColorAttachmentFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
     builder.addShaderModule("../../shaders/triangle.vert.spv", "main", VK_SHADER_STAGE_VERTEX_BIT);
@@ -136,4 +96,42 @@ void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
 
     pipeline = builder.build();
+}
+
+void TriangleRenderer::createMeshBuffers(const VulkanContext &vulkanContext)
+{
+    auto vertexBufferSize = meshData.getVertexSize() * meshData.getVertexCount();
+
+    VkBufferCreateInfo bufferCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .size = vertexBufferSize,
+        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = VK_NULL_HANDLE};
+    VmaAllocationCreateInfo vmaInfo{
+        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU};
+
+    vmaAllocator = vulkanContext.getVmaAllocator();
+
+    auto result = vmaCreateBuffer(vmaAllocator, &bufferCreateInfo, &vmaInfo, &vertexBuffer, &vertexBufferAllocation, nullptr);
+    VulkanUtils::CheckVkResult(result);
+
+    // Map the memory and copy the vertex data
+    void *data;
+    result = vmaMapMemory(vmaAllocator, vertexBufferAllocation, &data);
+    memcpy(data, meshData.getRawVertexData(), static_cast<size_t>(vertexBufferSize));
+    vmaUnmapMemory(vmaAllocator, vertexBufferAllocation);
+
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    bufferCreateInfo.size = meshData.getIndices().size() * sizeof(uint32_t);
+    result = vmaCreateBuffer(vmaAllocator, &bufferCreateInfo, &vmaInfo, &indexBuffer, &indexBufferAllocation, nullptr);
+    VulkanUtils::CheckVkResult(result);
+
+    void *indexData;
+    result = vmaMapMemory(vmaAllocator, indexBufferAllocation, &indexData);
+    memcpy(indexData, meshData.getIndices().data(), static_cast<size_t>(meshData.getIndices().size() * sizeof(uint32_t)));
+    vmaUnmapMemory(vmaAllocator, indexBufferAllocation);
 }

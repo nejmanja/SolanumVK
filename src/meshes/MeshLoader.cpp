@@ -30,6 +30,7 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
     {
         std::vector<uint32_t> indices{};
         std::vector<glm::vec3> positions{};
+        std::vector<glm::vec3> colors{};
 
         SimpleMeshData meshData{};
 
@@ -54,11 +55,21 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
                 {
                     positions.push_back(position);
                 });
+            // vertex colors
+            auto &colAccessor = asset->accessors[primitive.findAttribute("COLOR_0")->accessorIndex];
+            fastgltf::iterateAccessorWithIndex<glm::vec4>(
+                asset.get(),
+                colAccessor,
+                [&](glm::vec4 color, size_t index)
+                {
+                    colors.push_back(color);
+                });
         }
 
         meshData.setIndices(indices);
         meshData.setVertexCount(positions.size());
         meshData.setPositions(positions);
+        meshData.setColors(colors);
 
         return meshData;
     }
