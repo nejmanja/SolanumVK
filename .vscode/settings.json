@@ -80,6 +80,11 @@
         "cinttypes": "cpp",
         "condition_variable": "cpp",
         "mutex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "chrono": "cpp",
+        "filesystem": "cpp",
+        "forward_list": "cpp",
+        "memory_resource": "cpp",
+        "variant": "cpp"
     }
 }

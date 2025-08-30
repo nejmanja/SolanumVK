@@ -2,6 +2,7 @@
 
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
+#include "MeshDataFormatDescriptor.h"
 
 #include <vector>
 #include <string>
@@ -26,6 +27,7 @@ public:
 
     // Create an entire binding with all attributes contained within it
     void addVertexBinding(uint32_t binding, uint32_t stride, std::vector<VkVertexInputAttributeDescription> attributes);
+    void addVertexBinding(const VertexBinding &binding);
     void resetVertexBindings();
 
     // Attachments

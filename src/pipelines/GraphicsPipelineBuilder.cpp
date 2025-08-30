@@ -38,6 +38,16 @@ void GraphicsPipelineBuilder::addVertexBinding(uint32_t binding, uint32_t stride
     }
 }
 
+void GraphicsPipelineBuilder::addVertexBinding(const VertexBinding &binding)
+{
+    bindingDescriptions.push_back(binding.createBindingDescription());
+
+    for (auto &&attribute : binding.getAttributes())
+    {
+        attributeDescriptions.push_back(attribute.attributeDescription);
+    }
+}
+
 inline void GraphicsPipelineBuilder::resetVertexBindings()
 {
     bindingDescriptions.clear();
