@@ -15,18 +15,16 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
           .height = (float)SolVK::windowHeight,
           .minDepth = 0.0f,
           .maxDepth = 1.0f},
-      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}
+      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, meshUploader{vulkanContext}
 {
     meshData = MeshLoader::loadSimpleMesh("../../assets/vertexColorCube.glb");
+    meshUploader.uploadMesh(meshData);
 
     buildPipeline(vulkanContext);
-    createMeshBuffers(vulkanContext);
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer()
 {
-    vmaDestroyBuffer(vmaAllocator, vertexBuffer, vertexBufferAllocation);
-    vmaDestroyBuffer(vmaAllocator, indexBuffer, indexBufferAllocation);
 }
 
 void SimpleMeshRenderer::setup(ImageResource finalTarget)
@@ -74,8 +72,9 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
     pipeline->setScissor(&scissor);
 
     VkDeviceSize offset{0};
+    auto vertexBuffer = meshData.getVertexBuffer();
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(cmd, meshData.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
     vkCmdDrawIndexed(cmd, meshData.getIndices().size(), 1, 0, 0, 0);
 
@@ -96,42 +95,4 @@ void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
 
     pipeline = builder.build();
-}
-
-void SimpleMeshRenderer::createMeshBuffers(const VulkanContext &vulkanContext)
-{
-    auto vertexBufferSize = meshData.getVertexSize() * meshData.getVertexCount();
-
-    VkBufferCreateInfo bufferCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .size = vertexBufferSize,
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 0,
-        .pQueueFamilyIndices = VK_NULL_HANDLE};
-    VmaAllocationCreateInfo vmaInfo{
-        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU};
-
-    vmaAllocator = vulkanContext.getVmaAllocator();
-
-    auto result = vmaCreateBuffer(vmaAllocator, &bufferCreateInfo, &vmaInfo, &vertexBuffer, &vertexBufferAllocation, nullptr);
-    VulkanUtils::CheckVkResult(result);
-
-    // Map the memory and copy the vertex data
-    void *data;
-    result = vmaMapMemory(vmaAllocator, vertexBufferAllocation, &data);
-    memcpy(data, meshData.getRawVertexData(), static_cast<size_t>(vertexBufferSize));
-    vmaUnmapMemory(vmaAllocator, vertexBufferAllocation);
-
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-    bufferCreateInfo.size = meshData.getIndices().size() * sizeof(uint32_t);
-    result = vmaCreateBuffer(vmaAllocator, &bufferCreateInfo, &vmaInfo, &indexBuffer, &indexBufferAllocation, nullptr);
-    VulkanUtils::CheckVkResult(result);
-
-    void *indexData;
-    result = vmaMapMemory(vmaAllocator, indexBufferAllocation, &indexData);
-    memcpy(indexData, meshData.getIndices().data(), static_cast<size_t>(meshData.getIndices().size() * sizeof(uint32_t)));
-    vmaUnmapMemory(vmaAllocator, indexBufferAllocation);
 }

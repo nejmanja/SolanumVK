@@ -4,6 +4,7 @@
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
 #include "SimpleMeshData.h"
+#include "MeshUploader.h"
 
 class SimpleMeshRenderer : public IRenderer
 {
@@ -16,7 +17,6 @@ public:
 
 private:
     void buildPipeline(const VulkanContext &vulkanContext);
-    void createMeshBuffers(const VulkanContext &vulkanContext);
 
     VkViewport viewport;
     VkRect2D scissor;
@@ -24,10 +24,8 @@ private:
     VmaAllocator vmaAllocator;
 
     SimpleMeshData meshData;
-    VkBuffer vertexBuffer;
-    VkBuffer indexBuffer;
-    VmaAllocation vertexBufferAllocation;
-    VmaAllocation indexBufferAllocation;
+
+    MeshUploader meshUploader;
 
     // Pipeline with which rendering will happen
     std::unique_ptr<GraphicsPipeline> pipeline;

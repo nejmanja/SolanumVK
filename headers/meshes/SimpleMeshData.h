@@ -13,10 +13,10 @@ public:
     void setVertexCount(size_t vertexCount) override;
     void setPositions(const std::vector<glm::vec3> &positions);
     void setColors(const std::vector<glm::vec3> &colors);
-    const size_t getVertexSize() override { return sizeof(Vertex); }
+    const size_t getVertexSize() const override { return sizeof(Vertex); }
 
     const void *getRawVertexData() const override;
-    const size_t getVertexCount() const { return vertices.size(); }
+    const size_t getVertexCount() const override { return vertices.size(); }
 
 private:
     struct Vertex
