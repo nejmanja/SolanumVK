@@ -1,4 +1,4 @@
-#include "TriangleRenderer.h"
+#include "SimpleMeshRenderer.h"
 
 #include "SolanumConstants.h"
 #include "VulkanUtils.h"
@@ -7,7 +7,7 @@
 
 #include "MeshLoader.h"
 
-TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
+SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
     : viewport{
           .x = 0,
           .y = 0,
@@ -23,13 +23,13 @@ TriangleRenderer::TriangleRenderer(const VulkanContext &vulkanContext)
     createMeshBuffers(vulkanContext);
 }
 
-TriangleRenderer::~TriangleRenderer()
+SimpleMeshRenderer::~SimpleMeshRenderer()
 {
     vmaDestroyBuffer(vmaAllocator, vertexBuffer, vertexBufferAllocation);
     vmaDestroyBuffer(vmaAllocator, indexBuffer, indexBufferAllocation);
 }
 
-void TriangleRenderer::setup(ImageResource finalTarget)
+void SimpleMeshRenderer::setup(ImageResource finalTarget)
 {
     IRenderer::setup(finalTarget);
 
@@ -40,7 +40,7 @@ void TriangleRenderer::setup(ImageResource finalTarget)
     scissor.extent.height = finalTarget.imageExtent.height;
 }
 
-void TriangleRenderer::execute(VkCommandBuffer cmd)
+void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
 {
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -82,7 +82,7 @@ void TriangleRenderer::execute(VkCommandBuffer cmd)
     vkCmdEndRendering(cmd);
 }
 
-void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
+void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
 {
     GraphicsPipelineBuilder builder{vulkanContext};
     builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
@@ -98,7 +98,7 @@ void TriangleRenderer::buildPipeline(const VulkanContext &vulkanContext)
     pipeline = builder.build();
 }
 
-void TriangleRenderer::createMeshBuffers(const VulkanContext &vulkanContext)
+void SimpleMeshRenderer::createMeshBuffers(const VulkanContext &vulkanContext)
 {
     auto vertexBufferSize = meshData.getVertexSize() * meshData.getVertexCount();
 

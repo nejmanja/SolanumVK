@@ -5,11 +5,11 @@
 #include "GraphicsPipeline.h"
 #include "SimpleMeshData.h"
 
-class TriangleRenderer : public IRenderer
+class SimpleMeshRenderer : public IRenderer
 {
 public:
-    TriangleRenderer(const VulkanContext &vulkanContext);
-    ~TriangleRenderer();
+    SimpleMeshRenderer(const VulkanContext &vulkanContext);
+    ~SimpleMeshRenderer();
 
     void setup(ImageResource finalTarget) override;
     void execute(VkCommandBuffer cmd) override;

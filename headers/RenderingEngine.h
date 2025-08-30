@@ -7,7 +7,7 @@
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
 #include "ComputeRenderer.h"
-#include "TriangleRenderer.h"
+#include "SimpleMeshRenderer.h"
 #include "ImGuiRenderer.h"
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
@@ -32,7 +32,7 @@ private:
 
 	// Renderers
 	std::unique_ptr<IRenderer> renderer;
-	std::unique_ptr<IRenderer> triangleRenderer;
+	std::unique_ptr<IRenderer> simpleMeshRenderer;
 	std::unique_ptr<ImGuiRenderer> imGuiRenderer;
 
 	uint32_t frameCounter{0};
