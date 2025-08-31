@@ -20,7 +20,7 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const Image
     descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
 
     descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
-    descriptorWriter->writeImage(descriptorSet, renderTarget.imageView, VK_IMAGE_LAYOUT_GENERAL);
+    descriptorWriter->writeImage(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, renderTarget.imageView, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 ComputeRenderer::~ComputeRenderer()

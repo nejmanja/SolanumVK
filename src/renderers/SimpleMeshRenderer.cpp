@@ -104,7 +104,6 @@ void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
     transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
 
     BufferAllocator bufferAllocator(vulkanContext);
-
     transformBuffer = bufferAllocator.allocateBuffer(sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
     memoryManager.registerResource(transformBuffer);
 
@@ -115,7 +114,7 @@ void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
     bufferAllocator.copyBufferData(&transform, sizeof(Transform), transformBuffer);
 
     descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
-    descriptorWriter->writeBuffer(transformUniformDescriptorSet, transformBuffer.buffer, sizeof(Transform));
+    descriptorWriter->writeBuffer(transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
 }
 
 void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
