@@ -1,5 +1,9 @@
 #pragma once
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "IRenderer.h"
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
@@ -17,6 +21,7 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    void createDescriptors(const VulkanContext &vulkanContext);
     void buildPipeline(const VulkanContext &vulkanContext);
 
     VkViewport viewport;
@@ -32,4 +37,14 @@ private:
     std::unique_ptr<GraphicsPipeline> pipeline;
 
     ScopedVkMemoryManager memoryManager;
+
+    struct Transform
+    {
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+    AllocatedBuffer transformBuffer;
+    VkDescriptorSetLayout transformUniformLayout{VK_NULL_HANDLE};
+    VkDescriptorSet transformUniformDescriptorSet{VK_NULL_HANDLE};
 };

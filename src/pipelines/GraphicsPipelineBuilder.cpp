@@ -10,10 +10,6 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder(const VulkanContext &vulkanCont
 
 void GraphicsPipelineBuilder::resetDescriptorSetLayouts()
 {
-    for (auto &&descriptorSetLayout : descriptorSetLayouts)
-    {
-        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
-    }
     descriptorSetLayouts.clear();
 }
 

@@ -4,6 +4,7 @@
 #include "VulkanUtils.h"
 
 #include "GraphicsPipelineBuilder.h"
+#include "DescriptorLayoutBuilder.h"
 
 #include "MeshLoader.h"
 
@@ -18,17 +19,15 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
       scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, meshUploader{vulkanContext}, memoryManager{vulkanContext}
 
 {
+    auto device = vulkanContext.getDevice();
+
     meshData = MeshLoader::loadSimpleMesh("../../assets/vertexColorCube.glb");
     meshUploader.uploadMesh(meshData);
     memoryManager.registerResource(meshData);
 
-    buildPipeline(vulkanContext);
+    createDescriptors(vulkanContext);
 
-    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(
-        vulkanContext.getDevice(),
-        std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
-            {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-             .countPerSet = 1}});
+    buildPipeline(vulkanContext);
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer()
@@ -75,6 +74,7 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
 
     vkCmdBeginRendering(cmd, &renderingInfo);
     pipeline->bind(cmd);
+    pipeline->bindDescriptorSets(1, &transformUniformDescriptorSet);
 
     pipeline->setViewport(&viewport);
     pipeline->setScissor(&scissor);
@@ -89,6 +89,35 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
     vkCmdEndRendering(cmd);
 }
 
+void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
+{
+    auto device = vulkanContext.getDevice();
+
+    DescriptorLayoutBuilder layoutBuilder{};
+    layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    transformUniformLayout = layoutBuilder.build(device, VK_SHADER_STAGE_VERTEX_BIT, 0);
+    memoryManager.registerResource(transformUniformLayout);
+
+    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
+    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
+
+    transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
+
+    BufferAllocator bufferAllocator(vulkanContext);
+
+    transformBuffer = bufferAllocator.allocateBuffer(sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+    memoryManager.registerResource(transformBuffer);
+
+    Transform transform{
+        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{1.2f}),
+        .view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -1.0f}),
+        .projection = glm::perspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f)};
+    bufferAllocator.copyBufferData(&transform, sizeof(Transform), transformBuffer);
+
+    descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
+    descriptorWriter->writeBuffer(transformUniformDescriptorSet, transformBuffer.buffer, sizeof(Transform));
+}
+
 void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
 {
     GraphicsPipelineBuilder builder{vulkanContext};
@@ -101,6 +130,7 @@ void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
     builder.setFrontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
     builder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
+    builder.addDescriptorSetLayout(transformUniformLayout);
 
     pipeline = builder.build();
 }
