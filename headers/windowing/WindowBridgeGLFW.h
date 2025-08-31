@@ -17,13 +17,23 @@ public:
 
     VkExtent2D getExtent() override { return windowExtent; }
 
+    double getTime() override { return currentTime; }
+    double getDeltaTime() override { return currentTime - lastFrameTime; }
+
     bool quitRequested() override { return glfwWindowShouldClose(window); }
     bool isHidden() override { return minimized; }
-    void newFrame() override { ImGui_ImplGlfw_NewFrame(); }
+    void newFrame() override
+    {
+        lastFrameTime = currentTime;
+        currentTime = glfwGetTime();
+        ImGui_ImplGlfw_NewFrame();
+    }
 
     std::vector<const char *> getWindowInstanceExtensions() override { return instanceExtensions; };
 
 private:
+    double currentTime{0.0}, lastFrameTime{0.0};
+
     std::vector<const char *> instanceExtensions{};
 
     VkExtent2D windowExtent;

@@ -14,6 +14,9 @@ public:
 
 	virtual VkExtent2D getExtent() = 0;
 
+	virtual double getTime() = 0;
+	virtual double getDeltaTime() = 0;
+
 	virtual bool quitRequested() = 0;
 	virtual bool isHidden() = 0;
 	virtual void newFrame() = 0;

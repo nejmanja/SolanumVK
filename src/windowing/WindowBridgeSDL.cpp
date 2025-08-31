@@ -70,3 +70,10 @@ void WindowBridgeSDL::handleEvents()
         ImGui_ImplSDL2_ProcessEvent(&e);
     }
 }
+
+void WindowBridgeSDL::newFrame()
+{
+    lastFrameTime = currentTime;
+    currentTime = (double)SDL_GetTicks64() / 1000.0;
+    ImGui_ImplSDL2_NewFrame();
+}
