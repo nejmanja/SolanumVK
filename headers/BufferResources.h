@@ -5,6 +5,6 @@
 
 struct AllocatedBuffer
 {
-    VkBuffer buffer;
-    VmaAllocation allocation;
+    VkBuffer buffer{VK_NULL_HANDLE};
+    VmaAllocation allocation{};
 };

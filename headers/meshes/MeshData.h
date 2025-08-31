@@ -22,8 +22,8 @@ public:
 
     virtual const void *getRawVertexData() const = 0;
 
-    const VkBuffer getVertexBuffer() const { return vertexBuffer.buffer; }
-    const VkBuffer getIndexBuffer() const { return indexBuffer.buffer; }
+    const AllocatedBuffer getVertexBuffer() const { return vertexBuffer; }
+    const AllocatedBuffer getIndexBuffer() const { return indexBuffer; }
 
     void setBuffers(AllocatedBuffer vertexBuffer, AllocatedBuffer indexBuffer)
     {

@@ -7,7 +7,7 @@ void DescriptorLayoutBuilder::addBinding(uint32_t bindingIdx, VkDescriptorType d
     VkDescriptorSetLayoutBinding binding{};
     binding.binding = bindingIdx;
     binding.descriptorType = descriptorType;
-    binding.descriptorCount = 1;
+    binding.descriptorCount = descriptorCount;
     binding.stageFlags = stageFlags;
 
     bindings.push_back(binding);

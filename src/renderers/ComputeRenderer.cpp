@@ -13,23 +13,15 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const Image
     descriptorSetLayout = layoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 
     pipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
+
+    descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
+
     auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}};
     rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
 
     descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
 
-    VkDescriptorImageInfo imageInfo{.sampler = nullptr,
-                                    .imageView = renderTarget.imageView,
-                                    .imageLayout = VK_IMAGE_LAYOUT_GENERAL};
-
-    VkWriteDescriptorSet descriptorWrite = {.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, .pNext = nullptr};
-    descriptorWrite.descriptorCount = 1;
-    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    descriptorWrite.dstBinding = 0;
-    descriptorWrite.dstSet = descriptorSet;
-    descriptorWrite.pImageInfo = &imageInfo;
-
-    vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+    descriptorWriter->writeImage(descriptorSet, renderTarget.imageView, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 ComputeRenderer::~ComputeRenderer()

@@ -5,6 +5,7 @@
 #include "GraphicsPipeline.h"
 #include "SimpleMeshData.h"
 #include "MeshUploader.h"
+#include "ScopedVkMemoryManager.h"
 
 class SimpleMeshRenderer : public IRenderer
 {
@@ -29,4 +30,6 @@ private:
 
     // Pipeline with which rendering will happen
     std::unique_ptr<GraphicsPipeline> pipeline;
+
+    ScopedVkMemoryManager memoryManager;
 };

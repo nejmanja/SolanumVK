@@ -5,6 +5,7 @@
 #include "IPipeline.h"
 #include "DescriptorSetAllocator.h"
 #include "ImageResources.h"
+#include "DescriptorWriter.h"
 
 class IRenderer
 {
@@ -23,4 +24,5 @@ protected:
 
     // For pipeline-specific descriptors
     std::unique_ptr<DescriptorSetAllocator> rendererDescriptorAllocator;
+    std::unique_ptr<DescriptorWriter> descriptorWriter;
 };

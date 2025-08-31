@@ -7,14 +7,6 @@ BufferAllocator::BufferAllocator(const VulkanContext &vulkanContext)
 {
 }
 
-BufferAllocator::~BufferAllocator()
-{
-    for (auto &&allocatedBuffer : allocatedBuffers)
-    {
-        vmaDestroyBuffer(allocator, allocatedBuffer.buffer, allocatedBuffer.allocation);
-    }
-}
-
 AllocatedBuffer BufferAllocator::allocateBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
                                                 VmaAllocationCreateFlags allocationFlags)
 {
@@ -36,8 +28,6 @@ AllocatedBuffer BufferAllocator::allocateBuffer(VkDeviceSize bufferSize, VkBuffe
 
     auto result = vmaCreateBuffer(allocator, &bufferCreateInfo, &vmaInfo, &buffer.buffer, &buffer.allocation, nullptr);
     VulkanUtils::CheckVkResult(result);
-
-    allocatedBuffers.push_back(buffer);
     return buffer;
 }
 

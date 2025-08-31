@@ -10,7 +10,7 @@ class BufferAllocator
 {
 public:
     BufferAllocator(const VulkanContext &vulkanContext);
-    ~BufferAllocator();
+    ~BufferAllocator() {}
 
     AllocatedBuffer allocateBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
                                    VmaAllocationCreateFlags allocationFlags = 0);
@@ -18,7 +18,5 @@ public:
     void copyBufferData(const void *cpuData, size_t dataSize, AllocatedBuffer buffer);
 
 private:
-    std::vector<AllocatedBuffer>
-        allocatedBuffers;
     VmaAllocator allocator;
 };

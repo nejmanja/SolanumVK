@@ -15,12 +15,20 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
           .height = (float)SolVK::windowHeight,
           .minDepth = 0.0f,
           .maxDepth = 1.0f},
-      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, meshUploader{vulkanContext}
+      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, meshUploader{vulkanContext}, memoryManager{vulkanContext}
+
 {
     meshData = MeshLoader::loadSimpleMesh("../../assets/vertexColorCube.glb");
     meshUploader.uploadMesh(meshData);
+    memoryManager.registerResource(meshData);
 
     buildPipeline(vulkanContext);
+
+    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(
+        vulkanContext.getDevice(),
+        std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
+            {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+             .countPerSet = 1}});
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer()
@@ -72,9 +80,9 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
     pipeline->setScissor(&scissor);
 
     VkDeviceSize offset{0};
-    auto vertexBuffer = meshData.getVertexBuffer();
+    auto vertexBuffer = meshData.getVertexBuffer().buffer;
     vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(cmd, meshData.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(cmd, meshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
 
     vkCmdDrawIndexed(cmd, meshData.getIndices().size(), 1, 0, 0, 0);
 
