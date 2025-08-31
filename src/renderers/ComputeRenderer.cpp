@@ -30,9 +30,9 @@ ComputeRenderer::~ComputeRenderer()
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
-void ComputeRenderer::setup(ImageResource finalTarget)
+void ComputeRenderer::setup(ImageResource finalTarget, double deltaTime)
 {
-    IRenderer::setup(finalTarget);
+    IRenderer::setup(finalTarget, deltaTime);
 }
 
 void ComputeRenderer::execute(VkCommandBuffer cmd)

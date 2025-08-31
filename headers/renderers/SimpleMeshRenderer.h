@@ -17,7 +17,7 @@ public:
     SimpleMeshRenderer(const VulkanContext &vulkanContext);
     ~SimpleMeshRenderer();
 
-    void setup(ImageResource finalTarget) override;
+    void setup(ImageResource finalTarget, double deltaTime) override;
     void execute(VkCommandBuffer cmd) override;
 
 private:
@@ -37,6 +37,7 @@ private:
     std::unique_ptr<GraphicsPipeline> pipeline;
 
     ScopedVkMemoryManager memoryManager;
+    std::unique_ptr<BufferAllocator> bufferAllocator;
 
     struct Transform
     {
@@ -44,6 +45,7 @@ private:
         glm::mat4 view;
         glm::mat4 projection;
     };
+    Transform transform;
     AllocatedBuffer transformBuffer;
     VkDescriptorSetLayout transformUniformLayout{VK_NULL_HANDLE};
     VkDescriptorSet transformUniformDescriptorSet{VK_NULL_HANDLE};

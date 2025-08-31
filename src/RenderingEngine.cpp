@@ -33,7 +33,7 @@ void RenderingEngine::exec()
 			continue;
 		}
 
-		draw();
+		draw(window->getDeltaTime());
 
 		++frameCounter;
 		commandManager.nextFrame();
@@ -48,7 +48,7 @@ RenderingEngine::~RenderingEngine()
 	ImageAllocator::freeImage(vulkanContext, renderTarget);
 }
 
-void RenderingEngine::draw()
+void RenderingEngine::draw(double deltaTime)
 {
 	auto device = vulkanContext.getDevice();
 
@@ -67,10 +67,10 @@ void RenderingEngine::draw()
 	auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
 	auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
 
-	renderer->setup(renderTarget.resource);
+	renderer->setup(renderTarget.resource, deltaTime);
 	auto swapchainExtent = vulkanContext.getSwapchain().extent;
-	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}});
-	simpleMeshRenderer->setup(renderTarget.resource);
+	imGuiRenderer->setup({.image = swapchainImage, .imageView = swapchainImageView, .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}}, deltaTime);
+	simpleMeshRenderer->setup(renderTarget.resource, deltaTime);
 	// ===============================================================================================================
 	// Begin Command Recording
 	// ===============================================================================================================

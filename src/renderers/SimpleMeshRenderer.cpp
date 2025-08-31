@@ -34,9 +34,12 @@ SimpleMeshRenderer::~SimpleMeshRenderer()
 {
 }
 
-void SimpleMeshRenderer::setup(ImageResource finalTarget)
+void SimpleMeshRenderer::setup(ImageResource finalTarget, double deltaTime)
 {
-    IRenderer::setup(finalTarget);
+    IRenderer::setup(finalTarget, deltaTime);
+
+    transform.model = glm::rotate(transform.model, (float)deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
+    bufferAllocator->copyBufferData(&transform, sizeof(Transform), transformBuffer);
 
     viewport.width = (float)finalTarget.imageExtent.width;
     viewport.height = (float)finalTarget.imageExtent.height;
@@ -103,15 +106,15 @@ void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
 
     transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
 
-    BufferAllocator bufferAllocator(vulkanContext);
-    transformBuffer = bufferAllocator.allocateBuffer(sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+    bufferAllocator = std::make_unique<BufferAllocator>(vulkanContext);
+    transformBuffer = bufferAllocator->allocateBuffer(sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memoryManager.registerResource(transformBuffer);
 
-    Transform transform{
-        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{1.2f}),
-        .view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -1.0f}),
-        .projection = glm::perspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f)};
-    bufferAllocator.copyBufferData(&transform, sizeof(Transform), transformBuffer);
+    transform = {
+        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f}),
+        .view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
+        .projection = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f)}; // glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f)};
+    bufferAllocator->copyBufferData(&transform, sizeof(Transform), transformBuffer);
 
     descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
     descriptorWriter->writeBuffer(transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));

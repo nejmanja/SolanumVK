@@ -21,7 +21,7 @@ public:
 	~RenderingEngine();
 
 private:
-	void draw();
+	void draw(double deltaTime);
 
 	// basic drawing context
 	std::unique_ptr<IWindowBridge> window;

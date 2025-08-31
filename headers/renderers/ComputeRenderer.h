@@ -10,7 +10,7 @@ public:
     ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget);
     ~ComputeRenderer();
 
-    void setup(ImageResource finalTarget) override;
+    void setup(ImageResource finalTarget, double deltaTime) override;
     void execute(VkCommandBuffer cmd) override;
 
 private:

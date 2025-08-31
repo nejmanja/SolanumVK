@@ -26,15 +26,20 @@ AllocatedBuffer BufferAllocator::allocateBuffer(VkDeviceSize bufferSize, VkBuffe
 
     AllocatedBuffer buffer{};
 
-    auto result = vmaCreateBuffer(allocator, &bufferCreateInfo, &vmaInfo, &buffer.buffer, &buffer.allocation, nullptr);
+    auto result = vmaCreateBuffer(allocator, &bufferCreateInfo, &vmaInfo, &buffer.buffer, &buffer.allocation, &buffer.allocationInfo);
     VulkanUtils::CheckVkResult(result);
     return buffer;
 }
 
 void BufferAllocator::copyBufferData(const void *cpuData, size_t dataSize, AllocatedBuffer buffer)
 {
-    void *data;
-    auto result = vmaMapMemory(allocator, buffer.allocation, &data);
+    void *data = buffer.allocationInfo.pMappedData;
+    auto alreadyMapped = data != nullptr;
+    if (!alreadyMapped)
+        vmaMapMemory(allocator, buffer.allocation, &data);
+
     memcpy(data, cpuData, dataSize);
-    vmaUnmapMemory(allocator, buffer.allocation);
+
+    if (!alreadyMapped)
+        vmaUnmapMemory(allocator, buffer.allocation);
 }

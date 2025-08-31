@@ -73,9 +73,9 @@ ImGuiRenderer::~ImGuiRenderer()
     vkDestroyDescriptorPool(device, imguiPool, nullptr);
 }
 
-void ImGuiRenderer::setup(ImageResource finalTarget)
+void ImGuiRenderer::setup(ImageResource finalTarget, double deltaTime)
 {
-    IRenderer::setup(finalTarget);
+    IRenderer::setup(finalTarget, deltaTime);
 
     ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();
