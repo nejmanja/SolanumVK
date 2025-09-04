@@ -124,6 +124,11 @@ std::unique_ptr<GraphicsPipeline> GraphicsPipelineBuilder::build()
     pipelineCreateInfo.stageCount = shaderStages.size();
     pipelineCreateInfo.pStages = shaderStages.data();
 
+    renderingCreateInfo.colorAttachmentCount = (uint32_t)colorAttachmentFormats.size();
+    renderingCreateInfo.pColorAttachmentFormats = colorAttachmentFormats.data();
+    renderingCreateInfo.depthAttachmentFormat = depthFormat;
+    renderingCreateInfo.stencilAttachmentFormat = stencilFormat;
+
     // only assign depthStencilState if we actually have depth or stencil
     pipelineCreateInfo.pDepthStencilState = depthFormat != VK_FORMAT_UNDEFINED || stencilFormat != VK_FORMAT_UNDEFINED
                                                 ? &depthStencilInfo

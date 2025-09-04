@@ -70,8 +70,8 @@ private:
     std::vector<VkPushConstantRange> pushConstantRanges{};
 
     std::vector<VkFormat> colorAttachmentFormats{};
-    VkFormat depthFormat;
-    VkFormat stencilFormat;
+    VkFormat depthFormat{VK_FORMAT_UNDEFINED};
+    VkFormat stencilFormat{VK_FORMAT_UNDEFINED};
 
     // These two hold the vertex format
     std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
