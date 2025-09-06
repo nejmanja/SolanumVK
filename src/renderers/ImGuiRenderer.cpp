@@ -3,7 +3,7 @@
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
     : IRenderer(vulkanContext)
 {
-    device = vulkanContext.getDevice();
+    auto device = vulkanContext.getDevice();
 
     // Yoinked directly from the ImGui samples
     VkDescriptorPoolSize poolSizes[] = {
@@ -71,7 +71,7 @@ ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
 ImGuiRenderer::~ImGuiRenderer()
 {
     ImGui_ImplVulkan_Shutdown();
-    vkDestroyDescriptorPool(device, imguiPool, nullptr);
+    vkDestroyDescriptorPool(vulkanContext.getDevice(), imguiPool, nullptr);
 }
 
 void ImGuiRenderer::setup(ImageResource finalTarget, double deltaTime)

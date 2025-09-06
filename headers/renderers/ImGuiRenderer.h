@@ -22,7 +22,6 @@ public:
 private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorSet descriptorSet;
-    VkDevice device;
 
     // This info remains the same between frames
     // Only the actual render target might change
