@@ -9,14 +9,11 @@
 class BufferAllocator
 {
 public:
-    BufferAllocator(const VulkanContext &vulkanContext);
-    ~BufferAllocator() {}
+    static AllocatedBuffer allocateBuffer(const VulkanContext &vulkanContext, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
+                                          VmaAllocationCreateFlags allocationFlags = 0);
 
-    AllocatedBuffer allocateBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
-                                   VmaAllocationCreateFlags allocationFlags = 0);
-
-    void copyBufferData(const void *cpuData, size_t dataSize, AllocatedBuffer buffer);
+    static void copyBufferData(const VulkanContext &vulkanContext, const void *cpuData, size_t dataSize, AllocatedBuffer buffer);
 
 private:
-    VmaAllocator allocator;
+    BufferAllocator() = delete;
 };

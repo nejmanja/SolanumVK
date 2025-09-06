@@ -9,25 +9,24 @@
 #include "MeshLoader.h"
 
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
-    : viewport{
+    : vulkanContext{vulkanContext},
+      viewport{
           .x = 0,
           .y = 0,
           .width = (float)SolVK::windowWidth,
           .height = (float)SolVK::windowHeight,
           .minDepth = 0.0f,
           .maxDepth = 1.0f},
-      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, meshUploader{vulkanContext}, memoryManager{vulkanContext}
-
+      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, memoryManager{vulkanContext}
 {
     auto device = vulkanContext.getDevice();
 
     meshData = MeshLoader::loadSimpleMesh("../../assets/vertexColorCube.glb");
-    meshUploader.uploadMesh(meshData);
+    MeshUploader::uploadMesh(vulkanContext, meshData);
     memoryManager.registerResource(meshData);
 
-    createDescriptors(vulkanContext);
-
-    buildPipeline(vulkanContext);
+    createDescriptors();
+    buildPipeline();
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer()
@@ -39,7 +38,7 @@ void SimpleMeshRenderer::setup(ImageResource finalTarget, double deltaTime)
     IRenderer::setup(finalTarget, deltaTime);
 
     transform.model = glm::rotate(transform.model, (float)deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
-    bufferAllocator->copyBufferData(&transform, sizeof(Transform), transformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
     viewport.width = (float)finalTarget.imageExtent.width;
     viewport.height = (float)finalTarget.imageExtent.height;
@@ -92,7 +91,7 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
     vkCmdEndRendering(cmd);
 }
 
-void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
+void SimpleMeshRenderer::createDescriptors()
 {
     auto device = vulkanContext.getDevice();
 
@@ -106,20 +105,19 @@ void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
 
     transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
 
-    bufferAllocator = std::make_unique<BufferAllocator>(vulkanContext);
-    transformBuffer = bufferAllocator->allocateBuffer(sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, VMA_ALLOCATION_CREATE_MAPPED_BIT);
+    transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memoryManager.registerResource(transformBuffer);
 
     transform = {
         .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f}),
         .view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
         .projection = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f)}; // glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f)};
-    bufferAllocator->copyBufferData(&transform, sizeof(Transform), transformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
     DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
 }
 
-void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
+void SimpleMeshRenderer::buildPipeline()
 {
     GraphicsPipelineBuilder builder{vulkanContext};
     builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);

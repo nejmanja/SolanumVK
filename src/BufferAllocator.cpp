@@ -2,12 +2,7 @@
 
 #include "VulkanUtils.h"
 
-BufferAllocator::BufferAllocator(const VulkanContext &vulkanContext)
-    : allocator(vulkanContext.getVmaAllocator())
-{
-}
-
-AllocatedBuffer BufferAllocator::allocateBuffer(VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
+AllocatedBuffer BufferAllocator::allocateBuffer(const VulkanContext &vulkanContext, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
                                                 VmaAllocationCreateFlags allocationFlags)
 {
     VkBufferCreateInfo bufferCreateInfo{
@@ -26,13 +21,15 @@ AllocatedBuffer BufferAllocator::allocateBuffer(VkDeviceSize bufferSize, VkBuffe
 
     AllocatedBuffer buffer{};
 
-    auto result = vmaCreateBuffer(allocator, &bufferCreateInfo, &vmaInfo, &buffer.buffer, &buffer.allocation, &buffer.allocationInfo);
+    auto result = vmaCreateBuffer(vulkanContext.getVmaAllocator(), &bufferCreateInfo, &vmaInfo, &buffer.buffer, &buffer.allocation, &buffer.allocationInfo);
     VulkanUtils::CheckVkResult(result);
     return buffer;
 }
 
-void BufferAllocator::copyBufferData(const void *cpuData, size_t dataSize, AllocatedBuffer buffer)
+void BufferAllocator::copyBufferData(const VulkanContext &vulkanContext, const void *cpuData, size_t dataSize, AllocatedBuffer buffer)
 {
+    auto &allocator = vulkanContext.getVmaAllocator();
+
     void *data = buffer.allocationInfo.pMappedData;
     auto alreadyMapped = data != nullptr;
     if (!alreadyMapped)

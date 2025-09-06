@@ -21,23 +21,20 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
-    void createDescriptors(const VulkanContext &vulkanContext);
-    void buildPipeline(const VulkanContext &vulkanContext);
+    void createDescriptors();
+    void buildPipeline();
+
+    const VulkanContext &vulkanContext;
 
     VkViewport viewport;
     VkRect2D scissor;
 
-    VmaAllocator vmaAllocator;
-
     SimpleMeshData meshData;
-
-    MeshUploader meshUploader;
 
     // Pipeline with which rendering will happen
     std::unique_ptr<GraphicsPipeline> pipeline;
 
     ScopedVkMemoryManager memoryManager;
-    std::unique_ptr<BufferAllocator> bufferAllocator;
 
     struct Transform
     {

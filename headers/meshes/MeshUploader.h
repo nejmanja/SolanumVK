@@ -9,11 +9,8 @@
 class MeshUploader
 {
 public:
-    MeshUploader(const VulkanContext &vulkanContext);
-    ~MeshUploader() {}
-
-    void uploadMesh(MeshData &meshData);
+    static void uploadMesh(const VulkanContext &vulkanContext, MeshData &meshData);
 
 private:
-    BufferAllocator allocator;
+    MeshUploader() = delete;
 };
