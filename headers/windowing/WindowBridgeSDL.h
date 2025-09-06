@@ -10,19 +10,19 @@ public:
     WindowBridgeSDL(bool resizeable);
     ~WindowBridgeSDL();
 
-    VkSurfaceKHR createSurface(VkInstance instance);
-    void handleEvents();
+    VkSurfaceKHR createSurface(VkInstance instance) override;
+    void handleEvents() override;
 
-    VkExtent2D getExtent() { return windowExtent; }
+    VkExtent2D getExtent() override { return windowExtent; }
 
     double getTime() override { return currentTime; }
     double getDeltaTime() override { return currentTime - lastFrameTime; }
 
-    bool quitRequested() { return wantsQuit; }
-    bool isHidden() { return minimized; }
+    bool quitRequested() override { return wantsQuit; }
+    bool isHidden() override { return minimized; }
     void newFrame() override;
 
-    std::vector<const char *> getWindowInstanceExtensions() { return {}; }
+    std::vector<const char *> getWindowInstanceExtensions() override { return {}; }
 
 private:
     double currentTime{0.0}, lastFrameTime{0.0};
