@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "VulkanContext.h"
 #include "IPipeline.h"
 #include "DescriptorSetAllocator.h"
 #include "ImageResources.h"
@@ -9,7 +10,7 @@
 class IRenderer
 {
 public:
-    IRenderer() {}
+    IRenderer(const VulkanContext &vulkanContext) : vulkanContext{vulkanContext} {}
     virtual ~IRenderer() {}
 
     // Used before recording commands. May include setup for descriptor sets and push constants.
@@ -19,6 +20,7 @@ public:
     virtual void execute(VkCommandBuffer cmd) = 0;
 
 protected:
+    const VulkanContext &vulkanContext;
     ImageResource finalTarget;
 
     // For pipeline-specific descriptors

@@ -9,7 +9,7 @@
 #include "MeshLoader.h"
 
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
-    : vulkanContext{vulkanContext},
+    : IRenderer(vulkanContext),
       viewport{
           .x = 0,
           .y = 0,

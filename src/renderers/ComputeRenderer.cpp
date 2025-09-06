@@ -4,6 +4,7 @@
 #include "DescriptorWriter.h"
 
 ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget)
+    : IRenderer(vulkanContext)
 {
     device = vulkanContext.getDevice();
 

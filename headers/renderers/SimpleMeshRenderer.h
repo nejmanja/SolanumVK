@@ -24,8 +24,6 @@ private:
     void createDescriptors();
     void buildPipeline();
 
-    const VulkanContext &vulkanContext;
-
     VkViewport viewport;
     VkRect2D scissor;
 

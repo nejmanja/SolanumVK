@@ -1,6 +1,7 @@
 #include "ImGuiRenderer.h"
 
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
+    : IRenderer(vulkanContext)
 {
     device = vulkanContext.getDevice();
 
