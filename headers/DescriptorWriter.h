@@ -5,13 +5,11 @@
 class DescriptorWriter
 {
 public:
-    DescriptorWriter(const VulkanContext &vulkanContext) : device(vulkanContext.getDevice()) {}
+    DescriptorWriter() = delete;
 
-    void writeImage(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkImageView imageView, VkImageLayout imageLayout);
-    void writeBuffer(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkBuffer buffer, VkDeviceSize bufferSize, VkDeviceSize offset = 0);
+    static void writeImage(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkImageView imageView, VkImageLayout imageLayout);
+    static void writeBuffer(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkBuffer buffer, VkDeviceSize bufferSize, VkDeviceSize offset = 0);
 
 private:
     static VkWriteDescriptorSet getDefaultWrite(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType);
-
-    VkDevice device;
 };

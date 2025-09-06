@@ -5,7 +5,7 @@
 
 #include "GraphicsPipelineBuilder.h"
 #include "DescriptorLayoutBuilder.h"
-
+#include "DescriptorWriter.h"
 #include "MeshLoader.h"
 
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
@@ -116,8 +116,7 @@ void SimpleMeshRenderer::createDescriptors(const VulkanContext &vulkanContext)
         .projection = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f)}; // glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f)};
     bufferAllocator->copyBufferData(&transform, sizeof(Transform), transformBuffer);
 
-    descriptorWriter = std::make_unique<DescriptorWriter>(vulkanContext);
-    descriptorWriter->writeBuffer(transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
+    DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
 }
 
 void SimpleMeshRenderer::buildPipeline(const VulkanContext &vulkanContext)
