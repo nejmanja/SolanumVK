@@ -5,7 +5,6 @@
 
 #include <thread>
 #include <cmath>
-#include <cstdio>
 
 RenderingEngine::RenderingEngine()
 	: window(std::make_unique<WindowBridgeGLFW>(false)),
