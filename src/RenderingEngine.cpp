@@ -3,6 +3,8 @@
 #include "WindowBridgeSDL.h"
 #include "WindowBridgeGLFW.h"
 
+#include "DescriptorWriter.h"
+
 #include <thread>
 #include <cmath>
 
@@ -11,11 +13,13 @@ RenderingEngine::RenderingEngine()
 	  vulkanContext(*window),
 	  commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics), vulkanContext.getSwapchain().framesInFlight),
 	  syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
-	  renderTarget(CreateRenderTarget(vulkanContext)),
+	  renderTarget(createRenderTarget(vulkanContext)),
 	  renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource)),
-	  simpleMeshRenderer(std::make_unique<SimpleMeshRenderer>(vulkanContext)),
-	  imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext))
+	  imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
+	  memoryManager(vulkanContext)
 {
+	createSceneDescriptor();
+	simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
 }
 
 void RenderingEngine::exec()
@@ -118,6 +122,31 @@ void RenderingEngine::draw(double deltaTime)
 	vkQueuePresentKHR(vulkanContext.getQueue(VulkanContext::QueueType::Graphics), &presentInfo);
 }
 
+void RenderingEngine::createSceneDescriptor()
+{
+	DescriptorLayoutBuilder layoutBuilder{};
+	layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT);
+	sceneDescriptorLayout = layoutBuilder.build(vulkanContext.getDevice(), VK_SHADER_STAGE_VERTEX_BIT, 0);
+	memoryManager.registerResource(sceneDescriptorLayout);
+
+	auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
+		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
+
+	sceneDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(vulkanContext.getDevice(), resourceSizes);
+	sceneDescriptorSet = sceneDescriptorAllocator->allocate(sceneDescriptorLayout);
+
+	sceneUniformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(SceneDescriptor), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+	memoryManager.registerResource(sceneUniformBuffer);
+	sceneDescriptor = {
+		.view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
+		.proj = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f),
+		.sunDirection = glm::normalize(glm::vec3{0.0f, -1.0f, 1.0f}),
+		.sunColor = glm::vec3{1.0f, 0.9f, 0.55f}};
+	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
+
+	DescriptorWriter::writeBuffer(vulkanContext, sceneDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, sceneUniformBuffer.buffer, sizeof(SceneDescriptor));
+}
+
 uint32_t RenderingEngine::getSwapchainImageIndex(VkDevice device)
 {
 	auto swapchainImageAcquiredSemaphore = syncManager.getRecycledSemaphore();
@@ -142,7 +171,7 @@ uint32_t RenderingEngine::getSwapchainImageIndex(VkDevice device)
 	return swapchainImageIndex;
 }
 
-AllocatedImageResource RenderingEngine::CreateRenderTarget(const VulkanContext &vulkanContext)
+AllocatedImageResource RenderingEngine::createRenderTarget(const VulkanContext &vulkanContext)
 {
 
 	VkImageUsageFlags usageFlags{};

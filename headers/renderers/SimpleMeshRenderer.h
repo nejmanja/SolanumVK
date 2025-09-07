@@ -14,7 +14,7 @@
 class SimpleMeshRenderer : public IRenderer
 {
 public:
-    SimpleMeshRenderer(const VulkanContext &vulkanContext);
+    SimpleMeshRenderer(const VulkanContext &vulkanContext, const VkDescriptorSetLayout sceneDescriptorLayout, const VkDescriptorSet sceneDescriptorSet);
     ~SimpleMeshRenderer();
 
     void setup(ImageResource finalTarget, double deltaTime) override;
@@ -22,7 +22,9 @@ public:
 
 private:
     void createDescriptors();
-    void buildPipeline();
+    void buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout);
+
+    const VkDescriptorSet sceneDescriptorSet;
 
     VkViewport viewport;
     VkRect2D scissor;
@@ -37,8 +39,6 @@ private:
     struct Transform
     {
         glm::mat4 model;
-        glm::mat4 view;
-        glm::mat4 projection;
     };
     Transform transform;
     AllocatedBuffer transformBuffer;

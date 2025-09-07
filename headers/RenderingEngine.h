@@ -12,6 +12,8 @@
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorSetAllocator.h"
 #include "ImageAllocator.h"
+#include "ScopedVkMemoryManager.h"
+#include "SceneDescriptor.h"
 
 class RenderingEngine
 {
@@ -22,6 +24,7 @@ public:
 
 private:
 	void draw(double deltaTime);
+	void createSceneDescriptor();
 
 	// basic drawing context
 	std::unique_ptr<IWindowBridge> window;
@@ -29,6 +32,14 @@ private:
 	CommandManager commandManager;
 	PresentSyncManager syncManager;
 	AllocatedImageResource renderTarget;
+	ScopedVkMemoryManager memoryManager;
+
+	// Scene global descriptors
+	std::unique_ptr<DescriptorSetAllocator> sceneDescriptorAllocator;
+	VkDescriptorSetLayout sceneDescriptorLayout;
+	VkDescriptorSet sceneDescriptorSet;
+	AllocatedBuffer sceneUniformBuffer;
+	SceneDescriptor sceneDescriptor;
 
 	// Renderers
 	std::unique_ptr<IRenderer> renderer;
@@ -39,5 +50,5 @@ private:
 	uint32_t getFrameIndex() { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
 	uint32_t getSwapchainImageIndex(VkDevice device);
 
-	static AllocatedImageResource CreateRenderTarget(const VulkanContext &vulkanContext);
+	static AllocatedImageResource createRenderTarget(const VulkanContext &vulkanContext);
 };

@@ -8,7 +8,7 @@
 #include "DescriptorWriter.h"
 #include "MeshLoader.h"
 
-SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
+SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext, const VkDescriptorSetLayout sceneDescriptorLayout, const VkDescriptorSet sceneDescriptorSet)
     : IRenderer(vulkanContext),
       viewport{
           .x = 0,
@@ -17,7 +17,8 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
           .height = (float)SolVK::windowHeight,
           .minDepth = 0.0f,
           .maxDepth = 1.0f},
-      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, memoryManager{vulkanContext}
+      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, memoryManager{vulkanContext},
+      sceneDescriptorSet{sceneDescriptorSet}
 {
     auto device = vulkanContext.getDevice();
 
@@ -26,7 +27,7 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext)
     memoryManager.registerResource(meshData);
 
     createDescriptors();
-    buildPipeline();
+    buildPipeline(sceneDescriptorLayout);
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer()
@@ -76,7 +77,9 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
 
     vkCmdBeginRendering(cmd, &renderingInfo);
     pipeline->bind(cmd);
-    pipeline->bindDescriptorSets(1, &transformUniformDescriptorSet);
+
+    VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, transformUniformDescriptorSet};
+    pipeline->bindDescriptorSets(2, descriptorSets);
 
     pipeline->setViewport(&viewport);
     pipeline->setScissor(&scissor);
@@ -109,26 +112,25 @@ void SimpleMeshRenderer::createDescriptors()
     memoryManager.registerResource(transformBuffer);
 
     transform = {
-        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f}),
-        .view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
-        .projection = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f)}; // glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f)};
+        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f})};
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
     DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
 }
 
-void SimpleMeshRenderer::buildPipeline()
+void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout)
 {
     GraphicsPipelineBuilder builder{vulkanContext};
     builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
 
     builder.addColorAttachmentFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
-    builder.addShaderModule("../../shaders/triangle.vert.spv", "main", VK_SHADER_STAGE_VERTEX_BIT);
-    builder.addShaderModule("../../shaders/triangle.frag.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT);
+    builder.addShaderModule("../../shaders/simpleMesh.vert.spv", "main", VK_SHADER_STAGE_VERTEX_BIT);
+    builder.addShaderModule("../../shaders/simpleMesh.frag.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT);
     builder.setCullMode(VK_CULL_MODE_BACK_BIT);
     builder.setFrontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE);
     builder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
+    builder.addDescriptorSetLayout(sceneDescriptorLayout);
     builder.addDescriptorSetLayout(transformUniformLayout);
 
     pipeline = builder.build();
