@@ -36,6 +36,12 @@ WindowBridgeGLFW::WindowBridgeGLFW(bool resizeable)
 
     instanceExtensions = extensions;
 
+    // GLFW can't comprehend the this parameter in callbacks
+    // hence the need for the user pointer to 'this' instance.
+    glfwSetWindowUserPointer(window, this);
+    // The callback itslef is static, and the class will be retreived inside of it
+    glfwSetKeyCallback(window, keyCallback);
+
     // Also yoinked from example, main function
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -68,4 +74,40 @@ VkSurfaceKHR WindowBridgeGLFW::createSurface(VkInstance instance)
 void WindowBridgeGLFW::handleEvents()
 {
     glfwPollEvents();
+}
+
+void WindowBridgeGLFW::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    WindowBridgeGLFW *windowBridge = static_cast<WindowBridgeGLFW *>(glfwGetWindowUserPointer(window));
+    if (windowBridge == nullptr)
+        return;
+
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_W:
+            windowBridge->lastKeyPress = KeyCode::KeyW;
+            break;
+        case GLFW_KEY_A:
+            windowBridge->lastKeyPress = KeyCode::KeyA;
+            break;
+        case GLFW_KEY_S:
+            windowBridge->lastKeyPress = KeyCode::KeyS;
+            break;
+        case GLFW_KEY_D:
+            windowBridge->lastKeyPress = KeyCode::KeyD;
+            break;
+        case GLFW_KEY_Q:
+            windowBridge->lastKeyPress = KeyCode::KeyQ;
+            break;
+        case GLFW_KEY_E:
+            windowBridge->lastKeyPress = KeyCode::KeyE;
+            break;
+        }
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        windowBridge->lastKeyPress = KeyCode::None;
+    }
 }

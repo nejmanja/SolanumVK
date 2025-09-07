@@ -22,9 +22,14 @@ public:
     bool isHidden() override { return minimized; }
     void newFrame() override;
 
+    KeyCode getLastKeyPress() { return lastKeyPress; }
+
     std::vector<const char *> getWindowInstanceExtensions() override { return {}; }
 
 private:
+    void processKeyPress(SDL_Event &e);
+    KeyCode lastKeyPress;
+
     double currentTime{0.0}, lastFrameTime{0.0};
 
     VkExtent2D windowExtent;

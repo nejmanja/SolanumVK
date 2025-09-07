@@ -14,6 +14,7 @@
 #include "ImageAllocator.h"
 #include "ScopedVkMemoryManager.h"
 #include "SceneDescriptor.h"
+#include "Camera.h"
 
 class RenderingEngine
 {
@@ -23,6 +24,7 @@ public:
 	~RenderingEngine();
 
 private:
+	void processInput();
 	void draw(double deltaTime);
 	void createSceneDescriptor();
 
@@ -33,6 +35,9 @@ private:
 	PresentSyncManager syncManager;
 	AllocatedImageResource renderTarget;
 	ScopedVkMemoryManager memoryManager;
+
+	// Camera
+	Camera camera;
 
 	// Scene global descriptors
 	std::unique_ptr<DescriptorSetAllocator> sceneDescriptorAllocator;

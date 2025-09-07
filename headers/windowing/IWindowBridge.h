@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
+#include "InputEnums.h"
+
 class IWindowBridge
 {
 public:
@@ -20,6 +22,8 @@ public:
 	virtual bool quitRequested() = 0;
 	virtual bool isHidden() = 0;
 	virtual void newFrame() = 0;
+
+	virtual KeyCode getLastKeyPress() = 0;
 
 	virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
 };

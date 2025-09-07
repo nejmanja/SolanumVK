@@ -29,9 +29,14 @@ public:
         ImGui_ImplGlfw_NewFrame();
     }
 
+    KeyCode getLastKeyPress() { return lastKeyPress; }
+
     std::vector<const char *> getWindowInstanceExtensions() override { return instanceExtensions; };
 
 private:
+    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
+    KeyCode lastKeyPress;
     double currentTime{0.0}, lastFrameTime{0.0};
 
     std::vector<const char *> instanceExtensions{};

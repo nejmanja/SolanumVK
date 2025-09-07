@@ -18,6 +18,9 @@ RenderingEngine::RenderingEngine()
 	  imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
 	  memoryManager(vulkanContext)
 {
+	camera.setPerspectiveProj(glm::radians(45.0f), 1.3333f, 0.01f, 1000.0f);
+	// camera.setOrthoProj(1.0f, 0.75f, 0.01f, 1000.0f);
+
 	createSceneDescriptor();
 	simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
 }
@@ -29,6 +32,8 @@ void RenderingEngine::exec()
 		window->newFrame();
 
 		window->handleEvents();
+
+		processInput();
 
 		if (window->isHidden())
 		{
@@ -122,6 +127,37 @@ void RenderingEngine::draw(double deltaTime)
 	vkQueuePresentKHR(vulkanContext.getQueue(VulkanContext::QueueType::Graphics), &presentInfo);
 }
 
+void RenderingEngine::processInput()
+{
+	glm::vec3 offset{0.0f};
+
+	switch (window->getLastKeyPress())
+	{
+	case KeyCode::KeyS:
+		offset.z = -1.0f;
+		break;
+	case KeyCode::KeyW:
+		offset.z = 1.0f;
+		break;
+	case KeyCode::KeyA:
+		offset.x = -1.0f;
+		break;
+	case KeyCode::KeyD:
+		offset.x = 1.0f;
+		break;
+	case KeyCode::KeyE:
+		offset.y = -1.0f;
+		break;
+	case KeyCode::KeyQ:
+		offset.y = 1.0f;
+		break;
+	}
+
+	camera.move(offset * (float)window->getDeltaTime());
+	sceneDescriptor.view = camera.getView();
+	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
+}
+
 void RenderingEngine::createSceneDescriptor()
 {
 	DescriptorLayoutBuilder layoutBuilder{};
@@ -135,11 +171,11 @@ void RenderingEngine::createSceneDescriptor()
 	sceneDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(vulkanContext.getDevice(), resourceSizes);
 	sceneDescriptorSet = sceneDescriptorAllocator->allocate(sceneDescriptorLayout);
 
-	sceneUniformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(SceneDescriptor), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+	sceneUniformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(SceneDescriptor), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, VMA_ALLOCATION_CREATE_MAPPED_BIT);
 	memoryManager.registerResource(sceneUniformBuffer);
 	sceneDescriptor = {
-		.view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
-		.proj = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f),
+		.view = camera.getView(),
+		.proj = camera.getProj(),
 		.sunDirection = glm::normalize(glm::vec3{0.0f, -1.0f, -1.0f}),
 		.sunColor = glm::vec3{1.0f, 0.9f, 0.55f}};
 	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
