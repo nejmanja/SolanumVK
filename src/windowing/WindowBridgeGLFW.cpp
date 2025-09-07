@@ -104,6 +104,9 @@ void WindowBridgeGLFW::keyCallback(GLFWwindow *window, int key, int scancode, in
         case GLFW_KEY_E:
             windowBridge->lastKeyPress = KeyCode::KeyE;
             break;
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(window, 1);
+            break;
         }
     }
     else if (action == GLFW_RELEASE)

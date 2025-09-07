@@ -27,5 +27,5 @@ private:
     glm::mat4 view{1.0f};
     glm::mat4 proj{1.0f};
     glm::vec3 lookVector{0.0f, 0.0f, 1.0f};
-    glm::vec3 camPosition{};
+    glm::vec3 camPosition{0.0f, 0.0f, -5.0f};
 };

@@ -44,7 +44,5 @@ private:
     VkExtent2D windowExtent;
 
     GLFWwindow *window;
-
-    bool wantsQuit;
     bool minimized = false;
 };
