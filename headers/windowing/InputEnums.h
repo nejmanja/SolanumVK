@@ -17,3 +17,9 @@ enum class KeyAction
     Press,
     Release
 };
+
+struct MouseOffset
+{
+    float x{0.0f};
+    float y{0.0f};
+};

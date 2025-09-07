@@ -153,7 +153,11 @@ void RenderingEngine::processInput()
 		break;
 	}
 
-	camera.move(offset * (float)window->getDeltaTime());
+	auto dt = (float)window->getDeltaTime();
+	camera.move(offset * dt);
+
+	auto mouseOffset = window->getMouseOffset();
+	camera.rotate(mouseOffset.x * dt, mouseOffset.y * dt);
 	sceneDescriptor.view = camera.getView();
 	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
 }

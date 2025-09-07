@@ -24,18 +24,28 @@ public:
     bool isHidden() override { return minimized; }
     void newFrame() override
     {
+        frameIndex++;
         lastFrameTime = currentTime;
         currentTime = glfwGetTime();
         ImGui_ImplGlfw_NewFrame();
     }
 
-    KeyCode getLastKeyPress() { return lastKeyPress; }
+    const KeyCode getLastKeyPress() const override { return lastKeyPress; }
+    const MouseOffset getMouseOffset() const override
+    {
+        return frameIndex - lastMouseMovementFrameIndex > 1
+                   ? MouseOffset{}
+                   : MouseOffset{currentMouseOffset.x - lastMouseOffset.x, currentMouseOffset.y - lastMouseOffset.y};
+    }
 
     std::vector<const char *> getWindowInstanceExtensions() override { return instanceExtensions; };
 
 private:
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void cursorPosCallback(GLFWwindow *window, double xpos, double ypos);
 
+    MouseOffset currentMouseOffset, lastMouseOffset{};
+    size_t lastMouseMovementFrameIndex{0};
     KeyCode lastKeyPress;
     double currentTime{0.0}, lastFrameTime{0.0};
 
@@ -45,4 +55,6 @@ private:
 
     GLFWwindow *window;
     bool minimized = false;
+
+    size_t frameIndex{0};
 };

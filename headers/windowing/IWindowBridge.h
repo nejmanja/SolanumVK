@@ -23,7 +23,8 @@ public:
 	virtual bool isHidden() = 0;
 	virtual void newFrame() = 0;
 
-	virtual KeyCode getLastKeyPress() = 0;
+	virtual const KeyCode getLastKeyPress() const = 0;
+	virtual const MouseOffset getMouseOffset() const = 0;
 
 	virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
 };

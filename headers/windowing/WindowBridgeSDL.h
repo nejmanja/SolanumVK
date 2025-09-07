@@ -22,7 +22,8 @@ public:
     bool isHidden() override { return minimized; }
     void newFrame() override;
 
-    KeyCode getLastKeyPress() { return lastKeyPress; }
+    const KeyCode getLastKeyPress() const override { return lastKeyPress; }
+    const MouseOffset getMouseOffset() const override { return MouseOffset{}; }
 
     std::vector<const char *> getWindowInstanceExtensions() override { return {}; }
 

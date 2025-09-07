@@ -42,6 +42,9 @@ WindowBridgeGLFW::WindowBridgeGLFW(bool resizeable)
     // The callback itslef is static, and the class will be retreived inside of it
     glfwSetKeyCallback(window, keyCallback);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, cursorPosCallback);
+
     // Also yoinked from example, main function
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -113,4 +116,17 @@ void WindowBridgeGLFW::keyCallback(GLFWwindow *window, int key, int scancode, in
     {
         windowBridge->lastKeyPress = KeyCode::None;
     }
+}
+
+void WindowBridgeGLFW::cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
+{
+    WindowBridgeGLFW *windowBridge = static_cast<WindowBridgeGLFW *>(glfwGetWindowUserPointer(window));
+    if (windowBridge == nullptr)
+        return;
+
+    windowBridge->lastMouseOffset = windowBridge->currentMouseOffset;
+
+    windowBridge->currentMouseOffset = MouseOffset{(float)xpos, (float)ypos};
+
+    windowBridge->lastMouseMovementFrameIndex = windowBridge->frameIndex;
 }
