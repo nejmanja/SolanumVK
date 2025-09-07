@@ -12,6 +12,7 @@ public:
 
     void setVertexCount(size_t vertexCount) override;
     void setPositions(const std::vector<glm::vec3> &positions);
+    void setNormals(const std::vector<glm::vec3> &normals);
     void setColors(const std::vector<glm::vec3> &colors);
     const size_t getVertexSize() const override { return sizeof(Vertex); }
 
@@ -23,6 +24,7 @@ private:
     {
         glm::vec3 pos;
         glm::vec3 color;
+        glm::vec3 normal;
     };
 
     std::vector<Vertex> vertices;

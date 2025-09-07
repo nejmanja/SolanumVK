@@ -85,6 +85,7 @@
         "filesystem": "cpp",
         "forward_list": "cpp",
         "memory_resource": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "stdfloat": "cpp"
     }
 }

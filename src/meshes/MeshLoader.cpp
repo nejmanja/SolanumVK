@@ -31,6 +31,7 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
         std::vector<uint32_t> indices{};
         std::vector<glm::vec3> positions{};
         std::vector<glm::vec3> colors{};
+        std::vector<glm::vec3> normals{};
 
         SimpleMeshData meshData{};
 
@@ -55,6 +56,15 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
                 {
                     positions.push_back(position);
                 });
+            // positions
+            auto &normalAccessor = asset->accessors[primitive.findAttribute("NORMAL")->accessorIndex];
+            fastgltf::iterateAccessorWithIndex<glm::vec3>(
+                asset.get(),
+                normalAccessor,
+                [&](glm::vec3 normal, size_t index)
+                {
+                    normals.push_back(normal);
+                });
             // vertex colors
             auto &colAccessor = asset->accessors[primitive.findAttribute("COLOR_0")->accessorIndex];
             fastgltf::iterateAccessorWithIndex<glm::vec4>(
@@ -70,6 +80,7 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
         meshData.setVertexCount(positions.size());
         meshData.setPositions(positions);
         meshData.setColors(colors);
+        meshData.setNormals(normals);
 
         return meshData;
     }

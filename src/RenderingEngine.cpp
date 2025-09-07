@@ -140,7 +140,7 @@ void RenderingEngine::createSceneDescriptor()
 	sceneDescriptor = {
 		.view = glm::translate(glm::mat4{1.0f}, glm::vec3{0.0f, 0.0f, -5.0f}),
 		.proj = glm::ortho(-1.0f, 1.0f, -0.75f, 0.75f, 0.1f, 1000.0f),
-		.sunDirection = glm::normalize(glm::vec3{0.0f, -1.0f, 1.0f}),
+		.sunDirection = glm::normalize(glm::vec3{0.0f, -1.0f, -1.0f}),
 		.sunColor = glm::vec3{1.0f, 0.9f, 0.55f}};
 	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
 

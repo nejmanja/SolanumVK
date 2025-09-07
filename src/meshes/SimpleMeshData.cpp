@@ -7,6 +7,7 @@ SimpleMeshData::SimpleMeshData()
     VertexBinding defaultBinding{0};
     defaultBinding.addAttribute(VertexAttribute::VertexAttributeType::Position, VK_FORMAT_R32G32B32_SFLOAT);
     defaultBinding.addAttribute(VertexAttribute::VertexAttributeType::Color, VK_FORMAT_R32G32B32_SFLOAT);
+    defaultBinding.addAttribute(VertexAttribute::VertexAttributeType::Normal, VK_FORMAT_R32G32B32_SFLOAT);
     formatDescriptor.addBinding(defaultBinding);
 
     setFormatDescriptor(formatDescriptor);
@@ -27,6 +28,17 @@ void SimpleMeshData::setPositions(const std::vector<glm::vec3> &positions)
     for (int i = 0; i < positions.size(); i++)
     {
         vertices[i].pos = positions[i];
+    }
+}
+
+void SimpleMeshData::setNormals(const std::vector<glm::vec3> &normals)
+{
+    if (normals.size() != vertexCount)
+        setVertexCount(normals.size());
+
+    for (int i = 0; i < normals.size(); i++)
+    {
+        vertices[i].normal = normals[i];
     }
 }
 
