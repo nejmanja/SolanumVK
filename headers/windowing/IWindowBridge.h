@@ -25,6 +25,7 @@ public:
 
 	virtual const KeyCode getLastKeyPress() const = 0;
 	virtual const MouseOffset getMouseOffset() const = 0;
+	virtual const ScrollOffset getScrollOffset() const = 0;
 
 	virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
 };

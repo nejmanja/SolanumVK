@@ -24,6 +24,7 @@ public:
 
     const KeyCode getLastKeyPress() const override { return lastKeyPress; }
     const MouseOffset getMouseOffset() const override { return MouseOffset{}; }
+    const ScrollOffset getScrollOffset() const override { return ScrollOffset{}; }
 
     std::vector<const char *> getWindowInstanceExtensions() override { return {}; }
 

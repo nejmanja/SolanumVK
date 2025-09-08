@@ -44,6 +44,7 @@ WindowBridgeGLFW::WindowBridgeGLFW(bool resizeable)
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, cursorPosCallback);
+    glfwSetScrollCallback(window, scrollCallback);
 
     // Also yoinked from example, main function
     ImGui::CreateContext();
@@ -129,4 +130,15 @@ void WindowBridgeGLFW::cursorPosCallback(GLFWwindow *window, double xpos, double
     windowBridge->currentMouseOffset = MouseOffset{(float)xpos, (float)ypos};
 
     windowBridge->lastMouseMovementFrameIndex = windowBridge->frameIndex;
+}
+
+void WindowBridgeGLFW::scrollCallback(GLFWwindow *window, double xOffset, double yOffset)
+{
+    WindowBridgeGLFW *windowBridge = static_cast<WindowBridgeGLFW *>(glfwGetWindowUserPointer(window));
+    if (windowBridge == nullptr)
+        return;
+
+    windowBridge->currentScrollOffset = ScrollOffset{(float)xOffset, (float)yOffset};
+
+    windowBridge->lastScrollFrameIndex = windowBridge->frameIndex;
 }

@@ -38,13 +38,23 @@ public:
                    : MouseOffset{currentMouseOffset.x - lastMouseOffset.x, currentMouseOffset.y - lastMouseOffset.y};
     }
 
+    const ScrollOffset getScrollOffset() const override
+    {
+        return frameIndex - lastScrollFrameIndex > 1
+                   ? ScrollOffset{}
+                   : currentScrollOffset;
+    }
+
     std::vector<const char *> getWindowInstanceExtensions() override { return instanceExtensions; };
 
 private:
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     static void cursorPosCallback(GLFWwindow *window, double xpos, double ypos);
+    static void scrollCallback(GLFWwindow *window, double xOffset, double yOffset);
 
-    MouseOffset currentMouseOffset, lastMouseOffset{};
+    ScrollOffset currentScrollOffset{};
+    size_t lastScrollFrameIndex{0};
+    MouseOffset currentMouseOffset{}, lastMouseOffset{};
     size_t lastMouseMovementFrameIndex{0};
     KeyCode lastKeyPress;
     double currentTime{0.0}, lastFrameTime{0.0};

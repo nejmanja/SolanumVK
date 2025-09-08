@@ -23,3 +23,9 @@ struct MouseOffset
     float x{0.0f};
     float y{0.0f};
 };
+
+struct ScrollOffset
+{
+    float x{0.0f};
+    float y{0.0f};
+};

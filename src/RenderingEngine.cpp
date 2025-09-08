@@ -158,6 +158,11 @@ void RenderingEngine::processInput()
 
 	auto mouseOffset = window->getMouseOffset();
 	camera.rotate(mouseOffset.x * dt, mouseOffset.y * dt);
+
+	auto scrollOffset = window->getScrollOffset();
+	if(scrollOffset.y != 0.0f)
+		camera.changeSpeed(scrollOffset.y);
+
 	sceneDescriptor.view = camera.getView();
 	BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
 }
