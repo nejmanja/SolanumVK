@@ -53,7 +53,7 @@ AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulk
         .format = format,
         .components = {},
         .subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .aspectMask = format == VK_FORMAT_D32_SFLOAT ? (VkImageAspectFlags)VK_IMAGE_ASPECT_DEPTH_BIT : (VkImageAspectFlags)VK_IMAGE_ASPECT_COLOR_BIT,
             .baseMipLevel = 0,
             .levelCount = VK_REMAINING_MIP_LEVELS,
             .baseArrayLayer = 0,

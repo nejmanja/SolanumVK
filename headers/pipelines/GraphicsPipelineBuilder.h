@@ -46,6 +46,7 @@ public:
 
     // Depth/stencil state
     void enableDepthTest(bool state) { depthStencilInfo.depthTestEnable = state; }
+    void enableDepthWrite(bool state) { depthStencilInfo.depthWriteEnable = state; }
 
     // Color blend state
     void enableBlending(bool state) { colorBlendState.blendEnable = state; }
@@ -126,7 +127,16 @@ private:
     VkPipelineDepthStencilStateCreateInfo depthStencilInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         .pNext = nullptr,
-    };
+        .flags = 0,
+        .depthTestEnable = VK_FALSE,
+        .depthWriteEnable = VK_FALSE,
+        .depthCompareOp = VK_COMPARE_OP_LESS,
+        .depthBoundsTestEnable = VK_FALSE,
+        .stencilTestEnable = VK_FALSE,
+        .front = {},
+        .back = {},
+        .minDepthBounds = {},
+        .maxDepthBounds = {}};
 
     VkPipelineColorBlendAttachmentState colorBlendState{
         .blendEnable = VK_FALSE,

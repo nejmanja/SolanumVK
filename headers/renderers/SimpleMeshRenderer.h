@@ -21,7 +21,9 @@ public:
     void execute(VkCommandBuffer cmd) override;
 
 private:
+    void createDepthTarget();
     void createDescriptors();
+    void transitionDepthTarget(VkCommandBuffer cmd);
     void buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout);
 
     const VkDescriptorSet sceneDescriptorSet;
@@ -30,6 +32,9 @@ private:
     VkRect2D scissor;
 
     SimpleMeshData meshData;
+
+    AllocatedImageResource depthTarget;
+    VkRenderingAttachmentInfo depthAttachmentInfo;
 
     // Pipeline with which rendering will happen
     std::unique_ptr<GraphicsPipeline> pipeline;
