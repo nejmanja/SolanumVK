@@ -4,25 +4,26 @@
 
 #include <vulkan/vulkan.h>
 
-class DescriptorSetAllocator
-{
+class DescriptorSetAllocator {
 public:
-    struct PoolResourceSizePerSet
-    {
+    struct PoolResourceSizePerSet {
         VkDescriptorType type;
         // The expected (average) count of the resource of given type PER SET
         // When allocating a pool, this value will be multiplied with maxSets.
         uint32_t countPerSet;
     };
 
-    DescriptorSetAllocator(const VkDevice device, const std::vector<PoolResourceSizePerSet> &resourceSizes);
+    DescriptorSetAllocator(VkDevice device, const std::vector<PoolResourceSizePerSet> &resourceSizes);
+
     ~DescriptorSetAllocator();
 
     void resetPools();
-    VkDescriptorSet allocate(const VkDescriptorSetLayout layout);
+
+    VkDescriptorSet allocate(VkDescriptorSetLayout layout);
 
 private:
     void allocateNewFreePool();
+
     VkDescriptorPool getPool();
 
     std::vector<VkDescriptorPoolSize> poolSizes;

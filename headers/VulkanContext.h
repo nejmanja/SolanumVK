@@ -1,53 +1,54 @@
 #pragma once
 
-#include <exception>
-
 #include <vma/vk_mem_alloc.h>
-#include <vulkan/vulkan.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
 #include "IWindowBridge.h"
 #include "Swapchain.h"
 
-class VulkanContext
-{
+class VulkanContext {
 public:
-	enum class QueueType
-	{
-		Graphics,
-		Compute
-	};
+    enum class QueueType {
+        Graphics,
+        Compute
+    };
 
-	VulkanContext(IWindowBridge &window);
-	~VulkanContext();
+    explicit VulkanContext(IWindowBridge &window);
 
-	const VkInstance &getInstance() const { return instance; }
-	const VmaAllocator &getVmaAllocator() const { return vmaAllocator; }
-	const Swapchain &getSwapchain() const { return swapchain; }
-	const VkDevice getDevice() const { return device; }
-	const VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
-	const uint32_t getQueueFamily(QueueType type) const;
-	const VkQueue getQueue(QueueType type) const;
+    ~VulkanContext();
+
+    [[nodiscard]] const VkInstance &getInstance() const { return instance; }
+    [[nodiscard]] const VmaAllocator &getVmaAllocator() const { return vmaAllocator; }
+    [[nodiscard]] const Swapchain &getSwapchain() const { return swapchain; }
+    [[nodiscard]] VkDevice getDevice() const { return device; }
+    [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
+
+    [[nodiscard]] const uint32_t getQueueFamily(QueueType type) const;
+
+    [[nodiscard]] const VkQueue getQueue(QueueType type) const;
 
 private:
-	vkb::Instance createInstance(std::vector<const char *> windowExtensions);
-	void createDevice(vkb::Instance vkbInstance);
-	void createSwapchain(VkExtent2D windowExtent);
-	void createVmaAllocator();
+    vkb::Instance createInstance(std::vector<const char *> windowExtensions);
 
-	VkSurfaceKHR surface;
-	VkInstance instance;
-	VkPhysicalDevice physicalDevice;
-	VkDevice device;
+    void createDevice(vkb::Instance vkbInstance);
 
-	VmaAllocator vmaAllocator;
+    void createSwapchain(VkExtent2D windowExtent);
 
-	uint32_t computeFamily;
-	VkQueue computeQueue;
-	uint32_t graphicsFamily;
-	VkQueue graphicsQueue;
+    void createVmaAllocator();
 
-	Swapchain swapchain;
+    VkSurfaceKHR surface;
+    VkInstance instance;
+    VkPhysicalDevice physicalDevice;
+    VkDevice device;
 
-	VkDebugUtilsMessengerEXT debugMessenger;
+    VmaAllocator vmaAllocator;
+
+    uint32_t computeFamily;
+    VkQueue computeQueue;
+    uint32_t graphicsFamily;
+    VkQueue graphicsQueue;
+
+    Swapchain swapchain;
+
+    VkDebugUtilsMessengerEXT debugMessenger;
 };

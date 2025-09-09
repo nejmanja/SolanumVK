@@ -5,56 +5,60 @@
 #include "MeshDataFormatDescriptor.h"
 
 #include <vector>
-#include <string>
 #include <memory>
 
-class GraphicsPipelineBuilder
-{
+class GraphicsPipelineBuilder {
 public:
-    GraphicsPipelineBuilder(const VulkanContext &vulkanContext);
-    ~GraphicsPipelineBuilder()
-    {
+    explicit GraphicsPipelineBuilder(const VulkanContext &vulkanContext);
+
+    ~GraphicsPipelineBuilder() {
         reset();
     }
 
     // Descriptor set layouts
     void addDescriptorSetLayout(VkDescriptorSetLayout layout) { descriptorSetLayouts.push_back(layout); }
+
     void resetDescriptorSetLayouts();
 
     // Push constants
-    void addPushConstantRange(VkPushConstantRange range) { pushConstantRanges.push_back(range); }
+    void addPushConstantRange(const VkPushConstantRange range) { pushConstantRanges.push_back(range); }
     void resetPushConstantRanges() { pushConstantRanges.clear(); }
 
     // Create an entire binding with all attributes contained within it
     void addVertexBinding(uint32_t binding, uint32_t stride, std::vector<VkVertexInputAttributeDescription> attributes);
+
     void addVertexBinding(const VertexBinding &binding);
+
     void resetVertexBindings();
 
     // Attachments
     void resetColorAttachments() { colorAttachmentFormats.clear(); }
-    void addColorAttachmentFormat(VkFormat format) { colorAttachmentFormats.push_back(format); }
-    void setDepthAttachmentFormat(VkFormat format) { depthFormat = format; }
-    void setStencilAttachmentFormat(VkFormat format) { stencilFormat = format; }
+    void addColorAttachmentFormat(const VkFormat format) { colorAttachmentFormats.push_back(format); }
+    void setDepthAttachmentFormat(const VkFormat format) { depthFormat = format; }
+    void setStencilAttachmentFormat(const VkFormat format) { stencilFormat = format; }
 
     // Shader modules
     void addShaderModule(const char *shaderName, const char *entryPointName, VkShaderStageFlagBits stage);
+
     void resetShaderModules();
 
     // Rasterization state
-    void setCullMode(VkCullModeFlagBits cullMode) { rasterizationInfo.cullMode = cullMode; }
-    void setFrontFace(VkFrontFace frontFace) { rasterizationInfo.frontFace = frontFace; }
+    void setCullMode(const VkCullModeFlagBits cullMode) { rasterizationInfo.cullMode = cullMode; }
+    void setFrontFace(const VkFrontFace frontFace) { rasterizationInfo.frontFace = frontFace; }
 
     // Depth/stencil state
-    void enableDepthTest(bool state) { depthStencilInfo.depthTestEnable = state; }
-    void enableDepthWrite(bool state) { depthStencilInfo.depthWriteEnable = state; }
+    void enableDepthTest(const bool state) { depthStencilInfo.depthTestEnable = state; }
+    void enableDepthWrite(const bool state) { depthStencilInfo.depthWriteEnable = state; }
 
     // Color blend state
-    void enableBlending(bool state) { colorBlendState.blendEnable = state; }
+    void enableBlending(const bool state) { colorBlendState.blendEnable = state; }
+
     void setColorBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op);
+
     void setAlphaBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op);
 
     // Dynamic state
-    void addDynamicState(VkDynamicState state) { dynamicState.push_back(state); }
+    void addDynamicState(const VkDynamicState state) { dynamicState.push_back(state); }
     void resetDynamicState() { dynamicState.clear(); }
 
     std::unique_ptr<GraphicsPipeline> build();
@@ -97,7 +101,8 @@ private:
     // Dynamic rendering info
     VkPipelineRenderingCreateInfo renderingCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
-        .pNext = nullptr};
+        .pNext = nullptr
+    };
 
     // vertex format will get filled into this structure upon building the pipeline
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{
@@ -136,7 +141,8 @@ private:
         .front = {},
         .back = {},
         .minDepthBounds = {},
-        .maxDepthBounds = {}};
+        .maxDepthBounds = {}
+    };
 
     VkPipelineColorBlendAttachmentState colorBlendState{
         .blendEnable = VK_FALSE,
@@ -146,7 +152,8 @@ private:
         .srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
         .dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
         .alphaBlendOp = VK_BLEND_OP_ADD,
-        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+                          VK_COLOR_COMPONENT_A_BIT,
     };
 
     VkPipelineColorBlendStateCreateInfo colorBlendInfo{
@@ -157,7 +164,8 @@ private:
         .logicOp = VK_LOGIC_OP_COPY,
         .attachmentCount = 1, // TODO: create arbitrary amount of blend states...
         .pAttachments = &colorBlendState,
-        .blendConstants = {0, 0, 0, 0}};
+        .blendConstants = {0, 0, 0, 0}
+    };
 
     VkPipelineDynamicStateCreateInfo dynamicStateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -173,7 +181,8 @@ private:
         .pNext = nullptr,
         .flags = 0,
         .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        .primitiveRestartEnable = VK_FALSE};
+        .primitiveRestartEnable = VK_FALSE
+    };
 
     VkViewport initialViewport{
         .x = 0.0f,
@@ -181,11 +190,13 @@ private:
         .width = 800.0f,
         .height = 600.0f,
         .minDepth = 0.0f,
-        .maxDepth = 1.0f};
+        .maxDepth = 1.0f
+    };
 
     VkRect2D initialScissor{
         .offset = {0, 0},
-        .extent = {800, 600}};
+        .extent = {800, 600}
+    };
 
     VkPipelineViewportStateCreateInfo viewportInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -194,7 +205,8 @@ private:
         .viewportCount = 1,
         .pViewports = &initialViewport,
         .scissorCount = 1,
-        .pScissors = &initialScissor};
+        .pScissors = &initialScissor
+    };
 
     // No MSAA (for now)...
     VkPipelineMultisampleStateCreateInfo multisampleInfo{
@@ -229,5 +241,6 @@ private:
         .subpass = 0,
         // Unused, for derived pipelines
         .basePipelineHandle = VK_NULL_HANDLE,
-        .basePipelineIndex = 0};
+        .basePipelineIndex = 0
+    };
 };

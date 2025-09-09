@@ -5,11 +5,9 @@
 
 #include "SimpleMeshData.h"
 
-class MeshLoader
-{
+class MeshLoader {
 public:
     static SimpleMeshData loadSimpleMesh(std::filesystem::path path);
 
-private:
     MeshLoader() = delete;
 };

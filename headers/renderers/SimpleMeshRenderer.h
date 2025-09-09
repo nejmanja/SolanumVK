@@ -14,8 +14,8 @@
 class SimpleMeshRenderer : public IRenderer
 {
 public:
-    SimpleMeshRenderer(const VulkanContext &vulkanContext, const VkDescriptorSetLayout sceneDescriptorLayout, const VkDescriptorSet sceneDescriptorSet);
-    ~SimpleMeshRenderer();
+    SimpleMeshRenderer(const VulkanContext &vulkanContext, VkDescriptorSetLayout sceneDescriptorLayout, VkDescriptorSet sceneDescriptorSet);
+    ~SimpleMeshRenderer() override;
 
     void setup(ImageResource finalTarget, double deltaTime) override;
     void execute(VkCommandBuffer cmd) override;
@@ -24,7 +24,7 @@ private:
     void createDepthTarget();
     void createDescriptors();
     void transitionDepthTarget(VkCommandBuffer cmd);
-    void buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout);
+    void buildPipeline(VkDescriptorSetLayout sceneDescriptorLayout);
 
     const VkDescriptorSet sceneDescriptorSet;
 

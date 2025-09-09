@@ -6,25 +6,31 @@
 
 #include "CommandBuffer.h"
 
-class CommandManager
-{
+class CommandManager {
 public:
-	CommandManager(VkDevice device, uint32_t queueFamily, uint32_t count);
-	~CommandManager();
+    CommandManager(VkDevice device, uint32_t queueFamily, uint32_t count);
 
-	VkCommandBuffer get() { return buffers[frameIdx].commandBuffer; }
-	void begin();
-	void reset() { vkResetCommandBuffer(get(), 0); }
-	void end() { vkEndCommandBuffer(get()); }
-	void copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize);
-	void transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout);
-	void nextFrame() { frameIdx = (frameIdx + 1) % buffers.size(); }
+    ~CommandManager();
 
-	void submit(VkQueue queue, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence);
-	void clearImage(VkImage image, VkClearColorValue clearValue);
+    [[nodiscard]] VkCommandBuffer get() const { return buffers[frameIdx].commandBuffer; }
+
+    void begin();
+
+    void reset() const { vkResetCommandBuffer(get(), 0); }
+    void end() const { vkEndCommandBuffer(get()); }
+
+    void copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize);
+
+    void transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout);
+
+    void nextFrame() { frameIdx = (frameIdx + 1) % buffers.size(); }
+
+    void submit(VkQueue queue, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence);
+
+    void clearImage(VkImage image, VkClearColorValue clearValue);
 
 private:
-	VkDevice device;
-	std::vector<CommandBuffer> buffers;
-	uint32_t frameIdx{0};
+    VkDevice device;
+    std::vector<CommandBuffer> buffers;
+    uint32_t frameIdx{0};
 };

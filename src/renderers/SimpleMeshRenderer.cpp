@@ -1,5 +1,6 @@
 #include "SimpleMeshRenderer.h"
 
+#include "BufferAllocator.h"
 #include "SolanumConstants.h"
 #include "VulkanUtils.h"
 
@@ -9,18 +10,20 @@
 #include "DescriptorWriter.h"
 #include "MeshLoader.h"
 
-SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext, const VkDescriptorSetLayout sceneDescriptorLayout, const VkDescriptorSet sceneDescriptorSet)
+SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
+                                       const VkDescriptorSetLayout sceneDescriptorLayout,
+                                       const VkDescriptorSet sceneDescriptorSet)
     : IRenderer(vulkanContext),
       viewport{
           .x = 0,
           .y = 0,
-          .width = (float)SolVK::windowWidth,
-          .height = (float)SolVK::windowHeight,
+          .width = (float) SolVK::windowWidth,
+          .height = (float) SolVK::windowHeight,
           .minDepth = 0.0f,
-          .maxDepth = 1.0f},
+          .maxDepth = 1.0f
+      },
       scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, memoryManager{vulkanContext},
-      sceneDescriptorSet{sceneDescriptorSet}
-{
+      sceneDescriptorSet{sceneDescriptorSet} {
     meshData = MeshLoader::loadSimpleMesh("../../assets/greenMonke.glb");
     MeshUploader::uploadMesh(vulkanContext, meshData);
     memoryManager.registerResource(meshData);
@@ -30,26 +33,23 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext, const
     buildPipeline(sceneDescriptorLayout);
 }
 
-SimpleMeshRenderer::~SimpleMeshRenderer()
-{
+SimpleMeshRenderer::~SimpleMeshRenderer() {
 }
 
-void SimpleMeshRenderer::setup(ImageResource finalTarget, double deltaTime)
-{
+void SimpleMeshRenderer::setup(ImageResource finalTarget, double deltaTime) {
     IRenderer::setup(finalTarget, deltaTime);
 
-    transform.model = glm::rotate(transform.model, (float)deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
+    transform.model = glm::rotate(transform.model, (float) deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
-    viewport.width = (float)finalTarget.imageExtent.width;
-    viewport.height = (float)finalTarget.imageExtent.height;
+    viewport.width = (float) finalTarget.imageExtent.width;
+    viewport.height = (float) finalTarget.imageExtent.height;
 
     scissor.extent.width = finalTarget.imageExtent.width;
     scissor.extent.height = finalTarget.imageExtent.height;
 }
 
-void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
-{
+void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
@@ -61,19 +61,23 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
         .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD, // compute pass will draw before this :)
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        .clearValue = {}};
+        .clearValue = {}
+    };
 
     VkRenderingInfo renderingInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .renderArea = VkRect2D{.offset = {0, 0}, .extent = {finalTarget.imageExtent.width, finalTarget.imageExtent.height}},
+        .renderArea = VkRect2D{
+            .offset = {0, 0}, .extent = {finalTarget.imageExtent.width, finalTarget.imageExtent.height}
+        },
         .layerCount = 1,
         .viewMask = 0,
         .colorAttachmentCount = 1,
         .pColorAttachments = &colorAttachmentInfo,
         .pDepthAttachment = &depthAttachmentInfo,
-        .pStencilAttachment = VK_NULL_HANDLE};
+        .pStencilAttachment = VK_NULL_HANDLE
+    };
 
     transitionDepthTarget(cmd);
 
@@ -96,8 +100,7 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd)
     vkCmdEndRendering(cmd);
 }
 
-void SimpleMeshRenderer::createDepthTarget()
-{
+void SimpleMeshRenderer::createDepthTarget() {
     depthTarget = ImageAllocator::allocateImage2D(
         vulkanContext,
         VK_FORMAT_D32_SFLOAT,
@@ -119,11 +122,11 @@ void SimpleMeshRenderer::createDepthTarget()
         .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        .clearValue = VkClearValue{.depthStencil{.depth{1.0f}, .stencil{0}}}};
+        .clearValue = VkClearValue{.depthStencil{.depth{1.0f}, .stencil{0}}}
+    };
 }
 
-void SimpleMeshRenderer::createDescriptors()
-{
+void SimpleMeshRenderer::createDescriptors() {
     auto device = vulkanContext.getDevice();
 
     DescriptorLayoutBuilder layoutBuilder{};
@@ -131,23 +134,28 @@ void SimpleMeshRenderer::createDescriptors()
     transformUniformLayout = layoutBuilder.build(device, VK_SHADER_STAGE_VERTEX_BIT, 0);
     memoryManager.registerResource(transformUniformLayout);
 
-    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}};
+    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
+        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
+    };
     rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
 
     transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
 
-    transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(Transform), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU, VMA_ALLOCATION_CREATE_MAPPED_BIT);
+    transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(Transform),
+                                                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU,
+                                                      VMA_ALLOCATION_CREATE_MAPPED_BIT);
     memoryManager.registerResource(transformBuffer);
 
     transform = {
-        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f})};
+        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f})
+    };
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
-    DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, transformBuffer.buffer, sizeof(Transform));
+    DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                  transformBuffer.buffer, sizeof(Transform));
 }
 
-void SimpleMeshRenderer::transitionDepthTarget(VkCommandBuffer cmd)
-{
+void SimpleMeshRenderer::transitionDepthTarget(VkCommandBuffer cmd) {
     VkImageMemoryBarrier2 imageBarrier{.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, .pNext = nullptr};
     imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
     imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
@@ -174,8 +182,7 @@ void SimpleMeshRenderer::transitionDepthTarget(VkCommandBuffer cmd)
     vkCmdPipelineBarrier2(cmd, &depInfo);
 }
 
-void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout)
-{
+void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout) {
     GraphicsPipelineBuilder builder{vulkanContext};
     builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
 

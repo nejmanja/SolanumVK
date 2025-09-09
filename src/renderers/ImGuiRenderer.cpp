@@ -1,8 +1,10 @@
 #include "ImGuiRenderer.h"
 
+#include "VulkanUtils.h"
+#include "backends/imgui_impl_vulkan.h"
+
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
-    : IRenderer(vulkanContext)
-{
+    : IRenderer(vulkanContext) {
     auto device = vulkanContext.getDevice();
 
     // Yoinked directly from the ImGui samples
@@ -13,9 +15,9 @@ ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
     VkDescriptorPoolCreateInfo poolInfo{.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .pNext = nullptr};
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     poolInfo.maxSets = 0;
-    for (VkDescriptorPoolSize &poolSize : poolSizes)
+    for (VkDescriptorPoolSize &poolSize: poolSizes)
         poolInfo.maxSets += poolSize.descriptorCount;
-    poolInfo.poolSizeCount = (uint32_t)std::size(poolSizes);
+    poolInfo.poolSizeCount = (uint32_t) std::size(poolSizes);
     poolInfo.pPoolSizes = poolSizes;
 
     auto result = vkCreateDescriptorPool(device, &poolInfo, nullptr, &imguiPool);
@@ -68,14 +70,12 @@ ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
     renderingInfo.renderArea = {};
 }
 
-ImGuiRenderer::~ImGuiRenderer()
-{
+ImGuiRenderer::~ImGuiRenderer() {
     ImGui_ImplVulkan_Shutdown();
     vkDestroyDescriptorPool(vulkanContext.getDevice(), imguiPool, nullptr);
 }
 
-void ImGuiRenderer::setup(ImageResource finalTarget, double deltaTime)
-{
+void ImGuiRenderer::setup(ImageResource finalTarget, double deltaTime) {
     IRenderer::setup(finalTarget, deltaTime);
 
     ImGui_ImplVulkan_NewFrame();
@@ -85,10 +85,11 @@ void ImGuiRenderer::setup(ImageResource finalTarget, double deltaTime)
     ImGui::Render();
 }
 
-void ImGuiRenderer::execute(VkCommandBuffer cmd)
-{
+void ImGuiRenderer::execute(VkCommandBuffer cmd) {
     colorAttachment.imageView = finalTarget.imageView;
-    renderingInfo.renderArea = VkRect2D{VkOffset2D{0, 0}, {finalTarget.imageExtent.width, finalTarget.imageExtent.height}};
+    renderingInfo.renderArea = VkRect2D{
+        VkOffset2D{0, 0}, {finalTarget.imageExtent.width, finalTarget.imageExtent.height}
+    };
 
     vkCmdBeginRendering(cmd, &renderingInfo);
 

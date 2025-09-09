@@ -2,21 +2,16 @@
 
 #include "IRenderer.h"
 
-#include "VulkanUtils.h"
 #include "VulkanContext.h"
 
-#include "backends/imgui_impl_vulkan.h"
-#include "backends/imgui_impl_sdl2.h"
-#include "backends/imgui_impl_glfw.h"
-#include "imgui.h"
-
-class ImGuiRenderer : public IRenderer
-{
+class ImGuiRenderer : public IRenderer {
 public:
-    ImGuiRenderer(const VulkanContext &vulkanContext);
-    ~ImGuiRenderer();
+    explicit ImGuiRenderer(const VulkanContext &vulkanContext);
+
+    ~ImGuiRenderer() override;
 
     void setup(ImageResource finalTarget, double deltaTime) override;
+
     void execute(VkCommandBuffer cmd) override;
 
 private:

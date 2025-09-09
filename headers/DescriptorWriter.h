@@ -2,13 +2,27 @@
 
 #include "VulkanContext.h"
 
-class DescriptorWriter
-{
+class DescriptorWriter {
 public:
-    static void writeImage(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkImageView imageView, VkImageLayout imageLayout);
-    static void writeBuffer(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkBuffer buffer, VkDeviceSize bufferSize, VkDeviceSize offset = 0);
+    static void writeImage(
+        const VulkanContext &vulkanContext,
+        VkDescriptorSet descriptorSet,
+        VkDescriptorType descriptorType,
+        VkImageView imageView,
+        VkImageLayout imageLayout
+    );
+
+    static void writeBuffer(
+        const VulkanContext &vulkanContext,
+        VkDescriptorSet descriptorSet,
+        VkDescriptorType descriptorType,
+        VkBuffer buffer,
+        VkDeviceSize bufferSize,
+        VkDeviceSize offset = 0
+    );
+
+    DescriptorWriter() = delete;
 
 private:
-    DescriptorWriter() = delete;
     static VkWriteDescriptorSet getDefaultWrite(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType);
 };

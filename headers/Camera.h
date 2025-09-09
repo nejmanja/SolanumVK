@@ -9,17 +9,17 @@ class Camera
 {
 public:
     Camera() { updateViewMatrix(); }
-    ~Camera() {}
+    ~Camera() = default;
 
     void setPerspectiveProj(float fovY, float aspect, float zNear, float zFar);
     void setOrthoProj(float width, float aspect, float zNear, float zFar);
-    void changeSpeed(float delta)
+    void changeSpeed(const float delta)
     {
         camSpeed += delta;
         if (camSpeed < 0.5f)
             camSpeed = 0.5f;
     }
-    void move(glm::vec3 offset)
+    void move(const glm::vec3 offset)
     {
         camPosition += offset.x * camSpeed * glm::cross(lookVector, glm::vec3{0.0f, 1.0f, 0.0f});
         camPosition += offset.y * camSpeed * glm::vec3{0.0f, 1.0f, 0.0f};
@@ -27,7 +27,7 @@ public:
         updateViewMatrix();
     }
 
-    void rotate(float yRot, float zRot)
+    void rotate(const float yRot, const float zRot)
     {
         cameraRotY += yRot * MOUSE_SENSITIVITY;
         cameraRotZ -= zRot * MOUSE_SENSITIVITY;
@@ -36,16 +36,16 @@ public:
         if (cameraRotZ < -89.0f)
             cameraRotZ = -89.0f;
 
-        auto cosTheta = std::cos(cameraRotY);
-        auto sinTheta = std::sin(cameraRotY);
-        auto cosPhi = std::cos(cameraRotZ);
-        auto sinPhi = std::sin(cameraRotZ);
+        const auto cosTheta = std::cos(cameraRotY);
+        const auto sinTheta = std::sin(cameraRotY);
+        const auto cosPhi = std::cos(cameraRotZ);
+        const auto sinPhi = std::sin(cameraRotZ);
 
         lookVector = glm::normalize(glm::vec3{cosPhi * cosTheta, sinPhi, cosPhi * sinTheta});
     }
 
-    const glm::mat4 &getView() const { return view; }
-    const glm::mat4 &getProj() const { return proj; }
+    [[nodiscard]] const glm::mat4 &getView() const { return view; }
+    [[nodiscard]] const glm::mat4 &getProj() const { return proj; }
 
 private:
     void updateViewMatrix();

@@ -3,12 +3,10 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <exception>
 
 #include <vulkan/vulkan.h>
 
-class ShaderLoader
-{
+class ShaderLoader {
 public:
     static VkShaderModule loadModule(VkDevice device, std::string path);
 

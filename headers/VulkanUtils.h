@@ -5,11 +5,9 @@
 
 #include <iostream>
 
-class VulkanUtils
-{
+class VulkanUtils {
 public:
-    static void CheckVkResult(VkResult result)
-    {
+    static void CheckVkResult(const VkResult result) {
 #if !_DEBUG
         // No need for these logs in release.
         return;
@@ -22,6 +20,7 @@ public:
         abort();
     }
 
-private:
     VulkanUtils() = delete;
+
+private:
 };

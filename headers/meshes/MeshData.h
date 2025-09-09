@@ -1,32 +1,35 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include "MeshDataFormatDescriptor.h"
 #include "BufferResources.h"
 
-class MeshData
-{
+class MeshData {
 public:
+    virtual ~MeshData() = default;
+
     MeshData() = default;
 
-    void setFormatDescriptor(MeshDataFormatDescriptor descriptor) { formatDescriptor = descriptor; }
-    const MeshDataFormatDescriptor &getFormatDescriptor() const { return formatDescriptor; }
+    void setFormatDescriptor(MeshDataFormatDescriptor descriptor) { formatDescriptor = std::move(descriptor); }
+    [[nodiscard]] const MeshDataFormatDescriptor &getFormatDescriptor() const { return formatDescriptor; }
 
     void setIndices(const std::vector<uint32_t> &indices) { this->indices = {indices}; }
-    const std::vector<uint32_t> &getIndices() const { return indices; }
+    [[nodiscard]] const std::vector<uint32_t> &getIndices() const { return indices; }
 
-    virtual const size_t getVertexSize() const = 0;
-    virtual const size_t getVertexCount() const = 0;
+    [[nodiscard]] virtual size_t getVertexSize() const = 0;
+
+    [[nodiscard]] virtual size_t getVertexCount() const = 0;
+
     virtual void setVertexCount(size_t vertexCount) { this->vertexCount = vertexCount; }
 
-    virtual const void *getRawVertexData() const = 0;
+    [[nodiscard]] virtual const void *getRawVertexData() const = 0;
 
-    const AllocatedBuffer getVertexBuffer() const { return vertexBuffer; }
-    const AllocatedBuffer getIndexBuffer() const { return indexBuffer; }
+    [[nodiscard]] AllocatedBuffer getVertexBuffer() const { return vertexBuffer; }
+    [[nodiscard]] AllocatedBuffer getIndexBuffer() const { return indexBuffer; }
 
-    void setBuffers(AllocatedBuffer vertexBuffer, AllocatedBuffer indexBuffer)
-    {
+    void setBuffers(const AllocatedBuffer &vertexBuffer, const AllocatedBuffer &indexBuffer) {
         this->vertexBuffer = vertexBuffer;
         this->indexBuffer = indexBuffer;
     }

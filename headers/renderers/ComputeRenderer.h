@@ -4,13 +4,14 @@
 #include "ComputePipeline.h"
 #include "VulkanContext.h"
 
-class ComputeRenderer : public IRenderer
-{
+class ComputeRenderer : public IRenderer {
 public:
     ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget);
-    ~ComputeRenderer();
+
+    ~ComputeRenderer() override;
 
     void setup(ImageResource finalTarget, double deltaTime) override;
+
     void execute(VkCommandBuffer cmd) override;
 
 private:

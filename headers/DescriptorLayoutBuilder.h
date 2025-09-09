@@ -4,15 +4,25 @@
 
 #include <vulkan/vulkan.h>
 
-class DescriptorLayoutBuilder
-{
+class DescriptorLayoutBuilder {
 public:
-    DescriptorLayoutBuilder() {};
-    ~DescriptorLayoutBuilder() {};
+    DescriptorLayoutBuilder() = default;
 
-    void addBinding(uint32_t bindingIdx, VkDescriptorType descriptorType, uint32_t descriptorCount = 1, VkShaderStageFlags stageFlags = 0);
+    ~DescriptorLayoutBuilder() = default;
+
+    void addBinding(
+        uint32_t bindingIdx,
+        VkDescriptorType descriptorType,
+        uint32_t descriptorCount = 1,
+        VkShaderStageFlags stageFlags = 0
+    );
+
     // Default stage flags will be applied to all bindings which didn't have their flags specified upon adding the binding.
-    VkDescriptorSetLayout build(VkDevice device, VkShaderStageFlags defaultStageFlags, VkDescriptorSetLayoutCreateFlags createFlags);
+    VkDescriptorSetLayout build(
+        VkDevice device,
+        VkShaderStageFlags defaultStageFlags,
+        VkDescriptorSetLayoutCreateFlags createFlags
+    );
 
     void clear() { bindings.clear(); }
 

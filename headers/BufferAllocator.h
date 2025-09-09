@@ -6,14 +6,22 @@
 #include "VulkanContext.h"
 #include "BufferResources.h"
 
-class BufferAllocator
-{
+class BufferAllocator {
 public:
-    static AllocatedBuffer allocateBuffer(const VulkanContext &vulkanContext, VkDeviceSize bufferSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage,
-                                          VmaAllocationCreateFlags allocationFlags = 0);
+    static AllocatedBuffer allocateBuffer(
+        const VulkanContext &vulkanContext,
+        VkDeviceSize bufferSize,
+        VkBufferUsageFlags usage,
+        VmaMemoryUsage memoryUsage,
+        VmaAllocationCreateFlags allocationFlags = 0
+    );
 
-    static void copyBufferData(const VulkanContext &vulkanContext, const void *cpuData, size_t dataSize, AllocatedBuffer buffer);
+    static void copyBufferData(
+        const VulkanContext &vulkanContext,
+        const void *cpuData,
+        size_t dataSize,
+        AllocatedBuffer buffer
+    );
 
-private:
     BufferAllocator() = delete;
 };

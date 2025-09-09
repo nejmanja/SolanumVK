@@ -2,14 +2,16 @@
 
 #include <vulkan/vulkan.h>
 
-class IPipeline
-{
+class IPipeline {
 public:
-    IPipeline(VkDevice device) { this->device = device; }
+    explicit IPipeline(VkDevice device) { this->device = device; }
+
     IPipeline(VkDevice device, VkPipelineLayout layout, VkPipeline pipeline)
-        : device(device), layout(layout), pipeline(pipeline) {}
+        : layout(layout), pipeline(pipeline), device(device) {
+    }
 
     virtual void bindPushConstants(void *pushConstantData) = 0;
+
     virtual void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) = 0;
 
     // Binds the pipeline to a command buffer.
@@ -17,32 +19,30 @@ public:
 
     virtual void execute() = 0;
 
-    virtual ~IPipeline() {};
+    virtual ~IPipeline() = default;
 
 protected:
     // Binds the pipeline to a command buffer.
-    void bind(VkCommandBuffer cmd, VkPipelineBindPoint bindPoint)
-    {
+    void bind(VkCommandBuffer cmd, VkPipelineBindPoint bindPoint) {
         boundCommandBuffer = cmd;
         vkCmdBindPipeline(boundCommandBuffer, bindPoint, pipeline);
     }
 
-    void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets, VkPipelineBindPoint bindPoint)
-    {
+    void bindDescriptorSets(const uint32_t setCount, const VkDescriptorSet *sets,
+                            const VkPipelineBindPoint bindPoint) const {
         vkCmdBindDescriptorSets(boundCommandBuffer, bindPoint, layout, 0, setCount, sets, 0, nullptr);
     }
 
-    void bindPushConstants(void *pushConstantData, VkShaderStageFlags stageFlags)
-    {
+    void bindPushConstants(const void *pushConstantData, const VkShaderStageFlags stageFlags) const {
         vkCmdPushConstants(boundCommandBuffer, layout, stageFlags, 0, sizeof(pushConstantData), pushConstantData);
     }
 
     // The command buffer to which the pipeline has been bound to.
-    VkCommandBuffer boundCommandBuffer;
+    VkCommandBuffer boundCommandBuffer{};
     // The layout for the pipeline, since it has to be destroyed separately
-    VkPipelineLayout layout;
+    VkPipelineLayout layout{};
     // The actual pipeline handle
-    VkPipeline pipeline;
+    VkPipeline pipeline{};
     // Device for which the pipeline gets created
-    VkDevice device;
+    VkDevice device{};
 };

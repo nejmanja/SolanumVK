@@ -5,11 +5,9 @@
 #include <vector>
 #include <string>
 
-class VertexAttribute
-{
+class VertexAttribute {
 public:
-    enum class VertexAttributeType
-    {
+    enum class VertexAttributeType {
         Position,
         Normal,
         Tangent,
@@ -17,21 +15,23 @@ public:
         UV0,
         UV1,
     };
+
     VertexAttributeType type;
     VkVertexInputAttributeDescription attributeDescription;
 };
 
-class VertexBinding
-{
+class VertexBinding {
 public:
-    VertexBinding(uint32_t index) : index(index) {}
+    explicit VertexBinding(uint32_t index) : index(index) {
+    }
+
     void addAttribute(VertexAttribute::VertexAttributeType type, VkFormat format);
 
-    const VkVertexInputBindingDescription createBindingDescription() const;
+    [[nodiscard]] const VkVertexInputBindingDescription createBindingDescription() const;
 
-    const uint32_t getIndex() const { return index; }
-    const uint32_t getStride() const { return totalStride; }
-    const std::vector<VertexAttribute> &getAttributes() const { return attributes; }
+    [[nodiscard]] uint32_t getIndex() const { return index; }
+    [[nodiscard]] uint32_t getStride() const { return totalStride; }
+    [[nodiscard]] const std::vector<VertexAttribute> &getAttributes() const { return attributes; }
 
 private:
     void updateStride(VkFormat format);
@@ -41,15 +41,14 @@ private:
     std::vector<VertexAttribute> attributes{};
 };
 
-class MeshDataFormatDescriptor
-{
+class MeshDataFormatDescriptor {
 public:
     MeshDataFormatDescriptor() = default;
 
     const std::vector<std::string> getExpectedGltfAttributes() { return std::vector<std::string>{}; }
-    const std::vector<VertexBinding> getBindingDescriptors() const { return bindings; }
+    [[nodiscard]] std::vector<VertexBinding> getBindingDescriptors() const { return bindings; }
 
-    void addBinding(VertexBinding binding) { bindings.push_back(binding); }
+    void addBinding(const VertexBinding &binding) { bindings.push_back(binding); }
 
 private:
     std::vector<VertexBinding> bindings{};
