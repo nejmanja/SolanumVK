@@ -1,7 +1,6 @@
 #include "SimpleMeshData.h"
 
-SimpleMeshData::SimpleMeshData()
-{
+SimpleMeshData::SimpleMeshData() {
     MeshDataFormatDescriptor formatDescriptor{};
 
     VertexBinding defaultBinding{0};
@@ -13,47 +12,39 @@ SimpleMeshData::SimpleMeshData()
     setFormatDescriptor(formatDescriptor);
 }
 
-void SimpleMeshData::setVertexCount(size_t vertexCount)
-{
+void SimpleMeshData::setVertexCount(const size_t vertexCount) {
     MeshData::setVertexCount(vertexCount);
 
     vertices.resize(vertexCount);
 }
 
-void SimpleMeshData::setPositions(const std::vector<glm::vec3> &positions)
-{
+void SimpleMeshData::setPositions(const std::vector<glm::vec3> &positions) {
     if (positions.size() != vertexCount)
         setVertexCount(positions.size());
 
-    for (int i = 0; i < positions.size(); i++)
-    {
+    for (int i = 0; i < positions.size(); i++) {
         vertices[i].pos = positions[i];
     }
 }
 
-void SimpleMeshData::setNormals(const std::vector<glm::vec3> &normals)
-{
+void SimpleMeshData::setNormals(const std::vector<glm::vec3> &normals) {
     if (normals.size() != vertexCount)
         setVertexCount(normals.size());
 
-    for (int i = 0; i < normals.size(); i++)
-    {
+    for (int i = 0; i < normals.size(); i++) {
         vertices[i].normal = normals[i];
     }
 }
 
-void SimpleMeshData::setColors(const std::vector<glm::vec3> &colors)
-{
+void SimpleMeshData::setColors(const std::vector<glm::vec3> &colors) {
     if (colors.size() != vertexCount)
         setVertexCount(colors.size());
 
-    for (int i = 0; i < colors.size(); i++)
-    {
+    for (int i = 0; i < colors.size(); i++) {
         vertices[i].color = colors[i];
     }
 }
 
-const void *SimpleMeshData::getRawVertexData() const
-{
+const void *SimpleMeshData::getRawVertexData() const {
     return vertices.data();
 }

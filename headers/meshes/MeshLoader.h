@@ -7,7 +7,7 @@
 
 class MeshLoader {
 public:
-    static SimpleMeshData loadSimpleMesh(std::filesystem::path path);
+    static SimpleMeshData loadSimpleMesh(const std::filesystem::path &path);
 
     MeshLoader() = delete;
 };

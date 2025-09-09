@@ -27,7 +27,7 @@ public:
 
     void addAttribute(VertexAttribute::VertexAttributeType type, VkFormat format);
 
-    [[nodiscard]] const VkVertexInputBindingDescription createBindingDescription() const;
+    [[nodiscard]] VkVertexInputBindingDescription createBindingDescription() const;
 
     [[nodiscard]] uint32_t getIndex() const { return index; }
     [[nodiscard]] uint32_t getStride() const { return totalStride; }

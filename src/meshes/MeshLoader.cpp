@@ -7,27 +7,23 @@
 
 #include <iostream>
 
-SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
-{
+SimpleMeshData MeshLoader::loadSimpleMesh(const std::filesystem::path &path) {
     fastgltf::Parser parser;
 
     auto dataBuffer = fastgltf::GltfDataBuffer::FromPath(path);
 
-    if (dataBuffer.error() != fastgltf::Error::None)
-    {
+    if (dataBuffer.error() != fastgltf::Error::None) {
         std::cout << "Failed to load mesh from path " << path << std::endl;
         abort();
     }
 
     auto asset = parser.loadGltf(dataBuffer.get(), path.parent_path());
-    if (auto error = asset.error(); error != fastgltf::Error::None)
-    {
+    if (auto error = asset.error(); error != fastgltf::Error::None) {
         std::cout << "Failed to load mesh data from file " << path << std::endl;
         abort();
     }
 
-    for (auto &&mesh : asset->meshes)
-    {
+    for (auto &&mesh: asset->meshes) {
         std::vector<uint32_t> indices{};
         std::vector<glm::vec3> positions{};
         std::vector<glm::vec3> colors{};
@@ -35,16 +31,14 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
 
         SimpleMeshData meshData{};
 
-        for (auto &&primitive : mesh.primitives)
-        {
+        for (auto &&primitive: mesh.primitives) {
             // indices
             auto &indexAccessor = asset->accessors[primitive.indicesAccessor.value()];
             fastgltf::iterateAccessor<uint32_t>(
                 asset.get(),
                 indexAccessor,
-                [&](uint32_t idx)
-                {
-                    indices.push_back(idx);
+                [&](uint32_t idx) {
+                    indices.emplace_back(idx);
                 });
 
             // positions
@@ -52,27 +46,24 @@ SimpleMeshData MeshLoader::loadSimpleMesh(std::filesystem::path path)
             fastgltf::iterateAccessorWithIndex<glm::vec3>(
                 asset.get(),
                 posAccessor,
-                [&](glm::vec3 position, size_t index)
-                {
-                    positions.push_back(position);
+                [&](const glm::vec3 position, size_t index) {
+                    positions.emplace_back(position);
                 });
             // positions
             auto &normalAccessor = asset->accessors[primitive.findAttribute("NORMAL")->accessorIndex];
             fastgltf::iterateAccessorWithIndex<glm::vec3>(
                 asset.get(),
                 normalAccessor,
-                [&](glm::vec3 normal, size_t index)
-                {
-                    normals.push_back(normal);
+                [&](const glm::vec3 normal, size_t index) {
+                    normals.emplace_back(normal);
                 });
             // vertex colors
             auto &colAccessor = asset->accessors[primitive.findAttribute("COLOR_0")->accessorIndex];
             fastgltf::iterateAccessorWithIndex<glm::vec4>(
                 asset.get(),
                 colAccessor,
-                [&](glm::vec4 color, size_t index)
-                {
-                    colors.push_back(color);
+                [&](const glm::vec4 color, size_t index) {
+                    colors.emplace_back(color);
                 });
         }
 
