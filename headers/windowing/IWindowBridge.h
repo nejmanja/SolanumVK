@@ -5,27 +5,33 @@
 
 #include "InputEnums.h"
 
-class IWindowBridge
-{
+class IWindowBridge {
 public:
-	IWindowBridge() {};
-	virtual ~IWindowBridge() {};
+    IWindowBridge() = default;
 
-	virtual VkSurfaceKHR createSurface(VkInstance instance) = 0;
-	virtual void handleEvents() = 0;
+    virtual ~IWindowBridge() = default;
 
-	virtual VkExtent2D getExtent() = 0;
+    virtual VkSurfaceKHR createSurface(VkInstance instance) = 0;
 
-	virtual double getTime() = 0;
-	virtual double getDeltaTime() = 0;
+    virtual void handleEvents() = 0;
 
-	virtual bool quitRequested() = 0;
-	virtual bool isHidden() = 0;
-	virtual void newFrame() = 0;
+    virtual VkExtent2D getExtent() = 0;
 
-	virtual const KeyCode getLastKeyPress() const = 0;
-	virtual const MouseOffset getMouseOffset() const = 0;
-	virtual const ScrollOffset getScrollOffset() const = 0;
+    virtual double getTime() = 0;
 
-	virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
+    virtual double getDeltaTime() = 0;
+
+    virtual bool quitRequested() = 0;
+
+    virtual bool isHidden() = 0;
+
+    virtual void newFrame() = 0;
+
+    [[nodiscard]] virtual KeyCode getLastKeyPress() const = 0;
+
+    [[nodiscard]] virtual MouseOffset getMouseOffset() const = 0;
+
+    [[nodiscard]] virtual ScrollOffset getScrollOffset() const = 0;
+
+    virtual std::vector<const char *> getWindowInstanceExtensions() = 0;
 };

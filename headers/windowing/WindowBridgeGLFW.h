@@ -6,13 +6,14 @@
 
 #include "backends/imgui_impl_glfw.h"
 
-class WindowBridgeGLFW : public IWindowBridge
-{
+class WindowBridgeGLFW : public IWindowBridge {
 public:
-    WindowBridgeGLFW(bool resizeable);
-    ~WindowBridgeGLFW();
+    explicit WindowBridgeGLFW(bool resizeable);
+
+    ~WindowBridgeGLFW() override;
 
     VkSurfaceKHR createSurface(VkInstance instance) override;
+
     void handleEvents() override;
 
     VkExtent2D getExtent() override { return windowExtent; }
@@ -22,24 +23,23 @@ public:
 
     bool quitRequested() override { return glfwWindowShouldClose(window); }
     bool isHidden() override { return minimized; }
-    void newFrame() override
-    {
+
+    void newFrame() override {
         frameIndex++;
         lastFrameTime = currentTime;
         currentTime = glfwGetTime();
         ImGui_ImplGlfw_NewFrame();
     }
 
-    const KeyCode getLastKeyPress() const override { return lastKeyPress; }
-    const MouseOffset getMouseOffset() const override
-    {
+    [[nodiscard]] KeyCode getLastKeyPress() const override { return lastKeyPress; }
+
+    [[nodiscard]] MouseOffset getMouseOffset() const override {
         return frameIndex - lastMouseMovementFrameIndex > 1
                    ? MouseOffset{}
                    : MouseOffset{currentMouseOffset.x - lastMouseOffset.x, currentMouseOffset.y - lastMouseOffset.y};
     }
 
-    const ScrollOffset getScrollOffset() const override
-    {
+    [[nodiscard]] ScrollOffset getScrollOffset() const override {
         return frameIndex - lastScrollFrameIndex > 1
                    ? ScrollOffset{}
                    : currentScrollOffset;
@@ -49,19 +49,21 @@ public:
 
 private:
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
     static void cursorPosCallback(GLFWwindow *window, double xpos, double ypos);
+
     static void scrollCallback(GLFWwindow *window, double xOffset, double yOffset);
 
     ScrollOffset currentScrollOffset{};
     size_t lastScrollFrameIndex{0};
     MouseOffset currentMouseOffset{}, lastMouseOffset{};
     size_t lastMouseMovementFrameIndex{0};
-    KeyCode lastKeyPress;
+    KeyCode lastKeyPress{KeyCode::None};
     double currentTime{0.0}, lastFrameTime{0.0};
 
     std::vector<const char *> instanceExtensions{};
 
-    VkExtent2D windowExtent;
+    VkExtent2D windowExtent{0, 0};
 
     GLFWwindow *window;
     bool minimized = false;
