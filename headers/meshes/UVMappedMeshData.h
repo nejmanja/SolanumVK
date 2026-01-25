@@ -6,6 +6,8 @@
 
 class UVMappedMeshData : public MeshData {
 public:
+    UVMappedMeshData();
+
     [[nodiscard]] size_t getVertexSize() const override { return sizeof(Vertex); }
 
     [[nodiscard]] size_t getVertexCount() const override { return vertices.size(); }

@@ -48,8 +48,9 @@ private:
     SceneDescriptor sceneDescriptor;
 
     // Renderers
-    std::unique_ptr<IRenderer> renderer;
+    std::unique_ptr<IRenderer> computeRenderer;
     std::unique_ptr<IRenderer> simpleMeshRenderer;
+    std::unique_ptr<IRenderer> pbrMeshRenderer;
     std::unique_ptr<ImGuiRenderer> imGuiRenderer;
 
     uint32_t frameCounter{0};

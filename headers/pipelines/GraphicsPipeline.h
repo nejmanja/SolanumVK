@@ -13,7 +13,7 @@ public:
 
     ~GraphicsPipeline() override;
 
-    void bindPushConstants(void *pushConstantData) override;
+    void bindPushConstants(const void *pushConstantData, size_t size) override;
 
     void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) override;
 

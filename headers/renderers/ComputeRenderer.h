@@ -1,12 +1,15 @@
 #pragma once
 
+#include <fastgltf/types.hpp>
+
+#include "Camera.h"
 #include "IRenderer.h"
 #include "ComputePipeline.h"
 #include "VulkanContext.h"
 
 class ComputeRenderer : public IRenderer {
 public:
-    ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget);
+    ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget, const Camera *camera);
 
     ~ComputeRenderer() override;
 
@@ -21,4 +24,6 @@ private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorSet descriptorSet;
     VkDevice device;
+
+    const Camera *camera;
 };

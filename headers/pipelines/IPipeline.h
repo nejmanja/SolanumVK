@@ -10,7 +10,7 @@ public:
         : layout(layout), pipeline(pipeline), device(device) {
     }
 
-    virtual void bindPushConstants(void *pushConstantData) = 0;
+    virtual void bindPushConstants(const void *pushConstantData, size_t size) = 0;
 
     virtual void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) = 0;
 
@@ -33,8 +33,8 @@ protected:
         vkCmdBindDescriptorSets(boundCommandBuffer, bindPoint, layout, 0, setCount, sets, 0, nullptr);
     }
 
-    void bindPushConstants(const void *pushConstantData, const VkShaderStageFlags stageFlags) const {
-        vkCmdPushConstants(boundCommandBuffer, layout, stageFlags, 0, sizeof(pushConstantData), pushConstantData);
+    void bindPushConstants(const void *pushConstantData, const size_t size, const VkShaderStageFlags stageFlags) const {
+        vkCmdPushConstants(boundCommandBuffer, layout, stageFlags, 0, size, pushConstantData);
     }
 
     // The command buffer to which the pipeline has been bound to.

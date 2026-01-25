@@ -73,7 +73,7 @@ std::vector<glm::vec2> MeshLoader::readUVs(fastgltf::Expected<fastgltf::Asset> &
                                            fastgltf::Primitive &primitive, const uint32_t channel) {
     std::vector<glm::vec2> uvs{};
 
-    std::string channelName = "UV_" + std::to_string(channel);
+    std::string channelName = "TEXCOORD_" + std::to_string(channel);
 
     auto &uvAccessor = asset->accessors[primitive.findAttribute(channelName)->accessorIndex];
     fastgltf::iterateAccessorWithIndex<glm::vec2>(

@@ -10,6 +10,7 @@
 #include "BufferAllocator.h"
 #include "ComputeRenderer.h"
 #include "DescriptorLayoutBuilder.h"
+#include "PBRMeshRenderer.h"
 #include "SimpleMeshRenderer.h"
 
 RenderingEngine::RenderingEngine()
@@ -20,13 +21,14 @@ RenderingEngine::RenderingEngine()
       syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
       renderTarget(createRenderTarget(vulkanContext)),
       memoryManager(vulkanContext),
-      renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource)),
       imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)) {
     camera.setPerspectiveProj(glm::radians(45.0f), 1.3333f, 0.01f, 1000.0f);
     // camera.setOrthoProj(1.0f, 0.75f, 0.01f, 1000.0f);
 
     createSceneDescriptor();
     simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
+    pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
+    computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource, &camera);
 }
 
 void RenderingEngine::exec() {
@@ -78,7 +80,7 @@ void RenderingEngine::draw(double deltaTime) {
         .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1},
     };
 
-    renderer->setup(renderTarget.resource, deltaTime);
+    computeRenderer->setup(renderTarget.resource, deltaTime);
     imGuiRenderer->setup(swapchainImageResource, deltaTime);
     simpleMeshRenderer->setup(renderTarget.resource, deltaTime);
     // ===============================================================================================================
@@ -89,7 +91,7 @@ void RenderingEngine::draw(double deltaTime) {
     commandManager.begin();
     commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-    renderer->execute(commandManager.get());
+    computeRenderer->execute(commandManager.get());
 
     commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL,
                                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
