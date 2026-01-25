@@ -40,6 +40,7 @@ private:
     Camera camera;
 
     // Scene global descriptors
+    // TODO: move these into the renderer, where it's actually needed...
     std::unique_ptr<DescriptorSetAllocator> sceneDescriptorAllocator;
     VkDescriptorSetLayout sceneDescriptorLayout;
     VkDescriptorSet sceneDescriptorSet;

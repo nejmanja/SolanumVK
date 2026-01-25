@@ -19,9 +19,9 @@ RenderingEngine::RenderingEngine()
                      vulkanContext.getSwapchain().framesInFlight),
       syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
       renderTarget(createRenderTarget(vulkanContext)),
+      memoryManager(vulkanContext),
       renderer(std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource)),
-      imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
-      memoryManager(vulkanContext) {
+      imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)) {
     camera.setPerspectiveProj(glm::radians(45.0f), 1.3333f, 0.01f, 1000.0f);
     // camera.setOrthoProj(1.0f, 0.75f, 0.01f, 1000.0f);
 
@@ -71,15 +71,15 @@ void RenderingEngine::draw(double deltaTime) {
     // Reset the render fence, we're beginning to render a new frame
     vkResetFences(device, 1, &renderFence);
 
-    auto swapchainImage = vulkanContext.getSwapchain().images[swapchainImageIndex];
-    auto swapchainImageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex];
+    auto swapchainExtent = vulkanContext.getSwapchain().extent;
+    auto swapchainImageResource = ImageResource{
+        .image = vulkanContext.getSwapchain().images[swapchainImageIndex],
+        .imageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex],
+        .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1},
+    };
 
     renderer->setup(renderTarget.resource, deltaTime);
-    auto swapchainExtent = vulkanContext.getSwapchain().extent;
-    imGuiRenderer->setup({
-                             .image = swapchainImage, .imageView = swapchainImageView,
-                             .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1}
-                         }, deltaTime);
+    imGuiRenderer->setup(swapchainImageResource, deltaTime);
     simpleMeshRenderer->setup(renderTarget.resource, deltaTime);
     // ===============================================================================================================
     // Begin Command Recording
@@ -96,18 +96,24 @@ void RenderingEngine::draw(double deltaTime) {
 
     simpleMeshRenderer->execute(commandManager.get());
 
+
+    // Copy rendering result into swapchain image
     commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_UNDEFINED,
+                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    commandManager.copyImage(renderTarget.resource.image, swapchainImage, swapchainExtent, swapchainExtent);
+    commandManager.copyImage(renderTarget.resource.image, swapchainImageResource.image, swapchainExtent,
+                             swapchainExtent);
 
-    commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
+    // Render imgui at the very end
     imGuiRenderer->execute(commandManager.get());
 
-    commandManager.transitionImage(swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    // Transition for present
+    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     commandManager.end();
@@ -155,15 +161,17 @@ void RenderingEngine::processInput() {
         case KeyCode::KeyQ:
             offset.y = 1.0f;
             break;
+        default:
+            break;
     }
 
-    auto dt = (float) window->getDeltaTime();
+    const auto dt = static_cast<float>(window->getDeltaTime());
     camera.move(offset * dt);
 
-    auto mouseOffset = window->getMouseOffset();
+    const auto mouseOffset = window->getMouseOffset();
     camera.rotate(mouseOffset.x * dt, mouseOffset.y * dt);
 
-    auto scrollOffset = window->getScrollOffset();
+    const auto scrollOffset = window->getScrollOffset();
     if (scrollOffset.y != 0.0f)
         camera.changeSpeed(scrollOffset.y);
 
