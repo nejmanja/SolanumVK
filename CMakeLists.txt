@@ -13,33 +13,33 @@ find_package(GLFW REQUIRED)
 find_package(FastGLTF REQUIRED)
 
 include_directories(
-    ${GLM_INCLUDE_DIR}
-    ${SDL2_INCLUDE_DIR}
-    ${SDL2_INCLUDE_DIR}/SDL2 # so that ImGui won't complain...
-    ${VkBootstrap_INCLUDE_DIR}
-    ${GLFW_INCLUDE_DIR}
-    ${FastGLTF_INCLUDE_DIR}
+        ${GLM_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIR}/SDL2 # so that ImGui won't complain...
+        ${VkBootstrap_INCLUDE_DIR}
+        ${GLFW_INCLUDE_DIR}
+        ${FastGLTF_INCLUDE_DIR}
 )
 
 # Add source files
-file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp)
-	
+file(GLOB_RECURSE SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/src/*.c
+        ${CMAKE_SOURCE_DIR}/src/*.cpp)
+
 # Add header files
-file(GLOB_RECURSE HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/headers/*.h
-	${CMAKE_SOURCE_DIR}/headers/*.hpp
-    ${CMAKE_SOURCE_DIR}/imgui/*.h)
+file(GLOB_RECURSE HEADER_FILES
+        ${CMAKE_SOURCE_DIR}/headers/*.h
+        ${CMAKE_SOURCE_DIR}/headers/*.hpp
+        ${CMAKE_SOURCE_DIR}/imgui/*.h)
 
 file(GLOB IMGUI_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/imgui/*.cpp
-    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
-    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
-    ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
-    )
-    
-    
+        ${CMAKE_SOURCE_DIR}/imgui/*.cpp
+        ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
+        ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
+        ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
+)
+
+
 include_directories(${CMAKE_SOURCE_DIR}/headers)
 include_directories(${CMAKE_SOURCE_DIR}/headers/renderers)
 include_directories(${CMAKE_SOURCE_DIR}/headers/pipelines)
@@ -55,13 +55,13 @@ target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARY} ${SDL2_LIBRARY} ${VkBoot
 
 if (WIN32)
     add_custom_command(
-        TARGET SolanumVK POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${SDL2_DLL}" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
-        VERBATIM
+            TARGET SolanumVK POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${SDL2_DLL}" "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}"
+            VERBATIM
     )
 
     add_custom_command(
-        TARGET SolanumVK POST_BUILD
-        COMMAND "${CMAKE_SOURCE_DIR}/compile_shaders.bat"
+            TARGET SolanumVK POST_BUILD
+            COMMAND "${CMAKE_SOURCE_DIR}/compile_shaders.bat"
     )
-endif()
+endif ()
