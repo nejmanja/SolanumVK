@@ -59,27 +59,21 @@ RenderingEngine::~RenderingEngine() {
 }
 
 void RenderingEngine::draw(double deltaTime) {
-    auto device = vulkanContext.getDevice();
+    const auto device = vulkanContext.getDevice();
 
     // Get the swapchain image index.
-    auto swapchainImageIndex = getSwapchainImageIndex(device);
+    const auto swapchainImageIndex = getSwapchainImageIndex(device);
 
-    auto renderFence = syncManager.getRenderFence(swapchainImageIndex);
-    auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
-    auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
+    const auto renderFence = syncManager.getRenderFence(swapchainImageIndex);
+    const auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
+    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
 
     // Wait for previous render to finish
     vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
     // Reset the render fence, we're beginning to render a new frame
     vkResetFences(device, 1, &renderFence);
 
-    auto swapchainImageResource = ImageResource{
-        vulkanContext.getSwapchain().images[swapchainImageIndex],
-        vulkanContext.getSwapchain().imageViews[swapchainImageIndex],
-        vulkanContext.getSwapchain().extent,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        vulkanContext.getSwapchain().imageFormat
-    };
+    auto swapchainImageResource = vulkanContext.getSwapchain().images[swapchainImageIndex];
 
     computeRenderer->setup(&renderTarget.resource, deltaTime);
     imGuiRenderer->setup(&swapchainImageResource, deltaTime);
@@ -225,7 +219,7 @@ AllocatedImageResource RenderingEngine::createRenderTarget(const VulkanContext &
     usageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
     usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    auto swapchainExtent = vulkanContext.getSwapchain().extent;
+    auto swapchainExtent = vulkanContext.getSwapchain().getExtent();
 
     return ImageAllocator::allocateImage2D(vulkanContext,
                                            VK_FORMAT_R16G16B16A16_SFLOAT,

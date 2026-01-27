@@ -40,7 +40,8 @@ ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
     imguiVkInitInfo.UseDynamicRendering = true;
     imguiVkInitInfo.PipelineRenderingCreateInfo = {.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO};
     imguiVkInitInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-    imguiVkInitInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &vulkanContext.getSwapchain().imageFormat;
+    const auto colorFormat = vulkanContext.getSwapchain().getImageFormat();
+    imguiVkInitInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
 
     imguiVkInitInfo.MinImageCount = 3;
     imguiVkInitInfo.ImageCount = 3;

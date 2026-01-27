@@ -7,8 +7,9 @@
 
 class ImageResource {
 public:
-    ImageResource(VkImage image, VkImageView imageView, VkExtent3D imageExtent, VkImageLayout imageLayout,
-                  VkFormat imageFormat) {
+    ImageResource(const VkImage image, const VkImageView imageView, const VkExtent3D imageExtent,
+                  const VkImageLayout imageLayout,
+                  const VkFormat imageFormat) {
         this->imageLayout = imageLayout;
         this->imageFormat = imageFormat;
         this->image = image;
@@ -16,9 +17,11 @@ public:
         this->imageExtent = imageExtent;
     }
 
-    ImageResource(VkImage image, VkImageView imageView, VkExtent2D imageExtent, VkImageLayout imageLayout,
-                  VkFormat imageFormat) : ImageResource(image, imageView, {imageExtent.width, imageExtent.height, 1},
-                                                        imageLayout, imageFormat) {
+    ImageResource(const VkImage image, const VkImageView imageView, const VkExtent2D imageExtent,
+                  const VkImageLayout imageLayout,
+                  const VkFormat imageFormat) : ImageResource(image, imageView,
+                                                              {imageExtent.width, imageExtent.height, 1},
+                                                              imageLayout, imageFormat) {
     }
 
     void transition(const CommandManager &cmdManager, VkImageLayout dstLayout);
