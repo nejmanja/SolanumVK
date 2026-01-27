@@ -73,7 +73,6 @@ void RenderingEngine::draw(double deltaTime) {
     // Reset the render fence, we're beginning to render a new frame
     vkResetFences(device, 1, &renderFence);
 
-    auto swapchainExtent = vulkanContext.getSwapchain().extent;
     auto swapchainImageResource = ImageResource{
         vulkanContext.getSwapchain().images[swapchainImageIndex],
         vulkanContext.getSwapchain().imageViews[swapchainImageIndex],
