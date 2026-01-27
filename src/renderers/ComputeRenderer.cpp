@@ -23,7 +23,7 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const Image
 
     descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
 
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, renderTarget.imageView,
+    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, renderTarget.getImageView(),
                                  VK_IMAGE_LAYOUT_GENERAL);
 }
 
@@ -33,7 +33,7 @@ ComputeRenderer::~ComputeRenderer() {
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
-void ComputeRenderer::setup(ImageResource finalTarget, double deltaTime) {
+void ComputeRenderer::setup(ImageResource *finalTarget, double deltaTime) {
     IRenderer::setup(finalTarget, deltaTime);
 }
 

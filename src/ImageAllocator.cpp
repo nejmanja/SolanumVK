@@ -9,10 +9,11 @@ AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulk
                                                        const VkImageUsageFlags usageFlags,
                                                        const VkExtent3D extent,
                                                        const VkMemoryPropertyFlags memoryFlags,
-                                                       const VmaMemoryUsage memoryUsage)
-{
-    AllocatedImageResource allocatedImage{};
-    allocatedImage.resource.imageExtent = extent;
+                                                       const VmaMemoryUsage memoryUsage) {
+    constexpr auto layout = VK_IMAGE_LAYOUT_UNDEFINED; // == don't care
+     VmaAllocation allocation{};
+    VkImage image{};
+    VkImageView imageView{};
 
     VkImageCreateInfo imageCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -21,16 +22,16 @@ AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulk
         .imageType = VK_IMAGE_TYPE_2D,
         .format = format,
         .extent = extent,
-        .mipLevels = 1,                    // no mipmapping for now
-        .arrayLayers = 1,                  // no image arrays here
-        .samples = VK_SAMPLE_COUNT_1_BIT,  // no msaa
+        .mipLevels = 1, // no mipmapping for now
+        .arrayLayers = 1, // no image arrays here
+        .samples = VK_SAMPLE_COUNT_1_BIT, // no msaa
         .tiling = VK_IMAGE_TILING_OPTIMAL, // optimal memory tiling
         .usage = usageFlags,
         // Exclusive resource, no queue sharing
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         .queueFamilyIndexCount = 0,
         .pQueueFamilyIndices = VK_NULL_HANDLE,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED // == don't care
+        .initialLayout = layout
     };
 
     VmaAllocationCreateInfo allocationCreateInfo{
@@ -41,32 +42,43 @@ AllocatedImageResource ImageAllocator::allocateImage2D(const VulkanContext &vulk
         // everything else is default
     };
 
-    auto imgCreateResult = vmaCreateImage(vulkanContext.getVmaAllocator(), &imageCreateInfo, &allocationCreateInfo, &allocatedImage.resource.image, &allocatedImage.allocation, nullptr);
+    auto imgCreateResult = vmaCreateImage(vulkanContext.getVmaAllocator(),
+                                          &imageCreateInfo,
+                                          &allocationCreateInfo,
+                                          &image,
+                                          &allocation,
+                                          nullptr);
     VulkanUtils::CheckVkResult(imgCreateResult);
 
     VkImageViewCreateInfo imageViewCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .image = allocatedImage.resource.image,
+        .image = image,
         .viewType = VK_IMAGE_VIEW_TYPE_2D,
         .format = format,
         .components = {},
         .subresourceRange = {
-            .aspectMask = format == VK_FORMAT_D32_SFLOAT ? (VkImageAspectFlags)VK_IMAGE_ASPECT_DEPTH_BIT : (VkImageAspectFlags)VK_IMAGE_ASPECT_COLOR_BIT,
+            .aspectMask = format == VK_FORMAT_D32_SFLOAT
+                              ? (VkImageAspectFlags) VK_IMAGE_ASPECT_DEPTH_BIT
+                              : (VkImageAspectFlags) VK_IMAGE_ASPECT_COLOR_BIT,
             .baseMipLevel = 0,
             .levelCount = VK_REMAINING_MIP_LEVELS,
             .baseArrayLayer = 0,
-            .layerCount = VK_REMAINING_ARRAY_LAYERS}};
+            .layerCount = VK_REMAINING_ARRAY_LAYERS
+        }
+    };
 
-    auto viewCreateResult = vkCreateImageView(vulkanContext.getDevice(), &imageViewCreateInfo, nullptr, &allocatedImage.resource.imageView);
+    auto viewCreateResult = vkCreateImageView(vulkanContext.getDevice(), &imageViewCreateInfo, nullptr, &imageView);
     VulkanUtils::CheckVkResult(viewCreateResult);
 
-    return allocatedImage;
+    return {
+        .resource = ImageResource{image, imageView, extent, layout, format},
+        .allocation = allocation
+    };
 }
 
-void ImageAllocator::freeImage(const VulkanContext &vulkanContext, const AllocatedImageResource &imageResource)
-{
-    vkDestroyImageView(vulkanContext.getDevice(), imageResource.resource.imageView, nullptr);
-    vmaDestroyImage(vulkanContext.getVmaAllocator(), imageResource.resource.image, imageResource.allocation);
+void ImageAllocator::freeImage(const VulkanContext &vulkanContext, const AllocatedImageResource &imageResource) {
+    vkDestroyImageView(vulkanContext.getDevice(), imageResource.resource.getImageView(), nullptr);
+    vmaDestroyImage(vulkanContext.getVmaAllocator(), imageResource.resource.getImage(), imageResource.allocation);
 }

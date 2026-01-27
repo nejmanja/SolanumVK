@@ -34,26 +34,27 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
 }
 
 SimpleMeshRenderer::~SimpleMeshRenderer() {
+    delete depthTarget;
 }
 
-void SimpleMeshRenderer::setup(ImageResource finalTarget, double deltaTime) {
+void SimpleMeshRenderer::setup(ImageResource *finalTarget, double deltaTime) {
     IRenderer::setup(finalTarget, deltaTime);
 
     transform.model = glm::rotate(transform.model, (float) deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
-    viewport.width = (float) finalTarget.imageExtent.width;
-    viewport.height = (float) finalTarget.imageExtent.height;
+    viewport.width = (float) finalTarget->getExtent().width;
+    viewport.height = (float) finalTarget->getExtent().height;
 
-    scissor.extent.width = finalTarget.imageExtent.width;
-    scissor.extent.height = finalTarget.imageExtent.height;
+    scissor.extent.width = finalTarget->getExtent().width;
+    scissor.extent.height = finalTarget->getExtent().height;
 }
 
 void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
-        .imageView = finalTarget.imageView,
+        .imageView = finalTarget->getImageView(),
         .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         // no MSAA
         .resolveMode = VK_RESOLVE_MODE_NONE,
@@ -69,7 +70,7 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
         .pNext = nullptr,
         .flags = 0,
         .renderArea = VkRect2D{
-            .offset = {0, 0}, .extent = {finalTarget.imageExtent.width, finalTarget.imageExtent.height}
+            .offset = {0, 0}, .extent = {finalTarget->getExtent().width, finalTarget->getExtent().height}
         },
         .layerCount = 1,
         .viewMask = 0,
@@ -101,20 +102,32 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
 }
 
 void SimpleMeshRenderer::createDepthTarget() {
-    depthTarget = ImageAllocator::allocateImage2D(
+    auto depth = ImageAllocator::allocateImage2D(
         vulkanContext,
         VK_FORMAT_D32_SFLOAT,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VkExtent3D{SolVK::windowWidth, SolVK::windowHeight, 1},
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         VMA_MEMORY_USAGE_GPU_ONLY);
+    const auto depthResource = depth.resource;
+    depthTarget = new AllocatedImageResource{
+        .resource = {
+            depthResource.getImage(),
+            depthResource.getImageView(),
+            depthResource.getExtent(),
+            depthResource.getImageLayout(),
+            depthResource.getFormat()
+        },
+        .allocation = depth.allocation
+    };
 
-    memoryManager.registerResource(depthTarget);
+
+    memoryManager.registerResource(*depthTarget);
 
     depthAttachmentInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
-        .imageView = depthTarget.resource.imageView,
+        .imageView = depthTarget->resource.getImageView(),
         .imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         // no MSAA
         .resolveMode = VK_RESOLVE_MODE_NONE,
@@ -173,7 +186,7 @@ void SimpleMeshRenderer::transitionDepthTarget(VkCommandBuffer cmd) {
     subresourceRange.baseArrayLayer = 0;
     subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
     imageBarrier.subresourceRange = subresourceRange;
-    imageBarrier.image = depthTarget.resource.image;
+    imageBarrier.image = depthTarget->resource.getImage();
 
     VkDependencyInfo depInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .pNext = nullptr};
     depInfo.imageMemoryBarrierCount = 1;

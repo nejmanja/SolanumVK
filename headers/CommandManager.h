@@ -21,7 +21,7 @@ public:
 
     void copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize);
 
-    void transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout);
+    void transitionImage(VkImage image, VkImageLayout srcLayout, VkImageLayout dstLayout) const;
 
     void nextFrame() { frameIdx = (frameIdx + 1) % buffers.size(); }
 

@@ -11,19 +11,24 @@
 #include "MeshUploader.h"
 #include "ScopedVkMemoryManager.h"
 
-class SimpleMeshRenderer : public IRenderer
-{
+class SimpleMeshRenderer : public IRenderer {
 public:
-    SimpleMeshRenderer(const VulkanContext &vulkanContext, VkDescriptorSetLayout sceneDescriptorLayout, VkDescriptorSet sceneDescriptorSet);
+    SimpleMeshRenderer(const VulkanContext &vulkanContext, VkDescriptorSetLayout sceneDescriptorLayout,
+                       VkDescriptorSet sceneDescriptorSet);
+
     ~SimpleMeshRenderer() override;
 
-    void setup(ImageResource finalTarget, double deltaTime) override;
+    void setup(ImageResource *finalTarget, double deltaTime) override;
+
     void execute(VkCommandBuffer cmd) override;
 
 private:
     void createDepthTarget();
+
     void createDescriptors();
+
     void transitionDepthTarget(VkCommandBuffer cmd);
+
     void buildPipeline(VkDescriptorSetLayout sceneDescriptorLayout);
 
     const VkDescriptorSet sceneDescriptorSet;
@@ -33,7 +38,7 @@ private:
 
     SimpleMeshData meshData;
 
-    AllocatedImageResource depthTarget;
+    AllocatedImageResource *depthTarget;
     VkRenderingAttachmentInfo depthAttachmentInfo;
 
     // Pipeline with which rendering will happen
@@ -41,10 +46,10 @@ private:
 
     ScopedVkMemoryManager memoryManager;
 
-    struct Transform
-    {
+    struct Transform {
         glm::mat4 model;
     };
+
     Transform transform;
     AllocatedBuffer transformBuffer;
     VkDescriptorSetLayout transformUniformLayout{VK_NULL_HANDLE};

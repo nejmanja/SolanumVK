@@ -13,7 +13,7 @@ public:
 
     ~ComputeRenderer() override;
 
-    void setup(ImageResource finalTarget, double deltaTime) override;
+    void setup(ImageResource *finalTarget, double deltaTime) override;
 
     void execute(VkCommandBuffer cmd) override;
 

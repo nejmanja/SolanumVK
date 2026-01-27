@@ -75,48 +75,45 @@ void RenderingEngine::draw(double deltaTime) {
 
     auto swapchainExtent = vulkanContext.getSwapchain().extent;
     auto swapchainImageResource = ImageResource{
-        .image = vulkanContext.getSwapchain().images[swapchainImageIndex],
-        .imageView = vulkanContext.getSwapchain().imageViews[swapchainImageIndex],
-        .imageExtent = {swapchainExtent.width, swapchainExtent.height, 1},
+        vulkanContext.getSwapchain().images[swapchainImageIndex],
+        vulkanContext.getSwapchain().imageViews[swapchainImageIndex],
+        vulkanContext.getSwapchain().extent,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        vulkanContext.getSwapchain().imageFormat
     };
 
-    computeRenderer->setup(renderTarget.resource, deltaTime);
-    imGuiRenderer->setup(swapchainImageResource, deltaTime);
-    simpleMeshRenderer->setup(renderTarget.resource, deltaTime);
+    computeRenderer->setup(&renderTarget.resource, deltaTime);
+    imGuiRenderer->setup(&swapchainImageResource, deltaTime);
+    simpleMeshRenderer->setup(&renderTarget.resource, deltaTime);
     // ===============================================================================================================
     // Begin Command Recording
     // ===============================================================================================================
     commandManager.reset();
 
     commandManager.begin();
-    commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_GENERAL);
 
     computeRenderer->execute(commandManager.get());
 
-    commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_GENERAL,
-                                   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     simpleMeshRenderer->execute(commandManager.get());
 
 
     // Copy rendering result into swapchain image
-    commandManager.transitionImage(renderTarget.resource.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                   VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_UNDEFINED,
-                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    commandManager.copyImage(renderTarget.resource.image, swapchainImageResource.image, swapchainExtent,
+    commandManager.copyImage(renderTarget.resource.getImage(), swapchainImageResource.getImage(), swapchainExtent,
                              swapchainExtent);
 
-    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     // Render imgui at the very end
     imGuiRenderer->execute(commandManager.get());
 
     // Transition for present
-    commandManager.transitionImage(swapchainImageResource.image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                   VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     commandManager.end();
 
