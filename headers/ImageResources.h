@@ -21,10 +21,7 @@ public:
                                                         imageLayout, imageFormat) {
     }
 
-    void transition(const CommandManager &cmdManager, const VkImageLayout dstLayout) {
-        cmdManager.transitionImage(image, imageLayout, dstLayout);
-        imageLayout = dstLayout;
-    }
+    void transition(const CommandManager &cmdManager, VkImageLayout dstLayout);
 
     [[nodiscard]] VkImage getImage() const { return image; }
     [[nodiscard]] VkImageView getImageView() const { return imageView; }
