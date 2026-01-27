@@ -96,11 +96,7 @@ void RenderingEngine::draw(double deltaTime) {
     simpleMeshRenderer->execute(commandManager);
 
     // Copy rendering result into swapchain image
-    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-    commandManager.copyImage(renderTarget.resource.getImage(), swapchainImageResource.getImage(), swapchainExtent,
-                             swapchainExtent);
+    renderTarget.resource.blitContents(commandManager, swapchainImageResource);
 
     // Render imgui at the very end
     imGuiRenderer->execute(commandManager);

@@ -23,6 +23,8 @@ public:
 
     void transition(const CommandManager &cmdManager, VkImageLayout dstLayout);
 
+    void blitContents(const CommandManager &cmdManager, ImageResource &destination);
+
     [[nodiscard]] VkImage getImage() const { return image; }
     [[nodiscard]] VkImageView getImageView() const { return imageView; }
     [[nodiscard]] VkExtent3D getExtent() const { return imageExtent; }

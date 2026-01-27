@@ -19,8 +19,6 @@ public:
     void reset() const { vkResetCommandBuffer(get(), 0); }
     void end() const { vkEndCommandBuffer(get()); }
 
-    void copyImage(VkImage src, VkImage dst, VkExtent2D srcSize, VkExtent2D dstSize);
-
     void nextFrame() { frameIdx = (frameIdx + 1) % buffers.size(); }
 
     void submit(VkQueue queue, VkSemaphore waitSemaphore, VkSemaphore signalSemaphore, VkFence signalFence);
