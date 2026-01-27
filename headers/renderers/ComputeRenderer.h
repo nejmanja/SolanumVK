@@ -15,7 +15,7 @@ public:
 
     void setup(ImageResource *finalTarget, double deltaTime) override;
 
-    void execute(VkCommandBuffer cmd) override;
+    void execute(CommandManager &cmd) override;
 
 private:
     // Pipeline with which rendering will happen

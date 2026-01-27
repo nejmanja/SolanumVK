@@ -50,7 +50,7 @@ void SimpleMeshRenderer::setup(ImageResource *finalTarget, double deltaTime) {
     scissor.extent.height = finalTarget->getExtent().height;
 }
 
-void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
+void SimpleMeshRenderer::execute(CommandManager &cmd) {
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
@@ -80,10 +80,13 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
         .pStencilAttachment = VK_NULL_HANDLE
     };
 
-    transitionDepthTarget(cmd);
+    const auto cmdBuffer = cmd.get();
 
-    vkCmdBeginRendering(cmd, &renderingInfo);
-    pipeline->bind(cmd);
+    depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+    pipeline->bind(cmdBuffer);
 
     VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, transformUniformDescriptorSet};
     pipeline->bindDescriptorSets(2, descriptorSets);
@@ -93,12 +96,12 @@ void SimpleMeshRenderer::execute(VkCommandBuffer cmd) {
 
     VkDeviceSize offset{0};
     auto vertexBuffer = meshData.getVertexBuffer().buffer;
-    vkCmdBindVertexBuffers(cmd, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(cmd, meshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
+    vkCmdBindIndexBuffer(cmdBuffer, meshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdDrawIndexed(cmd, meshData.getIndices().size(), 1, 0, 0, 0);
+    vkCmdDrawIndexed(cmdBuffer, meshData.getIndices().size(), 1, 0, 0, 0);
 
-    vkCmdEndRendering(cmd);
+    vkCmdEndRendering(cmdBuffer);
 }
 
 void SimpleMeshRenderer::createDepthTarget() {
@@ -166,33 +169,6 @@ void SimpleMeshRenderer::createDescriptors() {
 
     DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                   transformBuffer.buffer, sizeof(Transform));
-}
-
-void SimpleMeshRenderer::transitionDepthTarget(VkCommandBuffer cmd) {
-    VkImageMemoryBarrier2 imageBarrier{.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2, .pNext = nullptr};
-    imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
-    imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-    imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
-
-    imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-
-    VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    VkImageSubresourceRange subresourceRange;
-    subresourceRange.aspectMask = aspectMask;
-    subresourceRange.baseMipLevel = 0;
-    subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-    subresourceRange.baseArrayLayer = 0;
-    subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-    imageBarrier.subresourceRange = subresourceRange;
-    imageBarrier.image = depthTarget->resource.getImage();
-
-    VkDependencyInfo depInfo{.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .pNext = nullptr};
-    depInfo.imageMemoryBarrierCount = 1;
-    depInfo.pImageMemoryBarriers = &imageBarrier;
-
-    vkCmdPipelineBarrier2(cmd, &depInfo);
 }
 
 void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout) {

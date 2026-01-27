@@ -91,14 +91,9 @@ void RenderingEngine::draw(double deltaTime) {
     commandManager.reset();
 
     commandManager.begin();
-    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_GENERAL);
 
-    computeRenderer->execute(commandManager.get());
-
-    renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    simpleMeshRenderer->execute(commandManager.get());
-
+    computeRenderer->execute(commandManager);
+    simpleMeshRenderer->execute(commandManager);
 
     // Copy rendering result into swapchain image
     renderTarget.resource.transition(commandManager, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -107,14 +102,11 @@ void RenderingEngine::draw(double deltaTime) {
     commandManager.copyImage(renderTarget.resource.getImage(), swapchainImageResource.getImage(), swapchainExtent,
                              swapchainExtent);
 
-    swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
     // Render imgui at the very end
-    imGuiRenderer->execute(commandManager.get());
+    imGuiRenderer->execute(commandManager);
 
     // Transition for present
     swapchainImageResource.transition(commandManager, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
     commandManager.end();
 
     // ===============================================================================================================

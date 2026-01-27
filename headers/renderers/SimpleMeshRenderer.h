@@ -20,14 +20,12 @@ public:
 
     void setup(ImageResource *finalTarget, double deltaTime) override;
 
-    void execute(VkCommandBuffer cmd) override;
+    void execute(CommandManager &cmd) override;
 
 private:
     void createDepthTarget();
 
     void createDescriptors();
-
-    void transitionDepthTarget(VkCommandBuffer cmd);
 
     void buildPipeline(VkDescriptorSetLayout sceneDescriptorLayout);
 

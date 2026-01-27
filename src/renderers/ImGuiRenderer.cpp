@@ -85,15 +85,19 @@ void ImGuiRenderer::setup(ImageResource *finalTarget, double deltaTime) {
     ImGui::Render();
 }
 
-void ImGuiRenderer::execute(VkCommandBuffer cmd) {
+void ImGuiRenderer::execute(CommandManager &cmd) {
     colorAttachment.imageView = finalTarget->getImageView();
     renderingInfo.renderArea = VkRect2D{
         VkOffset2D{0, 0}, {finalTarget->getExtent().width, finalTarget->getExtent().height}
     };
 
-    vkCmdBeginRendering(cmd, &renderingInfo);
+    const auto cmdBuffer = cmd.get();
 
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-    vkCmdEndRendering(cmd);
+    vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
+
+    vkCmdEndRendering(cmdBuffer);
 }

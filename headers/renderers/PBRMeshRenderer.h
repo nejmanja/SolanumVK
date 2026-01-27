@@ -7,7 +7,7 @@ class PBRMeshRenderer : public IRenderer {
 public:
     explicit PBRMeshRenderer(const VulkanContext &vulkanContext);
 
-    void execute(VkCommandBuffer cmd) override;
+    void execute(CommandManager &cmd) override;
 
 private:
     void buildPipeline();

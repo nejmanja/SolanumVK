@@ -23,7 +23,8 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const Image
 
     descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
 
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, renderTarget.getImageView(),
+    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                 renderTarget.getImageView(),
                                  VK_IMAGE_LAYOUT_GENERAL);
 }
 
@@ -37,8 +38,10 @@ void ComputeRenderer::setup(ImageResource *finalTarget, double deltaTime) {
     IRenderer::setup(finalTarget, deltaTime);
 }
 
-void ComputeRenderer::execute(VkCommandBuffer cmd) {
-    pipeline->bind(cmd);
+void ComputeRenderer::execute(CommandManager &cmd) {
+    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+    pipeline->bind(cmd.get());
     pipeline->bindPushConstants(&camera->getLook(), sizeof(glm::vec3));
     pipeline->bindDescriptorSets(1, &descriptorSet);
     pipeline->execute();

@@ -5,6 +5,7 @@
 #include "VulkanContext.h"
 #include "DescriptorSetAllocator.h"
 #include "ImageResources.h"
+#include "CommandManager.h"
 
 class IRenderer {
 public:
@@ -18,7 +19,7 @@ public:
     virtual void setup(ImageResource *finalTarget, double deltaTime) { this->finalTarget = finalTarget; }
 
     // Records and submits commands to the GPU using the pipeline.
-    virtual void execute(VkCommandBuffer cmd) = 0;
+    virtual void execute(CommandManager &cmd) = 0;
 
 protected:
     const VulkanContext &vulkanContext;
