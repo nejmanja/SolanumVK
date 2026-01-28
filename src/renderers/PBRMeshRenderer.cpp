@@ -5,7 +5,7 @@
 #include "GraphicsPipelineBuilder.h"
 #include "MeshLoader.h"
 
-PBRMeshRenderer::PBRMeshRenderer(const VulkanContext &vulkanContext) : IRenderer(vulkanContext) {
+PBRMeshRenderer::PBRMeshRenderer(const VulkanContext &vulkanContext) : Renderer(vulkanContext) {
     buildPipeline();
     meshData = MeshLoader::loadUVMappedMesh("../../assets/textureMappedTorusKnot.glb");
 

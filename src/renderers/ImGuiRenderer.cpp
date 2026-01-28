@@ -4,7 +4,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
-    : IRenderer(vulkanContext) {
+    : Renderer(vulkanContext) {
     auto device = vulkanContext.getDevice();
 
     // Yoinked directly from the ImGui samples
@@ -77,7 +77,7 @@ ImGuiRenderer::~ImGuiRenderer() {
 }
 
 void ImGuiRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    IRenderer::setup(finalTarget, deltaTime);
+    Renderer::setup(finalTarget, deltaTime);
 
     ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();

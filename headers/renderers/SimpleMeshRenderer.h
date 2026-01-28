@@ -4,14 +4,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "IRenderer.h"
+#include "Renderer.h"
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
 #include "SimpleMeshData.h"
 #include "MeshUploader.h"
 #include "ScopedVkMemoryManager.h"
 
-class SimpleMeshRenderer : public IRenderer {
+class SimpleMeshRenderer : public Renderer {
 public:
     SimpleMeshRenderer(const VulkanContext &vulkanContext, VkDescriptorSetLayout sceneDescriptorLayout,
                        VkDescriptorSet sceneDescriptorSet);

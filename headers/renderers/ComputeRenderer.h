@@ -3,11 +3,11 @@
 #include <fastgltf/types.hpp>
 
 #include "Camera.h"
-#include "IRenderer.h"
+#include "Renderer.h"
 #include "ComputePipeline.h"
 #include "VulkanContext.h"
 
-class ComputeRenderer : public IRenderer {
+class ComputeRenderer : public Renderer {
 public:
     ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget, const Camera *camera);
 

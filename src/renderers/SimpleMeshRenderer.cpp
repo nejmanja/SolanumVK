@@ -13,7 +13,7 @@
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
                                        const VkDescriptorSetLayout sceneDescriptorLayout,
                                        const VkDescriptorSet sceneDescriptorSet)
-    : IRenderer(vulkanContext),
+    : Renderer(vulkanContext),
       viewport{
           .x = 0,
           .y = 0,
@@ -38,7 +38,7 @@ SimpleMeshRenderer::~SimpleMeshRenderer() {
 }
 
 void SimpleMeshRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    IRenderer::setup(finalTarget, deltaTime);
+    Renderer::setup(finalTarget, deltaTime);
 
     transform.model = glm::rotate(transform.model, (float) deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);

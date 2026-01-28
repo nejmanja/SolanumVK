@@ -1,10 +1,10 @@
 #pragma once
 
-#include "IRenderer.h"
+#include "Renderer.h"
 
 #include "VulkanContext.h"
 
-class ImGuiRenderer : public IRenderer {
+class ImGuiRenderer : public Renderer {
 public:
     explicit ImGuiRenderer(const VulkanContext &vulkanContext);
 

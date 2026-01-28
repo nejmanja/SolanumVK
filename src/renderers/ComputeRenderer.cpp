@@ -7,7 +7,7 @@
 
 ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget,
                                  const Camera *camera)
-    : IRenderer(vulkanContext), camera(camera) {
+    : Renderer(vulkanContext), camera(camera) {
     device = vulkanContext.getDevice();
 
     DescriptorLayoutBuilder layoutBuilder{};
@@ -35,7 +35,7 @@ ComputeRenderer::~ComputeRenderer() {
 }
 
 void ComputeRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    IRenderer::setup(finalTarget, deltaTime);
+    Renderer::setup(finalTarget, deltaTime);
 }
 
 void ComputeRenderer::execute(CommandManager &cmd) {

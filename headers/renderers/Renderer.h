@@ -7,12 +7,12 @@
 #include "ImageResources.h"
 #include "CommandManager.h"
 
-class IRenderer {
+class Renderer {
 public:
-    explicit IRenderer(const VulkanContext &vulkanContext) : vulkanContext{vulkanContext} {
+    explicit Renderer(const VulkanContext &vulkanContext) : vulkanContext{vulkanContext} {
     }
 
-    virtual ~IRenderer() = default;
+    virtual ~Renderer() = default;
 
     // Used before recording commands. May include setup for descriptor sets and push constants.
     // Sets the final render target to which the renderer should write.

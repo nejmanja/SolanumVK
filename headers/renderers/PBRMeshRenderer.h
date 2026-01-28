@@ -1,9 +1,9 @@
 #pragma once
 #include "GraphicsPipeline.h"
-#include "IRenderer.h"
+#include "Renderer.h"
 #include "UVMappedMeshData.h"
 
-class PBRMeshRenderer : public IRenderer {
+class PBRMeshRenderer : public Renderer {
 public:
     explicit PBRMeshRenderer(const VulkanContext &vulkanContext);
 
