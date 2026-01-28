@@ -51,7 +51,7 @@ private:
     std::unique_ptr<Renderer> computeRenderer;
     std::unique_ptr<Renderer> simpleMeshRenderer;
     std::unique_ptr<Renderer> pbrMeshRenderer;
-    std::unique_ptr<ImGuiRenderer> imGuiRenderer;
+    std::unique_ptr<Renderer> imGuiRenderer;
 
     uint32_t frameCounter{0};
     [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

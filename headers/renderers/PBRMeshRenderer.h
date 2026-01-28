@@ -12,6 +12,9 @@ public:
 private:
     void buildPipeline();
 
+    void setup(double deltaTime) override {
+    };
+
     UVMappedMeshData meshData;
 
     std::unique_ptr<GraphicsPipeline> pipeline;

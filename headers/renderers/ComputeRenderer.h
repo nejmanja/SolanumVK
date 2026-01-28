@@ -9,15 +9,20 @@
 
 class ComputeRenderer : public Renderer {
 public:
-    ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget, const Camera *camera);
+    ComputeRenderer(const VulkanContext &vulkanContext, const Camera *camera);
 
     ~ComputeRenderer() override;
-
-    void setup(ImageResource *finalTarget, double deltaTime) override;
 
     void execute(CommandManager &cmd) override;
 
 private:
+    bool firstRun = true;
+
+    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
+    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
+
+    void setup(double deltaTime) override;
+
     // Pipeline with which rendering will happen
     std::unique_ptr<ComputePipeline> pipeline;
 

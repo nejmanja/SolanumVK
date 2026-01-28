@@ -10,18 +10,21 @@ public:
 
     ~ImGuiRenderer() override;
 
-    void setup(ImageResource *finalTarget, double deltaTime) override;
-
     void execute(CommandManager &cmd) override;
 
 private:
-    VkDescriptorSetLayout descriptorSetLayout;
-    VkDescriptorSet descriptorSet;
+    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
+    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
+
+    void setup(double deltaTime) override;
+
+    VkDescriptorSetLayout descriptorSetLayout{};
+    VkDescriptorSet descriptorSet{};
 
     // This info remains the same between frames
     // Only the actual render target might change
-    VkRenderingInfo renderingInfo;
-    VkRenderingAttachmentInfo colorAttachment;
+    VkRenderingInfo renderingInfo{};
+    VkRenderingAttachmentInfo colorAttachment{};
 
-    VkDescriptorPool imguiPool;
+    VkDescriptorPool imguiPool{};
 };

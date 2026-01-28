@@ -18,11 +18,15 @@ public:
 
     ~SimpleMeshRenderer() override;
 
-    void setup(ImageResource *finalTarget, double deltaTime) override;
 
     void execute(CommandManager &cmd) override;
 
 private:
+    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
+    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
+
+    void setup(double deltaTime) override;
+
     void createDepthTarget();
 
     void createDescriptors();

@@ -28,7 +28,7 @@ RenderingEngine::RenderingEngine()
     createSceneDescriptor();
     simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
     pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
-    computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, renderTarget.resource, &camera);
+    computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, &camera);
 }
 
 void RenderingEngine::exec() {
@@ -74,10 +74,11 @@ void RenderingEngine::draw(double deltaTime) {
     vkResetFences(device, 1, &renderFence);
 
     auto swapchainImageResource = vulkanContext.getSwapchain().images[swapchainImageIndex];
+    std::vector mainOutputImages = {&renderTarget.resource};
 
-    computeRenderer->setup(&renderTarget.resource, deltaTime);
-    imGuiRenderer->setup(&swapchainImageResource, deltaTime);
-    simpleMeshRenderer->setup(&renderTarget.resource, deltaTime);
+    computeRenderer->setup({}, mainOutputImages, deltaTime);
+    simpleMeshRenderer->setup({}, mainOutputImages, deltaTime);
+    imGuiRenderer->setup({}, {&swapchainImageResource}, deltaTime);
     // ===============================================================================================================
     // Begin Command Recording
     // ===============================================================================================================

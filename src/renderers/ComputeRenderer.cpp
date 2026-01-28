@@ -5,9 +5,9 @@
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorWriter.h"
 
-ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const ImageResource &renderTarget,
+ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
                                  const Camera *camera)
-    : Renderer(vulkanContext), camera(camera) {
+    : Renderer(vulkanContext, 0, 1), camera(camera) {
     device = vulkanContext.getDevice();
 
     DescriptorLayoutBuilder layoutBuilder{};
@@ -22,10 +22,6 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext, const Image
     rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
 
     descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
-
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                 renderTarget.getImageView(),
-                                 VK_IMAGE_LAYOUT_GENERAL);
 }
 
 ComputeRenderer::~ComputeRenderer() {
@@ -34,15 +30,24 @@ ComputeRenderer::~ComputeRenderer() {
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
-void ComputeRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    Renderer::setup(finalTarget, deltaTime);
-}
-
 void ComputeRenderer::execute(CommandManager &cmd) {
-    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
+    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
     pipeline->bind(cmd.get());
     pipeline->bindPushConstants(&camera->getLook(), sizeof(glm::vec3));
     pipeline->bindDescriptorSets(1, &descriptorSet);
     pipeline->execute();
+}
+
+void ComputeRenderer::setup(double deltaTime) {
+    // This is a really silly hack to work around the fact that there's only one descriptor set
+    // when there should be as many as there are swapchain images
+    // TODO: Figure out a system to manage descriptor sets per-swapchain-image
+    if (!firstRun) return;
+
+    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                 getOutput()->getImageView(),
+                                 VK_IMAGE_LAYOUT_GENERAL);
+
+    firstRun = false;
 }

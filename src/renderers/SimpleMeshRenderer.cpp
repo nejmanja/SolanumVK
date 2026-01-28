@@ -13,7 +13,7 @@
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
                                        const VkDescriptorSetLayout sceneDescriptorLayout,
                                        const VkDescriptorSet sceneDescriptorSet)
-    : Renderer(vulkanContext),
+    : Renderer(vulkanContext, 0, 1),
       viewport{
           .x = 0,
           .y = 0,
@@ -37,24 +37,24 @@ SimpleMeshRenderer::~SimpleMeshRenderer() {
     delete depthTarget;
 }
 
-void SimpleMeshRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    Renderer::setup(finalTarget, deltaTime);
-
+void SimpleMeshRenderer::setup(double deltaTime) {
     transform.model = glm::rotate(transform.model, (float) deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
 
-    viewport.width = (float) finalTarget->getExtent().width;
-    viewport.height = (float) finalTarget->getExtent().height;
+    viewport.width = static_cast<float>(getOutput()->getExtent().width);
+    viewport.height = static_cast<float>(getOutput()->getExtent().height);
 
-    scissor.extent.width = finalTarget->getExtent().width;
-    scissor.extent.height = finalTarget->getExtent().height;
+    scissor.extent.width = getOutput()->getExtent().width;
+    scissor.extent.height = getOutput()->getExtent().height;
 }
 
 void SimpleMeshRenderer::execute(CommandManager &cmd) {
+    auto *output = getOutput();
+
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
-        .imageView = finalTarget->getImageView(),
+        .imageView = output->getImageView(),
         .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         // no MSAA
         .resolveMode = VK_RESOLVE_MODE_NONE,
@@ -70,7 +70,7 @@ void SimpleMeshRenderer::execute(CommandManager &cmd) {
         .pNext = nullptr,
         .flags = 0,
         .renderArea = VkRect2D{
-            .offset = {0, 0}, .extent = {finalTarget->getExtent().width, finalTarget->getExtent().height}
+            .offset = {0, 0}, .extent = {output->getExtent().width, output->getExtent().height}
         },
         .layerCount = 1,
         .viewMask = 0,
@@ -83,7 +83,7 @@ void SimpleMeshRenderer::execute(CommandManager &cmd) {
     const auto cmdBuffer = cmd.get();
 
     depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    output->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
     pipeline->bind(cmdBuffer);

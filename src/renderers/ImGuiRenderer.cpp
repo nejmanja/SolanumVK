@@ -4,7 +4,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
-    : Renderer(vulkanContext) {
+    : Renderer(vulkanContext, 0, 1) {
     auto device = vulkanContext.getDevice();
 
     // Yoinked directly from the ImGui samples
@@ -76,9 +76,7 @@ ImGuiRenderer::~ImGuiRenderer() {
     vkDestroyDescriptorPool(vulkanContext.getDevice(), imguiPool, nullptr);
 }
 
-void ImGuiRenderer::setup(ImageResource *finalTarget, double deltaTime) {
-    Renderer::setup(finalTarget, deltaTime);
-
+void ImGuiRenderer::setup(double deltaTime) {
     ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();
 
@@ -87,14 +85,14 @@ void ImGuiRenderer::setup(ImageResource *finalTarget, double deltaTime) {
 }
 
 void ImGuiRenderer::execute(CommandManager &cmd) {
-    colorAttachment.imageView = finalTarget->getImageView();
+    colorAttachment.imageView = getOutput()->getImageView();
     renderingInfo.renderArea = VkRect2D{
-        VkOffset2D{0, 0}, {finalTarget->getExtent().width, finalTarget->getExtent().height}
+        VkOffset2D{0, 0}, {getOutput()->getExtent().width, getOutput()->getExtent().height}
     };
 
     const auto cmdBuffer = cmd.get();
 
-    finalTarget->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
 
