@@ -74,11 +74,10 @@ void RenderingEngine::draw(double deltaTime) {
     vkResetFences(device, 1, &renderFence);
 
     auto swapchainImageResource = vulkanContext.getSwapchain().images[swapchainImageIndex];
-    std::vector mainOutputImages = {&renderTarget.resource};
 
-    computeRenderer->setup({}, mainOutputImages, deltaTime);
-    simpleMeshRenderer->setup({}, mainOutputImages, deltaTime);
-    imGuiRenderer->setup({}, {&swapchainImageResource}, deltaTime);
+    computeRenderer->setup(&renderTarget.resource, deltaTime);
+    simpleMeshRenderer->setup(&renderTarget.resource, deltaTime);
+    imGuiRenderer->setup(&swapchainImageResource, deltaTime);
     // ===============================================================================================================
     // Begin Command Recording
     // ===============================================================================================================

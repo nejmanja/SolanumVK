@@ -48,10 +48,10 @@ private:
     SceneDescriptor sceneDescriptor;
 
     // Renderers
-    std::unique_ptr<Renderer> computeRenderer;
-    std::unique_ptr<Renderer> simpleMeshRenderer;
+    std::unique_ptr<SimpleRenderer> computeRenderer;
+    std::unique_ptr<SimpleRenderer> simpleMeshRenderer;
     std::unique_ptr<Renderer> pbrMeshRenderer;
-    std::unique_ptr<Renderer> imGuiRenderer;
+    std::unique_ptr<SimpleRenderer> imGuiRenderer;
 
     uint32_t frameCounter{0};
     [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }

@@ -50,12 +50,11 @@ protected:
     [[nodiscard]] ImageResource *getOutputImage(const uint32_t index) const { return outputImages[index]; }
 
 private:
-    // TODO: add debug descriptors in case ranges don't match
     std::vector<ImageResource *> inputImages{}, outputImages{};
     std::vector<ImageBindingDescription> inputDescriptions{}, outputDescriptions{};
     const uint32_t numInputImages{}, numOutputImages{};
 
-    // TODO: add range checks
-    void setInputImages(std::vector<ImageResource *> &inputs) { inputImages = std::move(inputs); }
-    void setOutputImages(std::vector<ImageResource *> &outputs) { outputImages = std::move(outputs); }
+    void setInputImages(std::vector<ImageResource *> &inputs);
+
+    void setOutputImages(std::vector<ImageResource *> &outputs);
 };

@@ -9,6 +9,10 @@ public:
 
     ~SimpleRenderer() override = default;
 
+    void setup(ImageResource *outputImage, double deltaTime) {
+        Renderer::setup({}, {outputImage}, deltaTime);
+    }
+
     void execute(CommandManager &cmd) override = 0;
 
 protected:
@@ -16,4 +20,7 @@ protected:
 
     static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
     [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
+
+private:
+    using Renderer::setup;
 };
