@@ -4,14 +4,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Renderer.h"
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
 #include "SimpleMeshData.h"
-#include "MeshUploader.h"
 #include "ScopedVkMemoryManager.h"
+#include "SimpleRenderer.h"
 
-class SimpleMeshRenderer : public Renderer {
+class SimpleMeshRenderer : public SimpleRenderer {
 public:
     SimpleMeshRenderer(const VulkanContext &vulkanContext, VkDescriptorSetLayout sceneDescriptorLayout,
                        VkDescriptorSet sceneDescriptorSet);
@@ -22,9 +21,6 @@ public:
     void execute(CommandManager &cmd) override;
 
 private:
-    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
-    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
-
     void setup(double deltaTime) override;
 
     void createDepthTarget();

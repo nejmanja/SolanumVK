@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Renderer.h"
+#include "SimpleRenderer.h"
 
 #include "VulkanContext.h"
 
-class ImGuiRenderer : public Renderer {
+class ImGuiRenderer : public SimpleRenderer {
 public:
     explicit ImGuiRenderer(const VulkanContext &vulkanContext);
 
@@ -13,9 +13,6 @@ public:
     void execute(CommandManager &cmd) override;
 
 private:
-    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
-    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
-
     void setup(double deltaTime) override;
 
     VkDescriptorSetLayout descriptorSetLayout{};

@@ -3,11 +3,11 @@
 #include <fastgltf/types.hpp>
 
 #include "Camera.h"
-#include "Renderer.h"
 #include "ComputePipeline.h"
+#include "SimpleRenderer.h"
 #include "VulkanContext.h"
 
-class ComputeRenderer : public Renderer {
+class ComputeRenderer : public SimpleRenderer {
 public:
     ComputeRenderer(const VulkanContext &vulkanContext, const Camera *camera);
 
@@ -17,9 +17,6 @@ public:
 
 private:
     bool firstRun = true;
-
-    static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
-    [[nodiscard]] ImageResource *getOutput() const { return getOutputImage(TARGET_IMAGE_INDEX); }
 
     void setup(double deltaTime) override;
 

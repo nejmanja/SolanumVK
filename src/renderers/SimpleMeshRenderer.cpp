@@ -9,11 +9,13 @@
 #include "DescriptorLayoutBuilder.h"
 #include "DescriptorWriter.h"
 #include "MeshLoader.h"
+#include "MeshUploader.h"
 
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
                                        const VkDescriptorSetLayout sceneDescriptorLayout,
                                        const VkDescriptorSet sceneDescriptorSet)
-    : Renderer(vulkanContext, 0, 1),
+    : SimpleRenderer(vulkanContext),
+      sceneDescriptorSet{sceneDescriptorSet},
       viewport{
           .x = 0,
           .y = 0,
@@ -21,9 +23,8 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
           .height = (float) SolVK::windowHeight,
           .minDepth = 0.0f,
           .maxDepth = 1.0f
-      },
-      scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}}, memoryManager{vulkanContext},
-      sceneDescriptorSet{sceneDescriptorSet} {
+      }, scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}},
+      memoryManager{vulkanContext} {
     meshData = MeshLoader::loadSimpleMesh("../../assets/greenMonke.glb");
     MeshUploader::uploadMesh(vulkanContext, meshData);
     memoryManager.registerResource(meshData);

@@ -6,10 +6,19 @@
 #include "DescriptorSetAllocator.h"
 #include "ImageResources.h"
 #include "CommandManager.h"
+#include "ImageBindingDescription.h"
 
 class Renderer {
 public:
-    explicit Renderer(const VulkanContext &vulkanContext, const uint32_t numInputs, const uint32_t numOutputs)
+    Renderer(const VulkanContext &vulkanContext, const uint32_t numInputs,
+             const std::vector<ImageBindingDescription> inputDescriptions, const uint32_t numOutputs,
+             const std::vector<ImageBindingDescription> outputDescriptions)
+        : Renderer(vulkanContext, numInputs, numOutputs) {
+        this->inputDescriptions = inputDescriptions;
+        this->outputDescriptions = outputDescriptions;
+    }
+
+    Renderer(const VulkanContext &vulkanContext, const uint32_t numInputs, const uint32_t numOutputs)
         : vulkanContext{vulkanContext}, numInputImages{numInputs}, numOutputImages{numOutputs} {
     }
 
@@ -43,6 +52,7 @@ protected:
 private:
     // TODO: add debug descriptors in case ranges don't match
     std::vector<ImageResource *> inputImages{}, outputImages{};
+    std::vector<ImageBindingDescription> inputDescriptions{}, outputDescriptions{};
     const uint32_t numInputImages{}, numOutputImages{};
 
     // TODO: add range checks
