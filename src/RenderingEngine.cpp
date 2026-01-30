@@ -61,17 +61,24 @@ RenderingEngine::~RenderingEngine() {
 void RenderingEngine::draw(double deltaTime) {
     const auto device = vulkanContext.getDevice();
 
-    // Get the swapchain image index.
-    const auto swapchainImageIndex = getSwapchainImageIndex(device);
-
-    const auto renderFence = syncManager.getRenderFence(swapchainImageIndex);
-    const auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
-    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
+    // Get the render fence for the previously rendered frame
+    // This sync method works okay, it allows for overlap of cmd recording
+    // of a new frame while the last one is being presented,
+    // however, more parallelism can be achieved if the sync primitives are more decoupled
+    // with the tradeoff of allocating per-swapchain-image copies of resources (such as the g buffer)
+    const auto renderFence = syncManager.getRenderFence(lastSwapchainImageIndex);
 
     // Wait for previous render to finish
     vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
     // Reset the render fence, we're beginning to render a new frame
     vkResetFences(device, 1, &renderFence);
+
+    // Acquire the new swapchain image index.
+    const auto swapchainImageIndex = getSwapchainImageIndex(device);
+    const auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
+    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
+
+    lastSwapchainImageIndex = swapchainImageIndex;
 
     auto swapchainImageResource = vulkanContext.getSwapchain().images[swapchainImageIndex];
 

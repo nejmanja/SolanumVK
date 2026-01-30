@@ -54,7 +54,7 @@ private:
     std::unique_ptr<SimpleRenderer> imGuiRenderer;
 
     uint32_t frameCounter{0};
-    [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
+    uint32_t lastSwapchainImageIndex{0};
 
     uint32_t getSwapchainImageIndex(VkDevice device);
 
