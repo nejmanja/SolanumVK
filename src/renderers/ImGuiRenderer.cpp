@@ -86,12 +86,12 @@ void ImGuiRenderer::prepareFrame(double deltaTime) {
 
 
 void ImGuiRenderer::setupResources(const CommandManager &cmd) {
-    colorAttachment.imageView = getOutput()->getImageView();
+    colorAttachment.imageView = getOutputImage()->getImageView();
     renderingInfo.renderArea = VkRect2D{
-        VkOffset2D{0, 0}, {getOutput()->getExtent().width, getOutput()->getExtent().height}
+        VkOffset2D{0, 0}, {getOutputImage()->getExtent().width, getOutputImage()->getExtent().height}
     };
 
-    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    getOutputImage()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 }
 
 void ImGuiRenderer::draw(const CommandManager &cmd) {

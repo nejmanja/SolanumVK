@@ -10,10 +10,10 @@
 
 class Renderer {
 public:
-    Renderer(const VulkanContext &vulkanContext, const uint32_t numInputs,
-             const std::vector<ImageBindingDescription> &inputDescriptions, const uint32_t numOutputs,
+    Renderer(const VulkanContext &vulkanContext,
+             const std::vector<ImageBindingDescription> &inputDescriptions,
              const std::vector<ImageBindingDescription> &outputDescriptions)
-        : Renderer(vulkanContext, numInputs, numOutputs) {
+        : Renderer(vulkanContext, inputDescriptions.size(), outputDescriptions.size()) {
         this->inputDescriptions = inputDescriptions;
         this->outputDescriptions = outputDescriptions;
     }

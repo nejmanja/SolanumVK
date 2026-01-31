@@ -32,12 +32,12 @@ ComputeRenderer::~ComputeRenderer() {
 
 void ComputeRenderer::initialize() {
     DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                 getOutput()->getImageView(),
+                                 getOutputImage()->getImageView(),
                                  VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void ComputeRenderer::setupResources(const CommandManager &cmd) {
-    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
+    getOutputImage()->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
     pipeline->bind(cmd.get());
     pipeline->bindPushConstants(&camera->getLook(), sizeof(glm::vec3));

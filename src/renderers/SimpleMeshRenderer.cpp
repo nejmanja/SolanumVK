@@ -37,18 +37,18 @@ SimpleMeshRenderer::~SimpleMeshRenderer() {
 }
 
 void SimpleMeshRenderer::initialize() {
-    viewport.width = static_cast<float>(getOutput()->getExtent().width);
-    viewport.height = static_cast<float>(getOutput()->getExtent().height);
+    viewport.width = static_cast<float>(getOutputImage()->getExtent().width);
+    viewport.height = static_cast<float>(getOutputImage()->getExtent().height);
 
-    scissor.extent.width = getOutput()->getExtent().width;
-    scissor.extent.height = getOutput()->getExtent().height;
+    scissor.extent.width = getOutputImage()->getExtent().width;
+    scissor.extent.height = getOutputImage()->getExtent().height;
 
     MeshUploader::uploadMesh(vulkanContext, meshData);
     memoryManager.registerResource(meshData);
 }
 
 void SimpleMeshRenderer::draw(const CommandManager &cmd) {
-    auto *output = getOutput();
+    auto *output = getOutputImage();
 
     VkRenderingAttachmentInfo colorAttachmentInfo{
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -191,7 +191,7 @@ void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescript
 void SimpleMeshRenderer::setupResources(const CommandManager &cmd) {
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
     depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    getOutputImage()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 }
 
 void SimpleMeshRenderer::prepareFrame(double deltaTime) {
