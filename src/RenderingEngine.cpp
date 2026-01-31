@@ -74,7 +74,7 @@ void RenderingEngine::draw(double deltaTime) {
     // of a new frame while the last one is being presented,
     // however, more parallelism can be achieved if the sync primitives are more decoupled
     // with the tradeoff of allocating per-swapchain-image copies of resources (such as the g buffer)
-    const auto renderFence = syncManager.getRenderFence(lastSwapchainImageIndex);
+    const auto renderFence = syncManager.getRenderFence(getFrameIndex());
 
     // Wait for previous render to finish
     vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
@@ -83,10 +83,8 @@ void RenderingEngine::draw(double deltaTime) {
 
     // Acquire the new swapchain image index.
     const auto swapchainImageIndex = getSwapchainImageIndex(device);
-    const auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
-    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
-
-    lastSwapchainImageIndex = swapchainImageIndex;
+    const auto renderSemaphore = syncManager.getRenderSemaphore(getFrameIndex());
+    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(getFrameIndex());
 
     currentSwapchainTarget = vulkanContext.getSwapchainImages()[swapchainImageIndex];
 
@@ -205,23 +203,16 @@ void RenderingEngine::createSceneDescriptor() {
 }
 
 uint32_t RenderingEngine::getSwapchainImageIndex(VkDevice device) {
-    auto swapchainImageAcquiredSemaphore = syncManager.getRecycledSemaphore();
     uint32_t swapchainImageIndex;
     vkAcquireNextImageKHR(
         device,
         vulkanContext.getSwapchain().swapchain,
         UINT64_MAX,
         // Signal the present semaphore, so that drawing commands know that an image was acquired.
-        swapchainImageAcquiredSemaphore,
+        syncManager.getSwapchainImageAcquiredSemaphore(getFrameIndex()),
         // No fences needed to signal, the CPU waits for the render commands to get issued.
         nullptr,
         &swapchainImageIndex);
-
-    auto oldImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(swapchainImageIndex);
-    if (oldImageAcquiredSemaphore != VK_NULL_HANDLE) {
-        syncManager.emplaceRecycledSemaphore(oldImageAcquiredSemaphore);
-    }
-    syncManager.setSwapchainImageAcuqiredSemaphore(swapchainImageIndex, swapchainImageAcquiredSemaphore);
 
     return swapchainImageIndex;
 }
