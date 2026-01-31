@@ -20,6 +20,7 @@ public:
     [[nodiscard]] const VkInstance &getInstance() const { return instance; }
     [[nodiscard]] const VmaAllocator &getVmaAllocator() const { return vmaAllocator; }
     [[nodiscard]] const Swapchain &getSwapchain() const { return swapchain; }
+    [[nodiscard]] std::vector<ImageResource> &getSwapchainImages() { return swapchain.images; }
     [[nodiscard]] VkDevice getDevice() const { return device; }
     [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const { return physicalDevice; }
 

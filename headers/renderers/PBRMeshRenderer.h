@@ -7,13 +7,21 @@ class PBRMeshRenderer : public Renderer {
 public:
     explicit PBRMeshRenderer(const VulkanContext &vulkanContext);
 
-    void execute(CommandManager &cmd) override;
+    void prepareFrame(double deltaTime) override {
+    }
+
+protected:
+    void initialize() override {
+    }
+
+    void setupResources(const CommandManager &cmd) override {
+    }
+
+    void draw(const CommandManager &cmd) override {
+    }
 
 private:
     void buildPipeline();
-
-    void setup(double deltaTime) override {
-    };
 
     UVMappedMeshData meshData;
 

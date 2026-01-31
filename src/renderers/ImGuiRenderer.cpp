@@ -76,7 +76,7 @@ ImGuiRenderer::~ImGuiRenderer() {
     vkDestroyDescriptorPool(vulkanContext.getDevice(), imguiPool, nullptr);
 }
 
-void ImGuiRenderer::setup(double deltaTime) {
+void ImGuiRenderer::prepareFrame(double deltaTime) {
     ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();
 
@@ -84,15 +84,18 @@ void ImGuiRenderer::setup(double deltaTime) {
     ImGui::Render();
 }
 
-void ImGuiRenderer::execute(CommandManager &cmd) {
+
+void ImGuiRenderer::setupResources(const CommandManager &cmd) {
     colorAttachment.imageView = getOutput()->getImageView();
     renderingInfo.renderArea = VkRect2D{
         VkOffset2D{0, 0}, {getOutput()->getExtent().width, getOutput()->getExtent().height}
     };
 
-    const auto cmdBuffer = cmd.get();
-
     getOutput()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+}
+
+void ImGuiRenderer::draw(const CommandManager &cmd) {
+    const auto cmdBuffer = cmd.get();
 
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
 

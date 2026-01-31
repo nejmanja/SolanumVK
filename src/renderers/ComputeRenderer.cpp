@@ -30,24 +30,20 @@ ComputeRenderer::~ComputeRenderer() {
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 }
 
-void ComputeRenderer::execute(CommandManager &cmd) {
+void ComputeRenderer::initialize() {
+    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                 getOutput()->getImageView(),
+                                 VK_IMAGE_LAYOUT_GENERAL);
+}
+
+void ComputeRenderer::setupResources(const CommandManager &cmd) {
     getOutput()->transition(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
     pipeline->bind(cmd.get());
     pipeline->bindPushConstants(&camera->getLook(), sizeof(glm::vec3));
     pipeline->bindDescriptorSets(1, &descriptorSet);
-    pipeline->execute();
 }
 
-void ComputeRenderer::setup(double deltaTime) {
-    // This is a really silly hack to work around the fact that there's only one descriptor set
-    // when there should be as many as there are swapchain images
-    // TODO: Figure out a system to manage descriptor sets per-swapchain-image
-    if (!firstRun) return;
-
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                 getOutput()->getImageView(),
-                                 VK_IMAGE_LAYOUT_GENERAL);
-
-    firstRun = false;
+void ComputeRenderer::draw(const CommandManager &cmd) {
+    pipeline->execute();
 }

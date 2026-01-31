@@ -11,8 +11,8 @@
 class Renderer {
 public:
     Renderer(const VulkanContext &vulkanContext, const uint32_t numInputs,
-             const std::vector<ImageBindingDescription> inputDescriptions, const uint32_t numOutputs,
-             const std::vector<ImageBindingDescription> outputDescriptions)
+             const std::vector<ImageBindingDescription> &inputDescriptions, const uint32_t numOutputs,
+             const std::vector<ImageBindingDescription> &outputDescriptions)
         : Renderer(vulkanContext, numInputs, numOutputs) {
         this->inputDescriptions = inputDescriptions;
         this->outputDescriptions = outputDescriptions;
@@ -25,20 +25,33 @@ public:
     virtual ~Renderer() = default;
 
     // Records and submits rendering commands to the GPU.
-    virtual void execute(CommandManager &cmd) = 0;
+    void execute(CommandManager &cmd) {
+        setupResources(cmd);
+        draw(cmd);
+    }
 
-    void setup(std::vector<ImageResource *> inputs, std::vector<ImageResource *> outputs, double deltaTime) {
+    // Used once at the beginning of lifetime - setting I/O is done here
+    // TODO: pass global scene data here as well
+    void initialize(std::vector<ImageResource *> inputs, std::vector<ImageResource *> outputs) {
         setInputImages(inputs);
         setOutputImages(outputs);
 
-        setup(deltaTime);
+        initialize();
     };
 
-protected:
-    // Used before recording commands. May include setup for descriptor sets and push constants.
-    // Sets the final render target to which the renderer should write.
-    virtual void setup(double deltaTime) = 0;
+    // Used for preparing the frame before rendering - per-frame resources should be set up in overrides
+    // delta-time can be used for updating any internal time-based state.
+    virtual void prepareFrame(double deltaTime) = 0;
 
+protected:
+    // Used once at the beginning of lifetime - "bind-once" resources should be set up in overrides
+    virtual void initialize() = 0;
+
+    // Setup resources needed for the frame - write & bind the per-renderer state and global scene state
+    virtual void setupResources(const CommandManager &cmd) = 0;
+
+    // Write & bind per-draw state (if applicable) and do the actual rendering
+    virtual void draw(const CommandManager &cmd) = 0;
 
     const VulkanContext &vulkanContext;
 

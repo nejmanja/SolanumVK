@@ -17,6 +17,8 @@ class RenderingEngine {
 public:
     RenderingEngine();
 
+    void initialize();
+
     void exec();
 
     ~RenderingEngine();
@@ -34,6 +36,7 @@ private:
     CommandManager commandManager;
     PresentSyncManager syncManager;
     AllocatedImageResource renderTarget;
+    ImageResource currentSwapchainTarget;
     ScopedVkMemoryManager memoryManager;
 
     // Camera

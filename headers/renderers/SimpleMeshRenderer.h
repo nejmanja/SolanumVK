@@ -17,11 +17,8 @@ public:
 
     ~SimpleMeshRenderer() override;
 
-
-    void execute(CommandManager &cmd) override;
-
 private:
-    void setup(double deltaTime) override;
+    void initialize() override;
 
     void createDepthTarget();
 
@@ -29,6 +26,14 @@ private:
 
     void buildPipeline(VkDescriptorSetLayout sceneDescriptorLayout);
 
+protected:
+    void setupResources(const CommandManager &cmd) override;
+
+    void prepareFrame(double deltaTime) override;
+
+    void draw(const CommandManager &cmd) override;
+
+private:
     const VkDescriptorSet sceneDescriptorSet;
 
     VkViewport viewport;

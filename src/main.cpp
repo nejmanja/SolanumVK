@@ -1,10 +1,10 @@
 #include "RenderingEngine.h"
 
-int main()
-{
-	RenderingEngine engine;
+int main() {
+    RenderingEngine engine;
 
-	engine.exec();
+    engine.initialize();
+    engine.exec();
 
-	return 0;
+    return 0;
 }

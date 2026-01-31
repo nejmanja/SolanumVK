@@ -10,10 +10,16 @@ public:
 
     ~ImGuiRenderer() override;
 
-    void execute(CommandManager &cmd) override;
+    void prepareFrame(double deltaTime) override;
+
+protected:
+    void setupResources(const CommandManager &cmd) override;
+
+    void draw(const CommandManager &cmd) override;
 
 private:
-    void setup(double deltaTime) override;
+    void initialize() override {
+    }
 
     VkDescriptorSetLayout descriptorSetLayout{};
     VkDescriptorSet descriptorSet{};

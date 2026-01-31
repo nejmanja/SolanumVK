@@ -13,8 +13,6 @@ PBRMeshRenderer::PBRMeshRenderer(const VulkanContext &vulkanContext)
     std::cout << "UV Mesh data count: " + std::to_string(meshData.getVertexCount()) << std::endl;
 }
 
-void PBRMeshRenderer::execute(CommandManager &cmd) {
-}
 
 void PBRMeshRenderer::buildPipeline() {
     GraphicsPipelineBuilder pipelineBuilder(vulkanContext);

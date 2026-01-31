@@ -26,8 +26,6 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
       }, scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}},
       memoryManager{vulkanContext} {
     meshData = MeshLoader::loadSimpleMesh("../../assets/greenMonke.glb");
-    MeshUploader::uploadMesh(vulkanContext, meshData);
-    memoryManager.registerResource(meshData);
 
     createDepthTarget();
     createDescriptors();
@@ -38,18 +36,18 @@ SimpleMeshRenderer::~SimpleMeshRenderer() {
     delete depthTarget;
 }
 
-void SimpleMeshRenderer::setup(double deltaTime) {
-    transform.model = glm::rotate(transform.model, (float) deltaTime, glm::vec3{0.0f, 1.0f, 0.0f});
-    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
-
+void SimpleMeshRenderer::initialize() {
     viewport.width = static_cast<float>(getOutput()->getExtent().width);
     viewport.height = static_cast<float>(getOutput()->getExtent().height);
 
     scissor.extent.width = getOutput()->getExtent().width;
     scissor.extent.height = getOutput()->getExtent().height;
+
+    MeshUploader::uploadMesh(vulkanContext, meshData);
+    memoryManager.registerResource(meshData);
 }
 
-void SimpleMeshRenderer::execute(CommandManager &cmd) {
+void SimpleMeshRenderer::draw(const CommandManager &cmd) {
     auto *output = getOutput();
 
     VkRenderingAttachmentInfo colorAttachmentInfo{
@@ -83,8 +81,6 @@ void SimpleMeshRenderer::execute(CommandManager &cmd) {
 
     const auto cmdBuffer = cmd.get();
 
-    depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-    output->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
     pipeline->bind(cmdBuffer);
@@ -190,4 +186,14 @@ void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescript
     builder.addDescriptorSetLayout(transformUniformLayout);
 
     pipeline = builder.build();
+}
+
+void SimpleMeshRenderer::setupResources(const CommandManager &cmd) {
+    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
+    depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    getOutput()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+}
+
+void SimpleMeshRenderer::prepareFrame(double deltaTime) {
+    transform.model = glm::rotate(transform.model, static_cast<float>(deltaTime), glm::vec3{0.0f, 1.0f, 0.0f});
 }

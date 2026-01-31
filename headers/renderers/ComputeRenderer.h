@@ -13,13 +13,17 @@ public:
 
     ~ComputeRenderer() override;
 
-    void execute(CommandManager &cmd) override;
+    void prepareFrame(double deltaTime) override {
+    }
+
+protected:
+    void initialize() override;
+
+    void setupResources(const CommandManager &cmd) override;
+
+    void draw(const CommandManager &cmd) override;
 
 private:
-    bool firstRun = true;
-
-    void setup(double deltaTime) override;
-
     // Pipeline with which rendering will happen
     std::unique_ptr<ComputePipeline> pipeline;
 
