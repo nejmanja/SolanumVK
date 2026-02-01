@@ -6,16 +6,13 @@
 
 class PresentSyncManager {
 public:
-    PresentSyncManager(VkDevice device, uint32_t frameCount);
+    PresentSyncManager(VkDevice device, uint32_t frameCount, uint32_t swapchainImageCount);
 
     ~PresentSyncManager();
 
-    const VkSemaphore getRecycledSemaphore();
 
-    void emplaceRecycledSemaphore(VkSemaphore semaphore) { recycledSemaphores.push_back(semaphore); }
-
-    [[nodiscard]] VkSemaphore getRenderSemaphore(const uint32_t frameIndex) const {
-        return syncPrimitives[frameIndex].renderSemaphore;
+    [[nodiscard]] VkSemaphore getRenderSemaphore(const uint32_t swapchainImageIndex) const {
+        return renderSemaphores[swapchainImageIndex];
     }
 
     [[nodiscard]] VkSemaphore getSwapchainImageAcquiredSemaphore(const uint32_t frameIndex) const {
@@ -34,10 +31,10 @@ private:
     VkDevice device;
 
     struct PresentSyncPrimitives {
-        VkSemaphore swapchainSemaphore, renderSemaphore;
+        VkSemaphore swapchainSemaphore;
         VkFence renderFence;
     };
 
     std::vector<PresentSyncPrimitives> syncPrimitives;
-    std::vector<VkSemaphore> recycledSemaphores;
+    std::vector<VkSemaphore> renderSemaphores;
 };

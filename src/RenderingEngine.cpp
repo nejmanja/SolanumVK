@@ -1,5 +1,7 @@
 #include "RenderingEngine.h"
 
+#include <iostream>
+
 #include "WindowBridgeSDL.h"
 #include "WindowBridgeGLFW.h"
 
@@ -12,13 +14,14 @@
 #include "DescriptorLayoutBuilder.h"
 #include "PBRMeshRenderer.h"
 #include "SimpleMeshRenderer.h"
+#include "SolanumConstants.h"
 
 RenderingEngine::RenderingEngine()
     : window(std::make_unique<WindowBridgeGLFW>(false)),
       vulkanContext(*window),
       commandManager(vulkanContext.getDevice(), vulkanContext.getQueueFamily(VulkanContext::QueueType::Graphics),
-                     vulkanContext.getSwapchain().framesInFlight),
-      syncManager(vulkanContext.getDevice(), vulkanContext.getSwapchain().framesInFlight),
+                     SolVK::numFramesInFlight),
+      syncManager(vulkanContext.getDevice(), SolVK::numFramesInFlight, vulkanContext.getSwapchain().numberOfImages),
       renderTarget(createRenderTarget(vulkanContext)),
       memoryManager(vulkanContext),
       imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
@@ -75,6 +78,7 @@ void RenderingEngine::draw(double deltaTime) {
     // however, more parallelism can be achieved if the sync primitives are more decoupled
     // with the tradeoff of allocating per-swapchain-image copies of resources (such as the g buffer)
     const auto renderFence = syncManager.getRenderFence(getFrameIndex());
+    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(getFrameIndex());
 
     // Wait for previous render to finish
     vkWaitForFences(device, 1, &renderFence, VK_TRUE, UINT64_MAX);
@@ -82,10 +86,11 @@ void RenderingEngine::draw(double deltaTime) {
     vkResetFences(device, 1, &renderFence);
 
     // Acquire the new swapchain image index.
-    const auto swapchainImageIndex = getSwapchainImageIndex(device);
-    const auto renderSemaphore = syncManager.getRenderSemaphore(getFrameIndex());
-    const auto swapchainImageAcquiredSemaphore = syncManager.getSwapchainImageAcquiredSemaphore(getFrameIndex());
-
+    const auto swapchainImageIndex = getSwapchainImageIndex(vulkanContext.getDevice());
+    // The render semaphore is synced per-swapchain-image-index
+    // because the swapchain image is what's being signaled for presenting.
+    // This way the frames-in-flight mechanism is completely decoupled from the swapchain!
+    const auto renderSemaphore = syncManager.getRenderSemaphore(swapchainImageIndex);
     currentSwapchainTarget = vulkanContext.getSwapchainImages()[swapchainImageIndex];
 
     // ===============================================================================================================

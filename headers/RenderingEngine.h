@@ -12,6 +12,7 @@
 #include "ScopedVkMemoryManager.h"
 #include "SceneDescriptor.h"
 #include "Camera.h"
+#include "SolanumConstants.h"
 
 class RenderingEngine {
 public:
@@ -57,7 +58,7 @@ private:
     std::unique_ptr<SimpleRenderer> imGuiRenderer;
 
     uint32_t frameCounter{0};
-    [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % vulkanContext.getSwapchain().framesInFlight; }
+    [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % SolVK::numFramesInFlight; }
 
     uint32_t getSwapchainImageIndex(VkDevice device);
 

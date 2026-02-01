@@ -143,7 +143,7 @@ void VulkanContext::createSwapchain(VkExtent2D windowExtent) {
         swapchain.images.push_back(imageResource);
     }
 
-    swapchain.framesInFlight = swapchain.images.size();
+    swapchain.numberOfImages = swapchain.images.size();
 }
 
 void VulkanContext::createVmaAllocator() {
