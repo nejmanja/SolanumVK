@@ -9,7 +9,7 @@ void MeshUploader::uploadMesh(const VulkanContext &vulkanContext, MeshData &mesh
     const auto vertexBuffer = BufferAllocator::allocateBuffer(vulkanContext, vertexBufferSize,
                                                               VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                                                               VMA_MEMORY_USAGE_CPU_TO_GPU);
-    BufferAllocator::copyBufferData(vulkanContext, meshData.getRawVertexData(), vertexBufferSize, vertexBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, meshData.generateRawVertexData(), vertexBufferSize, vertexBuffer);
 
     const auto indexBuffer = BufferAllocator::allocateBuffer(vulkanContext, indexBufferSize,
                                                              VK_BUFFER_USAGE_INDEX_BUFFER_BIT,

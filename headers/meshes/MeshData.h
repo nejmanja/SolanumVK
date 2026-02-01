@@ -1,45 +1,73 @@
 #pragma once
 
-#include <utility>
+#include <iostream>
+#include <map>
 #include <vector>
 
-#include "MeshDataFormatDescriptor.h"
 #include "BufferResources.h"
+#include "GPUMesh.h"
+#include "VertexAttributes.h"
 
 class MeshData {
 public:
-    virtual ~MeshData() = default;
+    explicit MeshData(VertexAttributes attributes);
 
-    MeshData() = default;
+    ~MeshData();
 
-    void setFormatDescriptor(MeshDataFormatDescriptor descriptor) { formatDescriptor = std::move(descriptor); }
-    [[nodiscard]] const MeshDataFormatDescriptor &getFormatDescriptor() const { return formatDescriptor; }
-
-    void setIndices(const std::vector<uint32_t> &indices) { this->indices = {indices}; }
     [[nodiscard]] const std::vector<uint32_t> &getIndices() const { return indices; }
 
-    [[nodiscard]] virtual size_t getVertexSize() const = 0;
+    [[nodiscard]] size_t getVertexSize() const { return vertexSize; }
 
-    [[nodiscard]] virtual size_t getVertexCount() const = 0;
+    [[nodiscard]] size_t getVertexCount() const { return vertexCount; }
 
-    virtual void setVertexCount(size_t vertexCount) { this->vertexCount = vertexCount; }
+    void setVertexCount(size_t vertexCount);
 
-    [[nodiscard]] virtual const void *getRawVertexData() const = 0;
+    [[nodiscard]] GPUMesh MeshData::uploadToGPU() const;
+
 
     [[nodiscard]] AllocatedBuffer getVertexBuffer() const { return vertexBuffer; }
     [[nodiscard]] AllocatedBuffer getIndexBuffer() const { return indexBuffer; }
 
-    void setBuffers(const AllocatedBuffer &vertexBuffer, const AllocatedBuffer &indexBuffer) {
-        this->vertexBuffer = vertexBuffer;
-        this->indexBuffer = indexBuffer;
-    }
-
-protected:
-    size_t vertexCount;
+    template<typename T>
+    void setVertexAttributeData(VertexAttributes attribute, std::vector<T> data);
 
 private:
+    void calculateBindingStridesAndOffsets(VertexAttributes attribs);
+
+    void allocateBindingBuffers();
+
+    uint32_t vertexSize;
+    uint64_t vertexCount;
+    VertexAttributes attributes{};
+    VertexAttributeDescriptors attributeDescriptors{};
+
+    static constexpr uint32_t MaxBindings = 4;
+
+    // Raw vertex data, per-binding!
+    std::array<void *, MaxBindings> rawVertexBindingData{};
+    // strides of individual bindings
+    std::array<uint32_t, MaxBindings> bindingStrides{};
+    // offsets of individual attributes inside a binding
+    std::map<VertexAttributes, uint32_t> bindingOffsets{};
     AllocatedBuffer vertexBuffer;
     AllocatedBuffer indexBuffer;
     std::vector<uint32_t> indices;
-    MeshDataFormatDescriptor formatDescriptor;
 };
+
+template<typename T>
+void MeshData::setVertexAttributeData(VertexAttributes attribute, std::vector<T> data) {
+    const auto descriptor = attributeDescriptors.getDescriptor(attribute);
+    const auto binding = descriptor.getBinding();
+    const auto elementSize = descriptor.getSize();
+    const auto stride = bindingStrides[binding];
+    const auto offset = bindingOffsets[attribute];
+
+    if (data.size() * sizeof(T) != elementSize * vertexCount) {
+        std::cout << "ERROR: Provided raw data for attribute doesn't match expected size!" << std::endl;
+        abort();
+    }
+
+    for (uint64_t i = 0; i < data.size(); ++i) {
+        memcpy(rawVertexBindingData[i * stride + offset], data[i], elementSize);
+    }
+}

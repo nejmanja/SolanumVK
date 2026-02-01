@@ -2,7 +2,7 @@
 
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
-#include "MeshDataFormatDescriptor.h"
+#include "VertexAttributes.h"
 
 #include <vector>
 #include <memory>
