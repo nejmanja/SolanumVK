@@ -3,17 +3,19 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <glm/vec3.hpp>
 
-#include "BufferResources.h"
-#include "GPUMesh.h"
+#include "SolanumConstants.h"
 #include "VertexAttributes.h"
+#include "VertexBuffers.h"
 
 class MeshData {
 public:
     explicit MeshData(VertexAttributes attributes);
 
-    ~MeshData();
+    ~MeshData() = default;
 
+    void setIndices(const std::vector<uint32_t> &indices) { this->indices = {indices}; }
     [[nodiscard]] const std::vector<uint32_t> &getIndices() const { return indices; }
 
     [[nodiscard]] size_t getVertexSize() const { return vertexSize; }
@@ -22,36 +24,34 @@ public:
 
     void setVertexCount(size_t vertexCount);
 
-    [[nodiscard]] GPUMesh MeshData::uploadToGPU() const;
-
-
-    [[nodiscard]] AllocatedBuffer getVertexBuffer() const { return vertexBuffer; }
-    [[nodiscard]] AllocatedBuffer getIndexBuffer() const { return indexBuffer; }
+    [[nodiscard]] const VertexBuffer &getRawVertexBindingData() const;
 
     template<typename T>
     void setVertexAttributeData(VertexAttributes attribute, std::vector<T> data);
+
+    // void setVertexAttributeData(VertexAttributes attribute, std::vector<glm::vec3> data);
+
+    [[nodiscard]] uint32_t getNumBindings() const { return numBindings; }
 
 private:
     void calculateBindingStridesAndOffsets(VertexAttributes attribs);
 
     void allocateBindingBuffers();
 
-    uint32_t vertexSize;
-    uint64_t vertexCount;
+    uint32_t numBindings{};
+    uint32_t vertexSize{};
+    uint64_t vertexCount{};
     VertexAttributes attributes{};
     VertexAttributeDescriptors attributeDescriptors{};
 
-    static constexpr uint32_t MaxBindings = 4;
-
+    // TODO: Move all of this stuff into VertexBuffer!
     // Raw vertex data, per-binding!
-    std::array<void *, MaxBindings> rawVertexBindingData{};
+    VertexBuffer rawVertexBuffer{};
     // strides of individual bindings
-    std::array<uint32_t, MaxBindings> bindingStrides{};
+    std::array<uint32_t, SolVK::maxBindings> bindingStrides{};
     // offsets of individual attributes inside a binding
     std::map<VertexAttributes, uint32_t> bindingOffsets{};
-    AllocatedBuffer vertexBuffer;
-    AllocatedBuffer indexBuffer;
-    std::vector<uint32_t> indices;
+    std::vector<uint32_t> indices{};
 };
 
 template<typename T>
@@ -67,7 +67,9 @@ void MeshData::setVertexAttributeData(VertexAttributes attribute, std::vector<T>
         abort();
     }
 
+    auto *buffer = static_cast<uint8_t *>(rawVertexBuffer.getData(binding));
+
     for (uint64_t i = 0; i < data.size(); ++i) {
-        memcpy(rawVertexBindingData[i * stride + offset], data[i], elementSize);
+        memcpy(buffer + i * stride + offset, &data[i], elementSize);
     }
 }

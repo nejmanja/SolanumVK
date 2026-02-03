@@ -1,7 +1,5 @@
 #include "RenderingEngine.h"
 
-#include <iostream>
-
 #include "WindowBridgeSDL.h"
 #include "WindowBridgeGLFW.h"
 
@@ -175,7 +173,7 @@ void RenderingEngine::processInput() {
         camera.changeSpeed(scrollOffset.y);
 
     sceneDescriptor.view = camera.getView();
-    BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), 0, sceneUniformBuffer);
 }
 
 void RenderingEngine::createSceneDescriptor() {
@@ -201,7 +199,7 @@ void RenderingEngine::createSceneDescriptor() {
         .sunDirection = glm::normalize(glm::vec3{0.0f, -1.0f, -1.0f}),
         .sunColor = glm::vec3{1.0f, 0.9f, 0.55f}
     };
-    BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), sceneUniformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), 0, sceneUniformBuffer);
 
     DescriptorWriter::writeBuffer(vulkanContext, sceneDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                   sceneUniformBuffer.buffer, sizeof(SceneDescriptor));

@@ -6,11 +6,13 @@
 #include "MeshLoader.h"
 
 PBRMeshRenderer::PBRMeshRenderer(const VulkanContext &vulkanContext)
-    : Renderer(vulkanContext, 0, 1) {
+    : Renderer(vulkanContext, 0, 1),
+      meshData(MeshLoader::loadMesh(
+          VertexAttributes::Position | VertexAttributes::Normal | VertexAttributes::UV0,
+          "../../assets/textureMappedTorusKnot.glb")) {
     buildPipeline();
-    meshData = MeshLoader::loadUVMappedMesh("../../assets/textureMappedTorusKnot.glb");
 
-    std::cout << "UV Mesh data count: " + std::to_string(meshData.getVertexCount()) << std::endl;
+    std::cout << "UV Mesh data count: " + std::to_string(meshData->getVertexCount()) << std::endl;
 }
 
 

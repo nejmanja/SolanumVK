@@ -7,7 +7,6 @@
 
 #include <iostream>
 
-#include "UVMappedMeshData.h"
 
 std::vector<glm::vec3> MeshLoader::readPositions(fastgltf::Expected<fastgltf::Asset> &asset,
                                                  fastgltf::Primitive &primitive) {
@@ -86,7 +85,8 @@ std::vector<glm::vec2> MeshLoader::readUVs(fastgltf::Expected<fastgltf::Asset> &
     return uvs;
 }
 
-SimpleMeshData MeshLoader::loadSimpleMesh(const std::filesystem::path &path) {
+
+MeshData *MeshLoader::loadMesh(const VertexAttributes desiredAttributes, const std::filesystem::path &path) {
     fastgltf::Parser parser;
 
     auto dataBuffer = fastgltf::GltfDataBuffer::FromPath(path);
@@ -108,74 +108,34 @@ SimpleMeshData MeshLoader::loadSimpleMesh(const std::filesystem::path &path) {
         std::vector<glm::vec3> colors{};
         std::vector<glm::vec3> normals{};
 
-        SimpleMeshData meshData{};
-
         for (auto &&primitive: mesh.primitives) {
             // indices
             indices = readIndices(asset, primitive);
             // positions
-            positions = readPositions(asset, primitive);
+            if (hasAllAttributes(desiredAttributes, VertexAttributes::Position))
+                positions = readPositions(asset, primitive);
             // normals
-            normals = readNormals(asset, primitive);
+            if (hasAllAttributes(desiredAttributes, VertexAttributes::Normal))
+                normals = readNormals(asset, primitive);
             // vertex colors
-            colors = readColors(asset, primitive);
+            if (hasAllAttributes(desiredAttributes, VertexAttributes::Color))
+                colors = readColors(asset, primitive);
         }
 
-        meshData.setIndices(indices);
-        meshData.setVertexCount(positions.size());
-        meshData.setPositions(positions);
-        meshData.setColors(colors);
-        meshData.setNormals(normals);
+        auto *meshData = new MeshData(desiredAttributes);
+
+        meshData->setVertexCount(positions.size());
+        if (hasAllAttributes(desiredAttributes, VertexAttributes::Position))
+            meshData->setVertexAttributeData(VertexAttributes::Position, positions);
+        if (hasAllAttributes(desiredAttributes, VertexAttributes::Normal))
+            meshData->setVertexAttributeData(VertexAttributes::Normal, normals);
+        if (hasAllAttributes(desiredAttributes, VertexAttributes::Color))
+            meshData->setVertexAttributeData(VertexAttributes::Color, colors);
+
+        meshData->setIndices(indices);
 
         return meshData;
     }
 
-    return SimpleMeshData{};
-}
-
-UVMappedMeshData MeshLoader::loadUVMappedMesh(const std::filesystem::path &path) {
-    fastgltf::Parser parser;
-
-    auto dataBuffer = fastgltf::GltfDataBuffer::FromPath(path);
-
-    if (dataBuffer.error() != fastgltf::Error::None) {
-        std::cout << "Failed to load mesh from path " << path << std::endl;
-        abort();
-    }
-
-    auto asset = parser.loadGltf(dataBuffer.get(), path.parent_path());
-    if (auto error = asset.error(); error != fastgltf::Error::None) {
-        std::cout << "Failed to load mesh data from file " << path << std::endl;
-        abort();
-    }
-
-    for (auto &&mesh: asset->meshes) {
-        std::vector<uint32_t> indices{};
-        std::vector<glm::vec3> positions{};
-        std::vector<glm::vec2> uv0{};
-        std::vector<glm::vec3> normals{};
-
-        UVMappedMeshData meshData{};
-
-        for (auto &&primitive: mesh.primitives) {
-            // indices
-            indices = readIndices(asset, primitive);
-            // positions
-            positions = readPositions(asset, primitive);
-            // normals
-            normals = readNormals(asset, primitive);
-            // uvs
-            uv0 = readUVs(asset, primitive, 0);
-        }
-
-        meshData.setIndices(indices);
-        meshData.setVertexCount(positions.size());
-        meshData.setPositions(positions);
-        meshData.setUV0(uv0);
-        meshData.setNormals(normals);
-
-        return meshData;
-    }
-
-    return UVMappedMeshData{};
+    return nullptr;
 }

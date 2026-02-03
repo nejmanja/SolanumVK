@@ -1,11 +1,12 @@
 #pragma once
 
+#include "GPUMesh.h"
 #include "MeshData.h"
 #include "VulkanContext.h"
 
 class MeshUploader {
 public:
-    static void uploadMesh(const VulkanContext &vulkanContext, MeshData &meshData);
+    static GPUMesh uploadMesh(const VulkanContext &vulkanContext, const MeshData *meshData);
 
     MeshUploader() = delete;
 };

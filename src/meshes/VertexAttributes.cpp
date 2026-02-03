@@ -8,16 +8,17 @@ VertexAttributeDescriptors::VertexAttributeDescriptors() {
     }
 
     // binding 0 - position, normal, tangent (all most likely transform in VS)
-    const auto binding0Attribs = VertexAttributes::Position | VertexAttributes::Normal | VertexAttributes::Tangent;
+    const auto binding0Attribs = VertexAttributes::Position | VertexAttributes::Normal | VertexAttributes::Tangent |
+                                 VertexAttributes::Color;
     setBinding(binding0Attribs, 0);
     setDimensionality(VertexAttributes::Position | VertexAttributes::Normal, 3);
     setDimensionality(VertexAttributes::Tangent, 4);
+    setDimensionality(VertexAttributes::Color, 3); // RGB
 
-    // binding 1 - UVs, Color
-    const auto binding1Attribs = VertexAttributes::Color | VertexAttributes::UV0 | VertexAttributes::UV1;
+    // binding 1 - UVs
+    const auto binding1Attribs = VertexAttributes::UV0 | VertexAttributes::UV1;
     setBinding(binding1Attribs, 1);
     setDimensionality(VertexAttributes::UV0 | VertexAttributes::UV1, 2);
-    setDimensionality(VertexAttributes::Color, 4); // RGBA
 }
 
 void VertexAttributeDescriptors::setBinding(VertexAttributes attributes, uint32_t binding) {

@@ -20,7 +20,8 @@ public:
         const VulkanContext &vulkanContext,
         const void *cpuData,
         size_t dataSize,
-        AllocatedBuffer buffer
+        size_t offset,
+        const AllocatedBuffer &buffer
     );
 
     BufferAllocator() = delete;

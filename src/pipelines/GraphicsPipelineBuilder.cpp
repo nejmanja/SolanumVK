@@ -4,54 +4,52 @@
 #include "VulkanUtils.h"
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder(const VulkanContext &vulkanContext)
-    : device(vulkanContext.getDevice())
-{
+    : device(vulkanContext.getDevice()) {
 }
 
-void GraphicsPipelineBuilder::resetDescriptorSetLayouts()
-{
+void GraphicsPipelineBuilder::resetDescriptorSetLayouts() {
     descriptorSetLayouts.clear();
 }
 
-void GraphicsPipelineBuilder::addVertexBinding(uint32_t binding, uint32_t stride, std::vector<VkVertexInputAttributeDescription> attributes)
-{
+void GraphicsPipelineBuilder::addVertexBinding(uint32_t binding, uint32_t stride,
+                                               std::vector<VkVertexInputAttributeDescription> attributes) {
     VkVertexInputBindingDescription bindingDescription{
         .binding = binding,
         .stride = stride,
-        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
+        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+    };
 
     bindingDescriptions.push_back(bindingDescription);
 
-    for (auto &&attribute : attributes)
-    {
+    for (auto &&attribute: attributes) {
         VkVertexInputAttributeDescription attributeDescription{
             .location = attribute.location,
             .binding = binding,
             .format = attribute.format,
-            .offset = attribute.offset};
+            .offset = attribute.offset
+        };
 
         attributeDescriptions.push_back(attributeDescription);
     }
 }
 
-void GraphicsPipelineBuilder::addVertexBinding(const VertexBinding &binding)
-{
-    bindingDescriptions.push_back(binding.createBindingDescription());
+// void GraphicsPipelineBuilder::addVertexBinding(const VertexBinding &binding)
+// {
+//     bindingDescriptions.push_back(binding.createBindingDescription());
+//
+//     for (auto &&attribute : binding.getAttributes())
+//     {
+//         attributeDescriptions.push_back(attribute.attributeDescription);
+//     }
+// }
 
-    for (auto &&attribute : binding.getAttributes())
-    {
-        attributeDescriptions.push_back(attribute.attributeDescription);
-    }
-}
-
-inline void GraphicsPipelineBuilder::resetVertexBindings()
-{
+inline void GraphicsPipelineBuilder::resetVertexBindings() {
     bindingDescriptions.clear();
     attributeDescriptions.clear();
 }
 
-void GraphicsPipelineBuilder::addShaderModule(const char *shaderPath, const char *entryPointName, VkShaderStageFlagBits stage)
-{
+void GraphicsPipelineBuilder::addShaderModule(const char *shaderPath, const char *entryPointName,
+                                              VkShaderStageFlagBits stage) {
     auto shaderModule = ShaderLoader::loadModule(device, shaderPath);
     VkPipelineShaderStageCreateInfo stageInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -65,8 +63,7 @@ void GraphicsPipelineBuilder::addShaderModule(const char *shaderPath, const char
     shaderStages.push_back(stageInfo);
 }
 
-void GraphicsPipelineBuilder::reset()
-{
+void GraphicsPipelineBuilder::reset() {
     resetDescriptorSetLayouts();
     resetPushConstantRanges();
 
@@ -76,37 +73,34 @@ void GraphicsPipelineBuilder::reset()
     stencilFormat = VK_FORMAT_UNDEFINED;
 }
 
-void GraphicsPipelineBuilder::resetShaderModules()
-{
-    for (auto &&shaderStage : shaderStages)
-    {
+void GraphicsPipelineBuilder::resetShaderModules() {
+    for (auto &&shaderStage: shaderStages) {
         vkDestroyShaderModule(device, shaderStage.module, nullptr);
     }
 
     shaderStages.clear();
 }
 
-void GraphicsPipelineBuilder::setColorBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op)
-{
+void GraphicsPipelineBuilder::setColorBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op) {
     colorBlendState.srcColorBlendFactor = src;
     colorBlendState.dstColorBlendFactor = dst;
     colorBlendState.colorBlendOp = op;
 }
 
-void GraphicsPipelineBuilder::setAlphaBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op)
-{
+void GraphicsPipelineBuilder::setAlphaBlendFunction(VkBlendFactor src, VkBlendFactor dst, VkBlendOp op) {
     colorBlendState.srcAlphaBlendFactor = src;
     colorBlendState.dstAlphaBlendFactor = dst;
     colorBlendState.alphaBlendOp = op;
 }
 
-std::unique_ptr<GraphicsPipeline> GraphicsPipelineBuilder::build()
-{
+std::unique_ptr<GraphicsPipeline> GraphicsPipelineBuilder::build() {
     // Assign intermediary state to the layout
     layoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
     layoutCreateInfo.pSetLayouts = layoutCreateInfo.setLayoutCount > 0 ? descriptorSetLayouts.data() : VK_NULL_HANDLE;
     layoutCreateInfo.pushConstantRangeCount = pushConstantRanges.size();
-    layoutCreateInfo.pPushConstantRanges = layoutCreateInfo.pushConstantRangeCount > 0 ? pushConstantRanges.data() : VK_NULL_HANDLE;
+    layoutCreateInfo.pPushConstantRanges = layoutCreateInfo.pushConstantRangeCount > 0
+                                               ? pushConstantRanges.data()
+                                               : VK_NULL_HANDLE;
 
     // Build the layout...
     VkPipelineLayout pipelineLayout{};
@@ -124,7 +118,7 @@ std::unique_ptr<GraphicsPipeline> GraphicsPipelineBuilder::build()
     pipelineCreateInfo.stageCount = shaderStages.size();
     pipelineCreateInfo.pStages = shaderStages.data();
 
-    renderingCreateInfo.colorAttachmentCount = (uint32_t)colorAttachmentFormats.size();
+    renderingCreateInfo.colorAttachmentCount = (uint32_t) colorAttachmentFormats.size();
     renderingCreateInfo.pColorAttachmentFormats = colorAttachmentFormats.data();
     renderingCreateInfo.depthAttachmentFormat = depthFormat;
     renderingCreateInfo.stencilAttachmentFormat = stencilFormat;

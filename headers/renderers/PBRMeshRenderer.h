@@ -1,7 +1,7 @@
 #pragma once
 #include "GraphicsPipeline.h"
+#include "MeshData.h"
 #include "Renderer.h"
-#include "UVMappedMeshData.h"
 
 class PBRMeshRenderer : public Renderer {
 public:
@@ -23,7 +23,7 @@ protected:
 private:
     void buildPipeline();
 
-    UVMappedMeshData meshData;
+    std::unique_ptr<MeshData> meshData;
 
     std::unique_ptr<GraphicsPipeline> pipeline;
 };

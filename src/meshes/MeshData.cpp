@@ -1,6 +1,6 @@
 #include "MeshData.h"
 
-#include <iostream>
+#include "BufferAllocator.h"
 
 void MeshData::setVertexCount(const uint64_t count) {
     if (vertexCount == 0) {
@@ -9,20 +9,18 @@ void MeshData::setVertexCount(const uint64_t count) {
     }
 }
 
-GPUMesh MeshData::uploadToGPU() const {
-    // concatenate all bindings
-    // send them into a VkBuffer
-    // send indices into another buffer
-    return GPUMesh{};
+const VertexBuffer &MeshData::getRawVertexBindingData() const {
+    return rawVertexBuffer;
 }
 
 
 void MeshData::calculateBindingStridesAndOffsets(VertexAttributes attribs) {
     vertexSize = 0;
-    for (uint32_t binding = 0; binding < MaxBindings; binding++) {
+    for (uint32_t binding = 0; binding < SolVK::maxBindings; binding++) {
         bindingStrides[binding] = 0;
     }
 
+    numBindings = 0;
     for (VertexAttributes attribute = VertexAttributes::Position;
          attribute != MaxValue;
          attribute = static_cast<VertexAttributes>(static_cast<uint32_t>(attribute) << 1)) {
@@ -38,28 +36,20 @@ void MeshData::calculateBindingStridesAndOffsets(VertexAttributes attribs) {
             // Update strides per-binding, and total vertex size, which is just the sum of all of these
             bindingStrides[binding] += attributeSize;
             vertexSize += attributeSize;
+
+            if (numBindings < binding + 1) numBindings = binding + 1;
         }
     }
 }
 
 void MeshData::allocateBindingBuffers() {
-    for (uint32_t i = 0; i < MaxBindings; i++) {
-        if (bindingStrides[i] > 0) {
-            rawVertexBindingData[i] = ::operator new(bindingStrides[i] * vertexCount);
-        } else {
-            rawVertexBindingData[i] = nullptr;
+    for (uint32_t binding = 0; binding < numBindings; binding++) {
+        if (bindingStrides[binding] > 0) {
+            rawVertexBuffer.setDataSize(binding, bindingStrides[binding] * vertexCount);
         }
     }
 }
 
 MeshData::MeshData(const VertexAttributes attributes) : attributes(attributes) {
     calculateBindingStridesAndOffsets(attributes);
-}
-
-MeshData::~MeshData() {
-    for (uint32_t i = 0; i < MaxBindings; i++) {
-        if (bindingStrides[i] > 0) {
-            ::operator delete(rawVertexBindingData[i]);
-        }
-    }
 }

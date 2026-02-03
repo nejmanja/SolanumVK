@@ -1,11 +1,21 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "BufferResources.h"
 
 class GPUMesh {
 public:
     GPUMesh() = default;
 
+    GPUMesh(const AllocatedBuffer &vertexBuffer, const AllocatedBuffer &indexBuffer) {
+        this->vertexBuffer = vertexBuffer;
+        this->indexBuffer = indexBuffer;
+    }
+
+    ~GPUMesh() = default;
+
+    const AllocatedBuffer &getVertexBuffer() const { return vertexBuffer; }
+    const AllocatedBuffer &getIndexBuffer() const { return indexBuffer; }
+
 private:
-    VkBuffer vertexBuffer{}, indexBuffer{};
+    AllocatedBuffer vertexBuffer{}, indexBuffer{};
 };

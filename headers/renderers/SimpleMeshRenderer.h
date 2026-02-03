@@ -6,7 +6,6 @@
 
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
-#include "SimpleMeshData.h"
 #include "ScopedVkMemoryManager.h"
 #include "SimpleRenderer.h"
 
@@ -39,7 +38,8 @@ private:
     VkViewport viewport;
     VkRect2D scissor;
 
-    SimpleMeshData meshData;
+    std::unique_ptr<MeshData> meshData;
+    GPUMesh gpuMeshData{};
 
     AllocatedImageResource *depthTarget;
     VkRenderingAttachmentInfo depthAttachmentInfo;

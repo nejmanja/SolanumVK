@@ -24,9 +24,9 @@ SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
           .minDepth = 0.0f,
           .maxDepth = 1.0f
       }, scissor{.offset{0, 0}, .extent{SolVK::windowWidth, SolVK::windowHeight}},
-      memoryManager{vulkanContext} {
-    meshData = MeshLoader::loadSimpleMesh("../../assets/greenMonke.glb");
-
+      memoryManager{vulkanContext},
+      meshData(MeshLoader::loadMesh(VertexAttributes::Position | VertexAttributes::Normal | VertexAttributes::Color,
+                                    "../../assets/greenMonke.glb")) {
     createDepthTarget();
     createDescriptors();
     buildPipeline(sceneDescriptorLayout);
@@ -43,8 +43,8 @@ void SimpleMeshRenderer::initialize() {
     scissor.extent.width = getOutputImage()->getExtent().width;
     scissor.extent.height = getOutputImage()->getExtent().height;
 
-    MeshUploader::uploadMesh(vulkanContext, meshData);
-    memoryManager.registerResource(meshData);
+    gpuMeshData = MeshUploader::uploadMesh(vulkanContext, meshData.get());
+    memoryManager.registerResource(gpuMeshData);
 }
 
 void SimpleMeshRenderer::draw(const CommandManager &cmd) {
@@ -92,11 +92,11 @@ void SimpleMeshRenderer::draw(const CommandManager &cmd) {
     pipeline->setScissor(&scissor);
 
     VkDeviceSize offset{0};
-    auto vertexBuffer = meshData.getVertexBuffer().buffer;
+    auto vertexBuffer = gpuMeshData.getVertexBuffer().buffer;
     vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(cmdBuffer, meshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(cmdBuffer, gpuMeshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdDrawIndexed(cmdBuffer, meshData.getIndices().size(), 1, 0, 0, 0);
+    vkCmdDrawIndexed(cmdBuffer, meshData->getIndices().size(), 1, 0, 0, 0);
 
     vkCmdEndRendering(cmdBuffer);
 }
@@ -162,7 +162,7 @@ void SimpleMeshRenderer::createDescriptors() {
     transform = {
         .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f})
     };
-    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), 0, transformBuffer);
 
     DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                   transformBuffer.buffer, sizeof(Transform));
@@ -170,7 +170,31 @@ void SimpleMeshRenderer::createDescriptors() {
 
 void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout) {
     GraphicsPipelineBuilder builder{vulkanContext};
-    builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
+    // TODO: FIX! this data should be yoinked from the mesh
+    //builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
+    builder.addVertexBinding(0, 4 * 3 * 3, {
+                                 // POSITION
+                                 VkVertexInputAttributeDescription{
+                                     .location = 0,
+                                     .binding = 0,
+                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                     .offset = 0
+                                 },
+                                 // NORMAL
+                                 VkVertexInputAttributeDescription{
+                                     .location = 1,
+                                     .binding = 0,
+                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                     .offset = 4 * 3,
+                                 },
+                                 // COLOR
+                                 VkVertexInputAttributeDescription{
+                                     .location = 2,
+                                     .binding = 0,
+                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                     .offset = 2 * 4 * 3,
+                                 }
+                             });
 
     builder.addColorAttachmentFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
     builder.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT);
@@ -189,7 +213,7 @@ void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescript
 }
 
 void SimpleMeshRenderer::setupResources(const CommandManager &cmd) {
-    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), transformBuffer);
+    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), 0, transformBuffer);
     depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
     getOutputImage()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 }

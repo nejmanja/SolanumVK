@@ -2,15 +2,15 @@
 
 #include <filesystem>
 #include <fastgltf/core.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
-#include "SimpleMeshData.h"
-#include "UVMappedMeshData.h"
+#include "MeshData.h"
+
 
 class MeshLoader {
 public:
-    static SimpleMeshData loadSimpleMesh(const std::filesystem::path &path);
-
-    static UVMappedMeshData loadUVMappedMesh(const std::filesystem::path &path);
+    static MeshData *loadMesh(VertexAttributes desiredAttributes, const std::filesystem::path &path);
 
     MeshLoader() = delete;
 
