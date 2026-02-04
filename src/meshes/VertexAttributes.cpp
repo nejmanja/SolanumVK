@@ -1,5 +1,53 @@
 #include "VertexAttributes.h"
 
+VkFormat VertexAttributeDescriptor::getFormat() const {
+    switch (precision) {
+        case VertexAttributePrecision::Half:
+            switch (dimensionality) {
+                case 1:
+                    return VK_FORMAT_R16_SFLOAT;
+                case 2:
+                    return VK_FORMAT_R16G16_SFLOAT;
+                case 3:
+                    return VK_FORMAT_R16G16B16_SFLOAT;
+                case 4:
+                    return VK_FORMAT_R16G16B16A16_SFLOAT;
+                default:
+                    throw std::invalid_argument("Unsupported dimensionality!");
+            }
+        case VertexAttributePrecision::Float:
+            switch (dimensionality) {
+                case 1:
+                    return VK_FORMAT_R32_SFLOAT;
+                case 2:
+                    return VK_FORMAT_R32G32_SFLOAT;
+                case 3:
+                    return VK_FORMAT_R32G32B32_SFLOAT;
+                case 4:
+                    return VK_FORMAT_R32G32B32A32_SFLOAT;
+                default:
+                    throw std::invalid_argument("Unsupported dimensionality!");
+            }
+        case VertexAttributePrecision::Double:
+            switch (dimensionality) {
+                case 1:
+                    return VK_FORMAT_R64_SFLOAT;
+                case 2:
+                    return VK_FORMAT_R64G64_SFLOAT;
+                case 3:
+                    return VK_FORMAT_R64G64B64_SFLOAT;
+                case 4:
+                    return VK_FORMAT_R64G64B64A64_SFLOAT;
+                default:
+                    throw std::invalid_argument("Unsupported dimensionality!");
+            }
+        case VertexAttributePrecision::None:
+            throw std::invalid_argument("VertexAttributePrecision::None");
+        default:
+            throw std::invalid_argument("Unsupported VertexAttributePrecision!");
+    }
+}
+
 VertexAttributeDescriptors::VertexAttributeDescriptors() {
     for (int i = 0; i < NumVertexAttributes; i++) {
         const auto attribute = static_cast<VertexAttributes>(1 << i);
@@ -46,4 +94,15 @@ void VertexAttributeDescriptors::setDimensionality(VertexAttributes attributes, 
             descriptors[i].setDimensionality(dimensionality);
         }
     }
+}
+
+VkFormat VertexAttributeDescriptors::getFormat(VertexAttributes attribute) const {
+    for (int i = 0; i < NumVertexAttributes; i++) {
+        const auto attrib = static_cast<VertexAttributes>(1 << i);
+        if (hasAllAttributes(attribute, attrib)) {
+            return descriptors[i].getFormat();
+        }
+    }
+
+    throw std::invalid_argument("Invalid Vertex Attribute!");
 }

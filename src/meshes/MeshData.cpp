@@ -14,6 +14,29 @@ const VertexBuffer &MeshData::getRawVertexBindingData() const {
 }
 
 
+std::vector<VkVertexInputAttributeDescription> MeshData::getAttributeDescriptions() const {
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+    uint32_t locations[NumVertexAttributes] = {0};
+
+    for (VertexAttributes attribute = VertexAttributes::Position;
+         attribute != MaxValue;
+         attribute = static_cast<VertexAttributes>(static_cast<uint32_t>(attribute) << 1)) {
+        if ((attributes & attribute) == VertexAttributes::None) continue;
+
+        auto &descriptor = attributeDescriptors.getDescriptor(attribute);
+
+        auto binding = descriptor.getBinding();
+        attributeDescriptions.push_back({
+            .location = locations[binding]++,
+            .binding = binding,
+            .format = descriptor.getFormat(),
+            .offset = bindingOffsets.at(attribute)
+        });
+    }
+
+    return attributeDescriptions;
+}
+
 void MeshData::calculateBindingStridesAndOffsets(VertexAttributes attribs) {
     vertexSize = 0;
     for (uint32_t binding = 0; binding < SolVK::maxBindings; binding++) {

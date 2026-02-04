@@ -170,31 +170,7 @@ void SimpleMeshRenderer::createDescriptors() {
 
 void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout) {
     GraphicsPipelineBuilder builder{vulkanContext};
-    // TODO: FIX! this data should be yoinked from the mesh
-    //builder.addVertexBinding(meshData.getFormatDescriptor().getBindingDescriptors()[0]);
-    builder.addVertexBinding(0, 4 * 3 * 3, {
-                                 // POSITION
-                                 VkVertexInputAttributeDescription{
-                                     .location = 0,
-                                     .binding = 0,
-                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                     .offset = 0
-                                 },
-                                 // NORMAL
-                                 VkVertexInputAttributeDescription{
-                                     .location = 1,
-                                     .binding = 0,
-                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                     .offset = 4 * 3,
-                                 },
-                                 // COLOR
-                                 VkVertexInputAttributeDescription{
-                                     .location = 2,
-                                     .binding = 0,
-                                     .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                     .offset = 2 * 4 * 3,
-                                 }
-                             });
+    builder.addVertexBinding(0, 4 * 3 * 3, meshData->getAttributeDescriptions());
 
     builder.addColorAttachmentFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
     builder.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT);

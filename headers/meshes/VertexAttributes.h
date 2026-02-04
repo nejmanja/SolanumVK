@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <fastgltf/core.hpp>
+#include <vulkan/vulkan_core.h>
 
 enum class VertexAttributePrecision {
     None = 0,
@@ -79,6 +80,8 @@ public:
         this->binding = binding;
     }
 
+    VkFormat getFormat() const;
+
 private:
     VertexAttributes attribute;
     VertexAttributePrecision precision;
@@ -99,6 +102,8 @@ public:
 
     void setDimensionality(VertexAttributes attributes, uint8_t dimensionality);
 
+    VkFormat getFormat(VertexAttributes attribute) const;
+
     [[nodiscard]] const VertexAttributeDescriptor &getDescriptor(VertexAttributes attribute) const {
         for (const auto &descriptor: descriptors) {
             if (descriptor.getAttribute() == attribute) {
@@ -106,7 +111,7 @@ public:
             }
         }
 
-        return VertexAttributeDescriptor{VertexAttributes::None, VertexAttributePrecision::None, 0, 0};
+        throw std::runtime_error("Vertex attribute descriptor not found!");
     }
 
 private:

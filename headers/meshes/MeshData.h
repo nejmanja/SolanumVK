@@ -3,7 +3,6 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <glm/vec3.hpp>
 
 #include "SolanumConstants.h"
 #include "VertexAttributes.h"
@@ -29,9 +28,9 @@ public:
     template<typename T>
     void setVertexAttributeData(VertexAttributes attribute, std::vector<T> data);
 
-    // void setVertexAttributeData(VertexAttributes attribute, std::vector<glm::vec3> data);
-
     [[nodiscard]] uint32_t getNumBindings() const { return numBindings; }
+
+    std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() const;
 
 private:
     void calculateBindingStridesAndOffsets(VertexAttributes attribs);
