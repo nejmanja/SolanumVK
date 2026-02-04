@@ -102,8 +102,6 @@ public:
 
     void setDimensionality(VertexAttributes attributes, uint8_t dimensionality);
 
-    VkFormat getFormat(VertexAttributes attribute) const;
-
     [[nodiscard]] const VertexAttributeDescriptor &getDescriptor(VertexAttributes attribute) const {
         for (const auto &descriptor: descriptors) {
             if (descriptor.getAttribute() == attribute) {

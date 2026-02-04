@@ -95,14 +95,3 @@ void VertexAttributeDescriptors::setDimensionality(VertexAttributes attributes, 
         }
     }
 }
-
-VkFormat VertexAttributeDescriptors::getFormat(VertexAttributes attribute) const {
-    for (int i = 0; i < NumVertexAttributes; i++) {
-        const auto attrib = static_cast<VertexAttributes>(1 << i);
-        if (hasAllAttributes(attribute, attrib)) {
-            return descriptors[i].getFormat();
-        }
-    }
-
-    throw std::invalid_argument("Invalid Vertex Attribute!");
-}
