@@ -5,12 +5,18 @@
 void MeshData::setVertexCount(const uint64_t count) {
     if (vertexCount == 0) {
         vertexCount = count;
-        allocateBindingBuffers();
+
+        for (auto &vertexBuffer: vertexBuffers) {
+            vertexBuffer.setVertexCount(vertexCount);
+        }
     }
 }
 
-const VertexBuffer &MeshData::getRawVertexBindingData() const {
-    return rawVertexBuffer;
+const VertexBufferDescriptor &MeshData::getVertexBuffer(uint32_t binding) const {
+    if (binding >= vertexBuffers.size())
+        throw std::out_of_range("Vertex buffer binding not valid!");
+
+    return vertexBuffers[binding];
 }
 
 
@@ -23,56 +29,30 @@ std::vector<VkVertexInputAttributeDescription> MeshData::getAttributeDescription
          attribute = static_cast<VertexAttributes>(static_cast<uint32_t>(attribute) << 1)) {
         if ((attributes & attribute) == VertexAttributes::None) continue;
 
-        auto &descriptor = attributeDescriptors.getDescriptor(attribute);
+        auto binding = attributeBindings.at(attribute);
 
-        auto binding = descriptor.getBinding();
+        auto &descriptor = vertexBuffers[binding].getDescriptor(attribute);
+        auto offset = vertexBuffers[binding].getOffset(attribute);
+
         attributeDescriptions.push_back({
             .location = locations[binding]++,
             .binding = binding,
             .format = descriptor.getFormat(),
-            .offset = bindingOffsets.at(attribute)
+            .offset = offset
         });
     }
 
     return attributeDescriptions;
 }
 
-void MeshData::calculateBindingStridesAndOffsets(VertexAttributes attribs) {
-    vertexSize = 0;
-    for (uint32_t binding = 0; binding < SolVK::maxBindings; binding++) {
-        bindingStrides[binding] = 0;
-    }
+MeshData::MeshData(const VertexAttributes attributes) : attributes(attributes) {
+    vertexBuffers.emplace_back(VertexAttributeDescriptors(attributes));
 
-    numBindings = 0;
     for (VertexAttributes attribute = VertexAttributes::Position;
          attribute != MaxValue;
          attribute = static_cast<VertexAttributes>(static_cast<uint32_t>(attribute) << 1)) {
-        // if the attribute is actually present
-        if (hasAllAttributes(attribs, attribute)) {
-            const auto descriptor = attributeDescriptors.getDescriptor(attribute);
-            const auto binding = descriptor.getBinding();
-            const auto attributeSize = descriptor.getSize();
-
-            // The offset of individual attributes within a binding should be the size of that binding so far
-            // It is implied that the ordering of attributes inside a binding is the same as the enum order
-            bindingOffsets[attribute] = bindingStrides[binding];
-            // Update strides per-binding, and total vertex size, which is just the sum of all of these
-            bindingStrides[binding] += attributeSize;
-            vertexSize += attributeSize;
-
-            if (numBindings < binding + 1) numBindings = binding + 1;
+        if (hasAllAttributes(attributes, attribute)) {
+            attributeBindings[attribute] = 0;
         }
     }
-}
-
-void MeshData::allocateBindingBuffers() {
-    for (uint32_t binding = 0; binding < numBindings; binding++) {
-        if (bindingStrides[binding] > 0) {
-            rawVertexBuffer.setDataSize(binding, bindingStrides[binding] * vertexCount);
-        }
-    }
-}
-
-MeshData::MeshData(const VertexAttributes attributes) : attributes(attributes) {
-    calculateBindingStridesAndOffsets(attributes);
 }

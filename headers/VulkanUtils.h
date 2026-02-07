@@ -16,7 +16,7 @@ public:
         if (result == VK_SUCCESS)
             return;
 
-        std::cout << "Vk error detected" << string_VkResult(result) << std::endl;
+        std::cout << "Vk error detected " << string_VkResult(result) << std::endl;
         abort();
     }
 
