@@ -22,22 +22,31 @@ RenderingEngine::RenderingEngine()
       syncManager(vulkanContext.getDevice(), SolVK::numFramesInFlight, vulkanContext.getSwapchain().numberOfImages),
       renderTarget(createRenderTarget(vulkanContext)),
       memoryManager(vulkanContext),
-      imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
       currentSwapchainTarget(vulkanContext.getSwapchainImages()[0]) {
     camera.setPerspectiveProj(glm::radians(45.0f), 1.3333f, 0.01f, 1000.0f);
 
     createSceneDescriptor();
-    simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
-    pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
-    computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, &camera);
-    imageEffectRenderer = std::make_unique<ImageEffectRenderer>(vulkanContext);
 }
 
 void RenderingEngine::initialize() {
+    pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
+
+    std::unique_ptr<SimpleRenderer> simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(
+        vulkanContext, sceneDescriptorLayout,
+        sceneDescriptorSet);
+    std::unique_ptr<SimpleRenderer> computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, &camera);
+    std::unique_ptr<ImageEffectRenderer> imageEffectRenderer = std::make_unique<ImageEffectRenderer>(vulkanContext);
+    std::unique_ptr<SimpleRenderer> imGuiRenderer = std::make_unique<ImGuiRenderer>(vulkanContext);
+
     computeRenderer->initialize(&renderTarget.resource);
     simpleMeshRenderer->initialize(&renderTarget.resource);
     imGuiRenderer->initialize(&currentSwapchainTarget);
     imageEffectRenderer->initialize(&renderTarget.resource, &currentSwapchainTarget);
+
+    renderers.push_back(std::move(computeRenderer));
+    renderers.push_back(std::move(simpleMeshRenderer));
+    renderers.push_back(std::move(imGuiRenderer));
+    renderers.push_back(std::move(imageEffectRenderer));
 }
 
 void RenderingEngine::exec() {
@@ -95,18 +104,15 @@ void RenderingEngine::draw(double deltaTime) {
     // Begin Command Recording
     // ===============================================================================================================
     commandManager.reset();
-
     commandManager.begin();
 
-    computeRenderer->prepareFrame(deltaTime);
-    simpleMeshRenderer->prepareFrame(deltaTime);
-    imGuiRenderer->prepareFrame(deltaTime);
-    imageEffectRenderer->prepareFrame(deltaTime);
+    for (const auto &renderer: renderers) {
+        renderer->prepareFrame(deltaTime);
+    }
 
-    computeRenderer->execute(commandManager);
-    simpleMeshRenderer->execute(commandManager);
-    imageEffectRenderer->execute(commandManager);
-    imGuiRenderer->execute(commandManager);
+    for (const auto &renderer: renderers) {
+        renderer->execute(commandManager);
+    }
 
     // Transition for present
     currentSwapchainTarget.transition(commandManager, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
