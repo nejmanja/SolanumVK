@@ -22,11 +22,6 @@ public:
     void prepareFrame(double deltaTime) override {
     }
 
-    ~ImageEffectRenderer() override {
-        // TODO: add method for registering samplers in ScopedMemoryManager
-        vkDestroySampler(vulkanContext.getDevice(), inputImageSampler, nullptr);
-    }
-
 protected:
     void createInputSampler();
 

@@ -67,6 +67,7 @@ void ImageEffectRenderer::createInputSampler() {
         .unnormalizedCoordinates = VK_FALSE,
     };
     VulkanUtils::CheckVkResult(vkCreateSampler(vulkanContext.getDevice(), &info, VK_NULL_HANDLE, &inputImageSampler));
+    memoryManager.registerResource(inputImageSampler);
 }
 
 void ImageEffectRenderer::initialize() {

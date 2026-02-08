@@ -4,6 +4,9 @@ ScopedVkMemoryManager::~ScopedVkMemoryManager() {
     for (auto &&buffer: buffers) {
         vmaDestroyBuffer(context.getVmaAllocator(), buffer.buffer, buffer.allocation);
     }
+    for (auto &&sampler: imageSamplers) {
+        vkDestroySampler(context.getDevice(), sampler, nullptr);
+    }
     for (auto &&image: images) {
         vkDestroyImageView(context.getDevice(), image.resource.getImageView(), nullptr);
         vmaDestroyImage(context.getVmaAllocator(), image.resource.getImage(), image.allocation);
