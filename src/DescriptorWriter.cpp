@@ -1,10 +1,13 @@
 #include "DescriptorWriter.h"
 
-void DescriptorWriter::writeImage(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkImageView imageView, VkImageLayout imageLayout)
-{
-    VkDescriptorImageInfo imageInfo{.sampler = nullptr,
-                                    .imageView = imageView,
-                                    .imageLayout = imageLayout};
+void DescriptorWriter::writeImage(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet,
+                                  VkDescriptorType descriptorType, VkImageView imageView, VkImageLayout imageLayout,
+                                  VkSampler sampler) {
+    VkDescriptorImageInfo imageInfo{
+        .sampler = sampler,
+        .imageView = imageView,
+        .imageLayout = imageLayout
+    };
 
     VkWriteDescriptorSet descriptorWrite = getDefaultWrite(descriptorSet, descriptorType);
     descriptorWrite.pImageInfo = &imageInfo;
@@ -12,12 +15,14 @@ void DescriptorWriter::writeImage(const VulkanContext &vulkanContext, VkDescript
     vkUpdateDescriptorSets(vulkanContext.getDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
-void DescriptorWriter::writeBuffer(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet, VkDescriptorType descriptorType, VkBuffer buffer, VkDeviceSize bufferSize, VkDeviceSize offset)
-{
+void DescriptorWriter::writeBuffer(const VulkanContext &vulkanContext, VkDescriptorSet descriptorSet,
+                                   VkDescriptorType descriptorType, VkBuffer buffer, VkDeviceSize bufferSize,
+                                   VkDeviceSize offset) {
     VkDescriptorBufferInfo bufferInfo{
         .buffer = buffer,
         .offset = offset,
-        .range = bufferSize};
+        .range = bufferSize
+    };
 
     VkWriteDescriptorSet descriptorWrite = getDefaultWrite(descriptorSet, descriptorType);
     descriptorWrite.pBufferInfo = &bufferInfo;
@@ -25,8 +30,7 @@ void DescriptorWriter::writeBuffer(const VulkanContext &vulkanContext, VkDescrip
     vkUpdateDescriptorSets(vulkanContext.getDevice(), 1, &descriptorWrite, 0, nullptr);
 }
 
-VkWriteDescriptorSet DescriptorWriter::getDefaultWrite(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType)
-{
+VkWriteDescriptorSet DescriptorWriter::getDefaultWrite(VkDescriptorSet descriptorSet, VkDescriptorType descriptorType) {
     return VkWriteDescriptorSet{
         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
         .pNext = nullptr,

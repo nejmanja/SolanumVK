@@ -23,21 +23,21 @@ RenderingEngine::RenderingEngine()
       renderTarget(createRenderTarget(vulkanContext)),
       memoryManager(vulkanContext),
       imGuiRenderer(std::make_unique<ImGuiRenderer>(vulkanContext)),
-      currentSwapchainTarget(VK_NULL_HANDLE, VK_NULL_HANDLE, VkExtent3D{}, VK_IMAGE_LAYOUT_UNDEFINED,
-                             VK_FORMAT_UNDEFINED) {
-    // camera.setOrthoProj(1.0f, 0.75f, 0.01f, 1000.0f);
+      currentSwapchainTarget(vulkanContext.getSwapchainImages()[0]) {
     camera.setPerspectiveProj(glm::radians(45.0f), 1.3333f, 0.01f, 1000.0f);
 
     createSceneDescriptor();
     simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(vulkanContext, sceneDescriptorLayout, sceneDescriptorSet);
     pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
     computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, &camera);
+    imageEffectRenderer = std::make_unique<ImageEffectRenderer>(vulkanContext);
 }
 
 void RenderingEngine::initialize() {
     computeRenderer->initialize(&renderTarget.resource);
     simpleMeshRenderer->initialize(&renderTarget.resource);
     imGuiRenderer->initialize(&currentSwapchainTarget);
+    imageEffectRenderer->initialize(&renderTarget.resource, &currentSwapchainTarget);
 }
 
 void RenderingEngine::exec() {
@@ -101,14 +101,11 @@ void RenderingEngine::draw(double deltaTime) {
     computeRenderer->prepareFrame(deltaTime);
     simpleMeshRenderer->prepareFrame(deltaTime);
     imGuiRenderer->prepareFrame(deltaTime);
+    imageEffectRenderer->prepareFrame(deltaTime);
 
     computeRenderer->execute(commandManager);
     simpleMeshRenderer->execute(commandManager);
-
-    // Copy rendering result into swapchain image
-    renderTarget.resource.blitContents(commandManager, currentSwapchainTarget);
-
-    // Render imgui at the very end
+    imageEffectRenderer->execute(commandManager);
     imGuiRenderer->execute(commandManager);
 
     // Transition for present
@@ -228,6 +225,8 @@ AllocatedImageResource RenderingEngine::createRenderTarget(const VulkanContext &
     // for Compute shader writes
     usageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
     usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    // for post-processing input
+    usageFlags |= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     auto swapchainExtent = vulkanContext.getSwapchain().getExtent();
 

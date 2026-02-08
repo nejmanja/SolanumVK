@@ -9,7 +9,8 @@ public:
         VkDescriptorSet descriptorSet,
         VkDescriptorType descriptorType,
         VkImageView imageView,
-        VkImageLayout imageLayout
+        VkImageLayout imageLayout,
+        VkSampler sampler = VK_NULL_HANDLE
     );
 
     static void writeBuffer(

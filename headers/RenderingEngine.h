@@ -12,6 +12,7 @@
 #include "ScopedVkMemoryManager.h"
 #include "SceneDescriptor.h"
 #include "Camera.h"
+#include "ImageEffectRenderer.h"
 #include "SolanumConstants.h"
 
 class RenderingEngine {
@@ -56,6 +57,7 @@ private:
     std::unique_ptr<SimpleRenderer> simpleMeshRenderer;
     std::unique_ptr<Renderer> pbrMeshRenderer;
     std::unique_ptr<SimpleRenderer> imGuiRenderer;
+    std::unique_ptr<ImageEffectRenderer> imageEffectRenderer;
 
     uint32_t frameCounter{0};
     [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % SolVK::numFramesInFlight; }
