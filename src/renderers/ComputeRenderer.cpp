@@ -8,7 +8,7 @@
 ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
                                  const Camera *camera)
     : SimpleRenderer(vulkanContext), camera(camera) {
-    device = vulkanContext.getDevice();
+    const auto device = vulkanContext.getDevice();
 
     DescriptorLayoutBuilder layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
@@ -27,7 +27,7 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
 ComputeRenderer::~ComputeRenderer() {
     rendererDescriptorAllocator->resetPools();
 
-    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorSetLayout, nullptr);
 }
 
 void ComputeRenderer::initialize() {

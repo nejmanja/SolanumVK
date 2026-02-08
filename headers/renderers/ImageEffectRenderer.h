@@ -31,15 +31,15 @@ protected:
 
     void draw(const CommandManager &cmd) override;
 
-private:
-    void createPipeline();
-
-    void createDescriptors();
-
     static constexpr uint32_t SOURCE_IMAGE_INDEX = 0;
     [[nodiscard]] ImageResource *getInputImage() const { return Renderer::getInputImage(SOURCE_IMAGE_INDEX); }
     static constexpr uint32_t TARGET_IMAGE_INDEX = 0;
     [[nodiscard]] ImageResource *getOutputImage() const { return Renderer::getOutputImage(TARGET_IMAGE_INDEX); }
+
+private:
+    void createPipeline();
+
+    void createDescriptors();
 
     VkSampler inputImageSampler{};
 

@@ -29,7 +29,6 @@ private:
 
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorSet descriptorSet;
-    VkDevice device;
 
     const Camera *camera;
 };

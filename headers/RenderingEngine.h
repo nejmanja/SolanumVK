@@ -26,8 +26,6 @@ public:
     ~RenderingEngine();
 
 private:
-    void createRendererSequence();
-
     void processInput();
 
     void draw(double deltaTime);
