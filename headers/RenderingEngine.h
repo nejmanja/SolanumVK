@@ -56,11 +56,7 @@ private:
 
     // Renderers - execute in-order of the vector!
     std::vector<std::unique_ptr<Renderer> > renderers{};
-    // std::unique_ptr<SimpleRenderer> computeRenderer;
-    // std::unique_ptr<SimpleRenderer> simpleMeshRenderer;
     std::unique_ptr<Renderer> pbrMeshRenderer;
-    // std::unique_ptr<SimpleRenderer> imGuiRenderer;
-    // std::unique_ptr<ImageEffectRenderer> imageEffectRenderer;
 
     uint32_t frameCounter{0};
     [[nodiscard]] uint32_t getFrameIndex() const { return frameCounter % SolVK::numFramesInFlight; }
