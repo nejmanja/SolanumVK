@@ -17,7 +17,6 @@ public:
 
     void registerResource(const AllocatedBuffer &buffer) { buffers.push_back(buffer); }
     void registerResource(const AllocatedImageResource &image) { images.push_back(image); }
-    void registerResource(const VkDescriptorSetLayout &layout) { descriptorSetLayouts.push_back(layout); }
     void registerResource(const VkSampler &sampler) { imageSamplers.push_back(sampler); }
 
     void registerResource(const GPUMesh &gpuMesh) {

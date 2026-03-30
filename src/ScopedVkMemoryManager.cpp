@@ -11,7 +11,4 @@ ScopedVkMemoryManager::~ScopedVkMemoryManager() {
         vkDestroyImageView(context.getDevice(), image.resource.getImageView(), nullptr);
         vmaDestroyImage(context.getVmaAllocator(), image.resource.getImage(), image.allocation);
     }
-    for (auto &&descriptorSetLayout: descriptorSetLayouts) {
-        vkDestroyDescriptorSetLayout(context.getDevice(), descriptorSetLayout, nullptr);
-    }
 }

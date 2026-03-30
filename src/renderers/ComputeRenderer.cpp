@@ -25,8 +25,6 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
 
 ComputeRenderer::~ComputeRenderer() {
     rendererDescriptorMemoryManager->resetPools();
-
-    vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorModule->getLayout(), nullptr);
 }
 
 void ComputeRenderer::initialize() {
