@@ -26,8 +26,7 @@ void ImageEffectRenderer::createPipeline() {
 void ImageEffectRenderer::createDescriptors() {
     DescriptorLayoutBindings layoutBindings{};
     layoutBindings.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    descriptorModule = std::make_unique<DescriptorModule>(
-        layoutBindings.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT));
+    descriptorModule = layoutBindings.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT);
 
     rendererDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(vulkanContext.getDevice());
     rendererDescriptorMemoryManager->addBindings(descriptorModule->getBindings());

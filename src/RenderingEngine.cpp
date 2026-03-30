@@ -183,8 +183,7 @@ void RenderingEngine::processInput() {
 void RenderingEngine::createSceneDescriptor() {
     DescriptorLayoutBindings layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT);
-    sceneDescriptorModule = std::make_unique<DescriptorModule>(
-        layoutBuilder.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_VERTEX_BIT, 0));
+    sceneDescriptorModule = layoutBuilder.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_VERTEX_BIT, 0);
 
     sceneDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(vulkanContext.getDevice());
     sceneDescriptorMemoryManager->addBindings(sceneDescriptorModule->getBindings());

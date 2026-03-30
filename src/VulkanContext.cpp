@@ -94,6 +94,7 @@ void VulkanContext::createDevice(vkb::Instance vkbInstance) {
             .set_required_features_12(features12)
             .set_required_features_13(features13)
             .set_surface(surface)
+            .allow_any_gpu_device_type(false)
             .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
             .select()
             .value();

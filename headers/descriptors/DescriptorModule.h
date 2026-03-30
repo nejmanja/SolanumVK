@@ -13,6 +13,13 @@ public:
         layoutBindings(layoutBindings) {
     }
 
+    DescriptorModule(DescriptorModule &other) = delete;
+
+    DescriptorModule(DescriptorModule &&other) noexcept : device(other.device),
+                                                          layout(std::move(other.layout)),
+                                                          layoutBindings(std::move(other.layoutBindings)) {
+    }
+
     VkDescriptorSet createSet(DescriptorMemoryManager &memoryManager) {
         descriptorSets.push_back(memoryManager.allocate(layout));
         return descriptorSets.back();

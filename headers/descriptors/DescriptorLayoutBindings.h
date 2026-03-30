@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -20,7 +21,7 @@ public:
     );
 
     // Default stage flags will be applied to all bindings which didn't have their flags specified upon adding the binding.
-    DescriptorModule createModule(
+    std::unique_ptr<DescriptorModule> createModule(
         VkDevice device,
         VkShaderStageFlags defaultStageFlags,
         VkDescriptorSetLayoutCreateFlags createFlags = 0

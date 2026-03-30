@@ -12,8 +12,7 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
 
     DescriptorLayoutBindings layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-    descriptorModule = std::make_unique<DescriptorModule>(
-        DescriptorModule(layoutBuilder.createModule(device, VK_SHADER_STAGE_COMPUTE_BIT, 0)));
+    descriptorModule = layoutBuilder.createModule(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
 
     // TODO: check if you can replace raw layout getter with whole module
     pipeline = std::make_unique<ComputePipeline>(device, descriptorModule->getLayout());
