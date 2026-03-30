@@ -1,10 +1,11 @@
 #pragma once
 
 #include <vector>
-
+#include <map>
 #include <vulkan/vulkan.h>
 
-class DescriptorSetAllocator {
+
+class DescriptorMemoryManager {
 public:
     struct PoolResourceSizePerSet {
         VkDescriptorType type;
@@ -13,9 +14,13 @@ public:
         uint32_t countPerSet;
     };
 
-    DescriptorSetAllocator(VkDevice device, const std::vector<PoolResourceSizePerSet> &resourceSizes);
+    DescriptorMemoryManager(VkDevice device);
 
-    ~DescriptorSetAllocator();
+    ~DescriptorMemoryManager();
+
+    void addBindings(const std::vector<VkDescriptorSetLayoutBinding> &layoutBindings);
+
+    void initialize();
 
     void resetPools();
 
@@ -26,6 +31,9 @@ private:
 
     VkDescriptorPool getPool();
 
+    bool initialized = false;
+
+    std::map<VkDescriptorType, uint32_t> resourceSizes{};
     std::vector<VkDescriptorPoolSize> poolSizes;
     std::vector<VkDescriptorPool> freePools;
     std::vector<VkDescriptorPool> fullPools;

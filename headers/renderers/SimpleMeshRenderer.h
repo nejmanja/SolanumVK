@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "DescriptorModule.h"
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
 #include "ScopedVkMemoryManager.h"
@@ -55,6 +56,5 @@ private:
 
     Transform transform;
     AllocatedBuffer transformBuffer;
-    VkDescriptorSetLayout transformUniformLayout{VK_NULL_HANDLE};
-    VkDescriptorSet transformUniformDescriptorSet{VK_NULL_HANDLE};
+    std::unique_ptr<DescriptorModule> descriptorModule;
 };

@@ -12,7 +12,7 @@ public:
 
     virtual void bindPushConstants(const void *pushConstantData, size_t size) = 0;
 
-    virtual void bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) = 0;
+    virtual void bindDescriptorSets(uint32_t setCount, const VkDescriptorSet *sets) = 0;
 
     // Binds the pipeline to a command buffer.
     virtual void bind(VkCommandBuffer cmd) = 0;

@@ -1,9 +1,8 @@
 #include "ImageEffectRenderer.h"
 
-#include "DescriptorLayoutBuilder.h"
+#include "DescriptorLayoutBindings.h"
 #include "DescriptorWriter.h"
 #include "GraphicsPipelineBuilder.h"
-#include "SolanumConstants.h"
 #include "VulkanUtils.h"
 
 void ImageEffectRenderer::createPipeline() {
@@ -19,25 +18,24 @@ void ImageEffectRenderer::createPipeline() {
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
     builder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
 
-    builder.addDescriptorSetLayout(descriptorLayout);
+    builder.addDescriptorSetLayout(descriptorModule->getLayout());
 
     pipeline = builder.build();
 }
 
 void ImageEffectRenderer::createDescriptors() {
-    DescriptorLayoutBuilder layoutBuilder{};
-    layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    descriptorLayout = layoutBuilder.build(vulkanContext.getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT, 0);
-    memoryManager.registerResource(descriptorLayout);
+    DescriptorLayoutBindings layoutBindings{};
+    layoutBindings.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    descriptorModule = std::make_unique<DescriptorModule>(
+        layoutBindings.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_FRAGMENT_BIT));
 
-    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
-        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1}
-    };
-    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(vulkanContext.getDevice(), resourceSizes);
+    rendererDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(vulkanContext.getDevice());
+    rendererDescriptorMemoryManager->addBindings(descriptorModule->getBindings());
+    rendererDescriptorMemoryManager->initialize();
+    descriptorModule->createSet(*rendererDescriptorMemoryManager);
 
-    descriptorSet = rendererDescriptorAllocator->allocate(descriptorLayout);
-
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    DescriptorWriter::writeImage(vulkanContext, descriptorModule->getDescriptorSet(0),
+                                 VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                  getInputImage()->getImageView(), inputFormat, inputImageSampler);
 }
 
@@ -125,7 +123,7 @@ void ImageEffectRenderer::draw(const CommandManager &cmd) {
     // bind pipeline
     pipeline->bind(cmdBuffer);
     // bind descriptors
-    pipeline->bindDescriptorSets(1, &descriptorSet);
+    pipeline->bindDescriptorSets(1, descriptorModule->getDescriptorSetPtr(0));
     // render
     // TODO: this execute method is dumb (it does literally nothing), remove this entirely
     pipeline->execute();

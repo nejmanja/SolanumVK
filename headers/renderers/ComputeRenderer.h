@@ -4,6 +4,7 @@
 
 #include "Camera.h"
 #include "ComputePipeline.h"
+#include "DescriptorModule.h"
 #include "SimpleRenderer.h"
 #include "VulkanContext.h"
 
@@ -27,8 +28,7 @@ private:
     // Pipeline with which rendering will happen
     std::unique_ptr<ComputePipeline> pipeline;
 
-    VkDescriptorSetLayout descriptorSetLayout;
-    VkDescriptorSet descriptorSet;
+    std::unique_ptr<DescriptorModule> descriptorModule;
 
     const Camera *camera;
 };

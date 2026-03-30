@@ -6,7 +6,7 @@
 
 #include "ImageAllocator.h"
 #include "GraphicsPipelineBuilder.h"
-#include "DescriptorLayoutBuilder.h"
+#include "DescriptorLayoutBindings.h"
 #include "DescriptorWriter.h"
 #include "MeshLoader.h"
 #include "MeshUploader.h"
@@ -85,7 +85,7 @@ void SimpleMeshRenderer::draw(const CommandManager &cmd) {
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
     pipeline->bind(cmdBuffer);
 
-    VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, transformUniformDescriptorSet};
+    VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, descriptorModule->getDescriptorSet(0)};
     pipeline->bindDescriptorSets(2, descriptorSets);
 
     pipeline->setViewport(&viewport);
@@ -142,17 +142,16 @@ void SimpleMeshRenderer::createDepthTarget() {
 void SimpleMeshRenderer::createDescriptors() {
     auto device = vulkanContext.getDevice();
 
-    DescriptorLayoutBuilder layoutBuilder{};
-    layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-    transformUniformLayout = layoutBuilder.build(device, VK_SHADER_STAGE_VERTEX_BIT, 0);
-    memoryManager.registerResource(transformUniformLayout);
+    DescriptorLayoutBindings layoutBindings{};
+    layoutBindings.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    descriptorModule = std::make_unique<DescriptorModule>(
+        layoutBindings.createModule(device, VK_SHADER_STAGE_VERTEX_BIT, 0));
 
-    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
-    };
-    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
+    rendererDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(device);
+    rendererDescriptorMemoryManager->addBindings(descriptorModule->getBindings());
+    rendererDescriptorMemoryManager->initialize();
 
-    transformUniformDescriptorSet = rendererDescriptorAllocator->allocate(transformUniformLayout);
+    descriptorModule->createSet(*rendererDescriptorMemoryManager);
 
     transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(Transform),
                                                       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU,
@@ -164,7 +163,8 @@ void SimpleMeshRenderer::createDescriptors() {
     };
     BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), 0, transformBuffer);
 
-    DescriptorWriter::writeBuffer(vulkanContext, transformUniformDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    DescriptorWriter::writeBuffer(vulkanContext, descriptorModule->getDescriptorSet(0),
+                                  VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                   transformBuffer.buffer, sizeof(Transform));
 }
 
@@ -183,7 +183,7 @@ void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescript
     builder.addDynamicState(VK_DYNAMIC_STATE_VIEWPORT);
     builder.addDynamicState(VK_DYNAMIC_STATE_SCISSOR);
     builder.addDescriptorSetLayout(sceneDescriptorLayout);
-    builder.addDescriptorSetLayout(transformUniformLayout);
+    builder.addDescriptorSetLayout(descriptorModule->getLayout());
 
     pipeline = builder.build();
 }

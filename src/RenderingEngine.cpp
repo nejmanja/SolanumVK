@@ -9,7 +9,8 @@
 
 #include "BufferAllocator.h"
 #include "ComputeRenderer.h"
-#include "DescriptorLayoutBuilder.h"
+#include "DescriptorLayoutBindings.h"
+#include "DescriptorMemoryManager.h"
 #include "PBRMeshRenderer.h"
 #include "SimpleMeshRenderer.h"
 #include "SolanumConstants.h"
@@ -32,8 +33,8 @@ void RenderingEngine::initialize() {
     pbrMeshRenderer = std::make_unique<PBRMeshRenderer>(vulkanContext);
 
     std::unique_ptr<SimpleRenderer> simpleMeshRenderer = std::make_unique<SimpleMeshRenderer>(
-        vulkanContext, sceneDescriptorLayout,
-        sceneDescriptorSet);
+        vulkanContext, sceneDescriptorModule->getLayout(),
+        sceneDescriptorModule->getDescriptorSet(0));
     std::unique_ptr<SimpleRenderer> computeRenderer = std::make_unique<ComputeRenderer>(vulkanContext, &camera);
     std::unique_ptr<ImageEffectRenderer> imageEffectRenderer = std::make_unique<ImageEffectRenderer>(vulkanContext);
     std::unique_ptr<SimpleRenderer> imGuiRenderer = std::make_unique<ImGuiRenderer>(vulkanContext);
@@ -180,17 +181,16 @@ void RenderingEngine::processInput() {
 }
 
 void RenderingEngine::createSceneDescriptor() {
-    DescriptorLayoutBuilder layoutBuilder{};
+    DescriptorLayoutBindings layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT);
-    sceneDescriptorLayout = layoutBuilder.build(vulkanContext.getDevice(), VK_SHADER_STAGE_VERTEX_BIT, 0);
-    memoryManager.registerResource(sceneDescriptorLayout);
+    sceneDescriptorModule = std::make_unique<DescriptorModule>(
+        layoutBuilder.createModule(vulkanContext.getDevice(), VK_SHADER_STAGE_VERTEX_BIT, 0));
 
-    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
-    };
+    sceneDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(vulkanContext.getDevice());
+    sceneDescriptorMemoryManager->addBindings(sceneDescriptorModule->getBindings());
+    sceneDescriptorMemoryManager->initialize();
 
-    sceneDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(vulkanContext.getDevice(), resourceSizes);
-    sceneDescriptorSet = sceneDescriptorAllocator->allocate(sceneDescriptorLayout);
+    sceneDescriptorModule->createSet(*sceneDescriptorMemoryManager);
 
     sceneUniformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(SceneDescriptor),
                                                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -204,7 +204,8 @@ void RenderingEngine::createSceneDescriptor() {
     };
     BufferAllocator::copyBufferData(vulkanContext, &sceneDescriptor, sizeof(SceneDescriptor), 0, sceneUniformBuffer);
 
-    DescriptorWriter::writeBuffer(vulkanContext, sceneDescriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    DescriptorWriter::writeBuffer(vulkanContext, sceneDescriptorModule->getDescriptorSet(0),
+                                  VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                   sceneUniformBuffer.buffer, sizeof(SceneDescriptor));
 }
 

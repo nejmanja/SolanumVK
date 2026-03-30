@@ -2,7 +2,7 @@
 
 #include <glm/vec3.hpp>
 
-#include "DescriptorLayoutBuilder.h"
+#include "DescriptorLayoutBindings.h"
 #include "DescriptorWriter.h"
 
 ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
@@ -10,28 +10,28 @@ ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
     : SimpleRenderer(vulkanContext), camera(camera) {
     const auto device = vulkanContext.getDevice();
 
-    DescriptorLayoutBuilder layoutBuilder{};
+    DescriptorLayoutBindings layoutBuilder{};
     layoutBuilder.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-    descriptorSetLayout = layoutBuilder.build(device, VK_SHADER_STAGE_COMPUTE_BIT, 0);
+    descriptorModule = std::make_unique<DescriptorModule>(
+        DescriptorModule(layoutBuilder.createModule(device, VK_SHADER_STAGE_COMPUTE_BIT, 0)));
 
-    pipeline = std::make_unique<ComputePipeline>(device, descriptorSetLayout);
+    // TODO: check if you can replace raw layout getter with whole module
+    pipeline = std::make_unique<ComputePipeline>(device, descriptorModule->getLayout());
+    rendererDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(device);
+    rendererDescriptorMemoryManager->addBindings(descriptorModule->getBindings());
+    rendererDescriptorMemoryManager->initialize();
 
-    auto resourceSizes = std::vector<DescriptorSetAllocator::PoolResourceSizePerSet>{
-        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1}
-    };
-    rendererDescriptorAllocator = std::make_unique<DescriptorSetAllocator>(device, resourceSizes);
-
-    descriptorSet = rendererDescriptorAllocator->allocate(descriptorSetLayout);
+    descriptorModule->createSet(*rendererDescriptorMemoryManager);
 }
 
 ComputeRenderer::~ComputeRenderer() {
-    rendererDescriptorAllocator->resetPools();
+    rendererDescriptorMemoryManager->resetPools();
 
-    vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorModule->getLayout(), nullptr);
 }
 
 void ComputeRenderer::initialize() {
-    DescriptorWriter::writeImage(vulkanContext, descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+    DescriptorWriter::writeImage(vulkanContext, descriptorModule->getDescriptorSet(0), VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                  getOutputImage()->getImageView(),
                                  VK_IMAGE_LAYOUT_GENERAL);
 }
@@ -41,7 +41,7 @@ void ComputeRenderer::setupResources(const CommandManager &cmd) {
 
     pipeline->bind(cmd.get());
     pipeline->bindPushConstants(&camera->getLook(), sizeof(glm::vec3));
-    pipeline->bindDescriptorSets(1, &descriptorSet);
+    pipeline->bindDescriptorSets(1, descriptorModule->getDescriptorSetPtr(0));
 }
 
 void ComputeRenderer::draw(const CommandManager &cmd) {

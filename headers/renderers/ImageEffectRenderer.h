@@ -1,4 +1,5 @@
 #pragma once
+#include "DescriptorModule.h"
 #include "GraphicsPipelineBuilder.h"
 #include "Renderer.h"
 #include "ScopedVkMemoryManager.h"
@@ -47,8 +48,7 @@ private:
     std::unique_ptr<GraphicsPipeline> pipeline;
     VkRenderingAttachmentInfo colorAttachmentInfo{};
     VkRenderingInfo renderingInfo{};
-    VkDescriptorSetLayout descriptorLayout{};
-    VkDescriptorSet descriptorSet{};
+    std::unique_ptr<DescriptorModule> descriptorModule;
     const VkImageLayout inputFormat = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     using Renderer::initialize;

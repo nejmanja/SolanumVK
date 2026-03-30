@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "VulkanContext.h"
-#include "DescriptorSetAllocator.h"
+#include "DescriptorMemoryManager.h"
 #include "ImageResources.h"
 #include "CommandManager.h"
 #include "ImageBindingDescription.h"
@@ -56,7 +56,7 @@ protected:
     const VulkanContext &vulkanContext;
 
     // For pipeline-specific descriptors
-    std::unique_ptr<DescriptorSetAllocator> rendererDescriptorAllocator;
+    std::unique_ptr<DescriptorMemoryManager> rendererDescriptorMemoryManager;
 
     // TODO: add range checks
     [[nodiscard]] ImageResource *getInputImage(const uint32_t index) const { return inputImages[index]; }

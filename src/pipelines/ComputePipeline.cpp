@@ -64,7 +64,7 @@ void ComputePipeline::bindPushConstants(const void *pushConstantData, size_t siz
     IPipeline::bindPushConstants(pushConstantData, size, VK_SHADER_STAGE_COMPUTE_BIT);
 }
 
-void ComputePipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) {
+void ComputePipeline::bindDescriptorSets(uint32_t setCount, const VkDescriptorSet *sets) {
     IPipeline::bindDescriptorSets(setCount, sets, VK_PIPELINE_BIND_POINT_COMPUTE);
 }
 

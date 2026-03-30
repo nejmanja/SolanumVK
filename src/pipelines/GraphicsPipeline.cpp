@@ -12,7 +12,7 @@ void GraphicsPipeline::bindPushConstants(const void *pushConstantData, size_t si
     IPipeline::bindPushConstants(pushConstantData, size, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 }
 
-void GraphicsPipeline::bindDescriptorSets(uint32_t setCount, VkDescriptorSet *sets) {
+void GraphicsPipeline::bindDescriptorSets(uint32_t setCount, const VkDescriptorSet *sets) {
     IPipeline::bindDescriptorSets(setCount, sets, VK_PIPELINE_BIND_POINT_GRAPHICS);
 }
 

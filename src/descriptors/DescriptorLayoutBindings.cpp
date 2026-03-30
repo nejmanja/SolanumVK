@@ -1,0 +1,36 @@
+#include "DescriptorLayoutBindings.h"
+
+#include "VulkanUtils.h"
+
+void DescriptorLayoutBindings::addBinding(uint32_t bindingIdx, VkDescriptorType descriptorType,
+                                          uint32_t descriptorCount, VkShaderStageFlags stageFlags) {
+    VkDescriptorSetLayoutBinding binding{};
+    binding.binding = bindingIdx;
+    binding.descriptorType = descriptorType;
+    binding.descriptorCount = descriptorCount;
+    binding.stageFlags = stageFlags;
+
+    bindings.push_back(binding);
+}
+
+DescriptorModule DescriptorLayoutBindings::createModule(VkDevice device, VkShaderStageFlags defaultStageFlags,
+                                                        VkDescriptorSetLayoutCreateFlags createFlags) {
+    for (auto &&binding: bindings) {
+        if (binding.stageFlags == 0)
+            binding.stageFlags = defaultStageFlags;
+    }
+
+    VkDescriptorSetLayoutCreateInfo createInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, .pNext = nullptr
+    };
+    createInfo.flags = createFlags;
+    createInfo.bindingCount = (uint32_t) bindings.size();
+    createInfo.pBindings = bindings.data();
+
+    VkDescriptorSetLayout layout;
+
+    auto result = vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &layout);
+    VulkanUtils::CheckVkResult(result);
+
+    return DescriptorModule{device, layout, bindings};
+}
