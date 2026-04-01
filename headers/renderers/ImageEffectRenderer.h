@@ -6,7 +6,7 @@
 
 class ImageEffectRenderer : public Renderer {
 public:
-    explicit ImageEffectRenderer(const VulkanContext &vulkanContext) : Renderer(
+    explicit ImageEffectRenderer(const VulkanContext &vulkanContext) : Renderer("ImageEffectRenderer",
                                                                            vulkanContext, {
                                                                                {
                                                                                    "The main input to which effects are applied."

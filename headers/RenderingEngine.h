@@ -13,6 +13,7 @@
 #include "SceneDescriptor.h"
 #include "Camera.h"
 #include "ImageEffectRenderer.h"
+#include "RendererChain.h"
 #include "SolanumConstants.h"
 
 class RenderingEngine {
@@ -51,8 +52,8 @@ private:
     AllocatedBuffer sceneUniformBuffer;
     SceneDescriptor sceneDescriptor;
 
-    // Renderers - execute in-order of the vector!
-    std::vector<std::unique_ptr<Renderer> > renderers{};
+    RendererChain rendererChain{};
+
     std::unique_ptr<Renderer> pbrMeshRenderer;
 
     uint32_t frameCounter{0};

@@ -2,7 +2,30 @@
 
 #include <iostream>
 #include <ostream>
+#include <sstream>
 
+
+std::string Renderer::getInfo() const {
+    std::ostringstream stream{};
+
+    stream << "Renderer [" << name << "]" << std::endl;
+
+    if (!inputDescriptions.empty()) {
+        stream << "INPUTS:" << std::endl;
+        for (auto &&inputDescription: inputDescriptions) {
+            stream << "\t" << inputDescription.description << std::endl;
+        }
+    }
+
+    if (!outputDescriptions.empty()) {
+        stream << "OUTPUTS:" << std::endl;
+        for (auto &&outputDescription: outputDescriptions) {
+            stream << "\t" << outputDescription.description << std::endl;
+        }
+    }
+
+    return stream.str();
+}
 
 void Renderer::setInputImages(std::vector<ImageResource *> &inputs) {
     inputImages = std::move(inputs);

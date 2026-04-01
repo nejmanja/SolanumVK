@@ -4,7 +4,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 ImGuiRenderer::ImGuiRenderer(const VulkanContext &vulkanContext)
-    : SimpleRenderer(vulkanContext) {
+    : SimpleRenderer("IMGUIRenderer", vulkanContext) {
     auto device = vulkanContext.getDevice();
 
     // Yoinked directly from the ImGui samples

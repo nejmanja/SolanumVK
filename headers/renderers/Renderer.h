@@ -10,6 +10,13 @@
 
 class Renderer {
 public:
+    Renderer(const std::string &name, const VulkanContext &vulkanContext,
+             const std::vector<ImageBindingDescription> &inputDescriptions,
+             const std::vector<ImageBindingDescription> &outputDescriptions)
+        : Renderer(vulkanContext, inputDescriptions, outputDescriptions) {
+        this->name = name;
+    }
+
     Renderer(const VulkanContext &vulkanContext,
              const std::vector<ImageBindingDescription> &inputDescriptions,
              const std::vector<ImageBindingDescription> &outputDescriptions)
@@ -43,6 +50,8 @@ public:
     // delta-time can be used for updating any internal time-based state.
     virtual void prepareFrame(double deltaTime) = 0;
 
+    [[nodiscard]] std::string getInfo() const;
+
 protected:
     // Used once at the beginning of lifetime - "bind-once" resources should be set up in overrides
     virtual void initialize() = 0;
@@ -64,7 +73,9 @@ protected:
 
 private:
     std::vector<ImageResource *> inputImages{}, outputImages{};
+
     std::vector<ImageBindingDescription> inputDescriptions{}, outputDescriptions{};
+    std::string name;
     const uint32_t numInputImages{}, numOutputImages{};
 
     void setInputImages(std::vector<ImageResource *> &inputs);

@@ -3,7 +3,7 @@
 
 class SimpleRenderer : public Renderer {
 public:
-    explicit SimpleRenderer(const VulkanContext &vulkanContext) : Renderer(
+    explicit SimpleRenderer(const std::string &name, const VulkanContext &vulkanContext) : Renderer(name,
         vulkanContext, {}, {{"The main color buffer to output rendered content to."}}) {
     }
 

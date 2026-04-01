@@ -7,7 +7,7 @@
 
 ComputeRenderer::ComputeRenderer(const VulkanContext &vulkanContext,
                                  const Camera *camera)
-    : SimpleRenderer(vulkanContext), camera(camera) {
+    : SimpleRenderer("ComputeRenderer", vulkanContext), camera(camera) {
     const auto device = vulkanContext.getDevice();
 
     DescriptorLayoutBindings layoutBuilder{};

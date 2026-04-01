@@ -14,7 +14,7 @@
 SimpleMeshRenderer::SimpleMeshRenderer(const VulkanContext &vulkanContext,
                                        const VkDescriptorSetLayout sceneDescriptorLayout,
                                        const VkDescriptorSet sceneDescriptorSet)
-    : SimpleRenderer(vulkanContext),
+    : SimpleRenderer("SimpleMeshRenderer", vulkanContext),
       sceneDescriptorSet{sceneDescriptorSet},
       viewport{
           .x = 0,

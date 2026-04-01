@@ -44,10 +44,12 @@ void RenderingEngine::initialize() {
     imGuiRenderer->initialize(&currentSwapchainTarget);
     imageEffectRenderer->initialize(&renderTarget.resource, &currentSwapchainTarget);
 
-    renderers.push_back(std::move(computeRenderer));
-    renderers.push_back(std::move(simpleMeshRenderer));
-    renderers.push_back(std::move(imGuiRenderer));
-    renderers.push_back(std::move(imageEffectRenderer));
+    rendererChain.addRenderer(computeRenderer);
+    rendererChain.addRenderer(simpleMeshRenderer);
+    rendererChain.addRenderer(imGuiRenderer);
+    rendererChain.addRenderer(imageEffectRenderer);
+
+    rendererChain.logState();
 }
 
 void RenderingEngine::exec() {
@@ -107,13 +109,8 @@ void RenderingEngine::draw(double deltaTime) {
     commandManager.reset();
     commandManager.begin();
 
-    for (const auto &renderer: renderers) {
-        renderer->prepareFrame(deltaTime);
-    }
-
-    for (const auto &renderer: renderers) {
-        renderer->execute(commandManager);
-    }
+    rendererChain.prepareFrame(deltaTime);
+    rendererChain.execute(commandManager);
 
     // Transition for present
     currentSwapchainTarget.transition(commandManager, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
