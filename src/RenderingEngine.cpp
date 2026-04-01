@@ -11,6 +11,7 @@
 #include "ComputeRenderer.h"
 #include "DescriptorLayoutBindings.h"
 #include "DescriptorMemoryManager.h"
+#include "ImGuiRenderer.h"
 #include "PBRMeshRenderer.h"
 #include "SimpleMeshRenderer.h"
 #include "SolanumConstants.h"

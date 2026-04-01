@@ -1,10 +1,10 @@
 #include "RenderingEngine.h"
 
 int main() {
-    RenderingEngine engine;
+    std::unique_ptr<RenderingEngine> engine = std::make_unique<RenderingEngine>();
 
-    engine.initialize();
-    engine.exec();
+    engine->initialize();
+    engine->exec();
 
     return 0;
 }

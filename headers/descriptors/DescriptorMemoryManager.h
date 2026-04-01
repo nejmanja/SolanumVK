@@ -14,7 +14,7 @@ public:
         uint32_t countPerSet;
     };
 
-    DescriptorMemoryManager(VkDevice device);
+    explicit DescriptorMemoryManager(VkDevice device);
 
     ~DescriptorMemoryManager();
 
@@ -40,5 +40,5 @@ private:
 
     static constexpr int maxSets = 1024;
 
-    VkDevice device;
+    VkDevice device{VK_NULL_HANDLE};
 };
