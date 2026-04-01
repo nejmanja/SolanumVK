@@ -144,7 +144,7 @@ void SimpleMeshRenderer::createDescriptors() {
 
     DescriptorLayoutBindings layoutBindings{};
     layoutBindings.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-    descriptorModule = layoutBindings.createModule(device, VK_SHADER_STAGE_VERTEX_BIT, 0);
+    descriptorModule.emplace(layoutBindings.createModule(device, VK_SHADER_STAGE_VERTEX_BIT, 0));
 
     rendererDescriptorMemoryManager = std::make_unique<DescriptorMemoryManager>(device);
     rendererDescriptorMemoryManager->addBindings(descriptorModule->getBindings());

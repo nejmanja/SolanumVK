@@ -16,8 +16,9 @@ public:
     DescriptorModule(DescriptorModule &other) = delete;
 
     DescriptorModule(DescriptorModule &&other) noexcept : device(other.device),
-                                                          layout(std::move(other.layout)),
-                                                          layoutBindings(std::move(other.layoutBindings)) {
+                                                          layout(other.layout),
+                                                          layoutBindings(other.layoutBindings) {
+        other.layout = VK_NULL_HANDLE;
     }
 
     VkDescriptorSet createSet(DescriptorMemoryManager &memoryManager) {

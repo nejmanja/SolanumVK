@@ -6,7 +6,6 @@
 #include "VulkanContext.h"
 #include "CommandManager.h"
 #include "PresentSyncManager.h"
-#include "ImGuiRenderer.h"
 #include "DescriptorMemoryManager.h"
 #include "ImageAllocator.h"
 #include "ScopedVkMemoryManager.h"
@@ -48,7 +47,7 @@ private:
     // Scene global descriptors
     // TODO: move these into the renderer, where it's actually needed...
     std::unique_ptr<DescriptorMemoryManager> sceneDescriptorMemoryManager;
-    std::unique_ptr<DescriptorModule> sceneDescriptorModule;
+    std::optional<DescriptorModule> sceneDescriptorModule;
     AllocatedBuffer sceneUniformBuffer;
     SceneDescriptor sceneDescriptor;
 

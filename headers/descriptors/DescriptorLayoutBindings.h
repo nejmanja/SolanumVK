@@ -21,7 +21,7 @@ public:
     );
 
     // Default stage flags will be applied to all bindings which didn't have their flags specified upon adding the binding.
-    std::unique_ptr<DescriptorModule> createModule(
+    DescriptorModule createModule(
         VkDevice device,
         VkShaderStageFlags defaultStageFlags,
         VkDescriptorSetLayoutCreateFlags createFlags = 0

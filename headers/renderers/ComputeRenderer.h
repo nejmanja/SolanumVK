@@ -28,7 +28,7 @@ private:
     // Pipeline with which rendering will happen
     std::unique_ptr<ComputePipeline> pipeline;
 
-    std::unique_ptr<DescriptorModule> descriptorModule;
+    std::optional<DescriptorModule> descriptorModule;
 
     const Camera *camera;
 };

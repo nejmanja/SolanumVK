@@ -13,7 +13,7 @@ void DescriptorLayoutBindings::addBinding(uint32_t bindingIdx, VkDescriptorType 
     bindings.push_back(binding);
 }
 
-std::unique_ptr<DescriptorModule> DescriptorLayoutBindings::createModule(
+DescriptorModule DescriptorLayoutBindings::createModule(
     VkDevice device, VkShaderStageFlags defaultStageFlags,
     VkDescriptorSetLayoutCreateFlags createFlags) {
     for (auto &&binding: bindings) {
@@ -33,5 +33,5 @@ std::unique_ptr<DescriptorModule> DescriptorLayoutBindings::createModule(
     auto result = vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &layout);
     VulkanUtils::CheckVkResult(result);
 
-    return std::make_unique<DescriptorModule>(device, layout, bindings);
+    return {device, layout, bindings};
 }

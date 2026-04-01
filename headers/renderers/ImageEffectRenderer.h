@@ -48,7 +48,7 @@ private:
     std::unique_ptr<GraphicsPipeline> pipeline;
     VkRenderingAttachmentInfo colorAttachmentInfo{};
     VkRenderingInfo renderingInfo{};
-    std::unique_ptr<DescriptorModule> descriptorModule;
+    std::optional<DescriptorModule> descriptorModule;
     const VkImageLayout inputFormat = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     using Renderer::initialize;

@@ -56,5 +56,5 @@ private:
 
     Transform transform;
     AllocatedBuffer transformBuffer;
-    std::unique_ptr<DescriptorModule> descriptorModule;
+    std::optional<DescriptorModule> descriptorModule;
 };

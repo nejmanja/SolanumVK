@@ -2,5 +2,6 @@
 
 DescriptorModule::~DescriptorModule() {
     // The sets will be freed implicitly when pool gets destroyed...
-    vkDestroyDescriptorSetLayout(device, layout, nullptr);
+    if (layout != VK_NULL_HANDLE)
+        vkDestroyDescriptorSetLayout(device, layout, nullptr);
 }
