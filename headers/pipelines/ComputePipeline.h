@@ -8,8 +8,6 @@ public:
 
     ~ComputePipeline() override;
 
-    void execute() override;
-
     void bindPushConstants(const void *pushConstantData, size_t size) override;
 
     void bindDescriptorSets(uint32_t setCount, const VkDescriptorSet *sets) override;

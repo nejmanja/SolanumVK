@@ -42,5 +42,5 @@ void ComputeRenderer::setupResources(const CommandManager &cmd) {
 }
 
 void ComputeRenderer::draw(const CommandManager &cmd) {
-    pipeline->execute();
+    vkCmdDispatch(cmd.get(), std::ceil(800 / 16.0), std::ceil(600 / 16.0), 1);
 }

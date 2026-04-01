@@ -123,9 +123,6 @@ void ImageEffectRenderer::draw(const CommandManager &cmd) {
     pipeline->bind(cmdBuffer);
     // bind descriptors
     pipeline->bindDescriptorSets(1, descriptorModule->getDescriptorSetPtr(0));
-    // render
-    // TODO: this execute method is dumb (it does literally nothing), remove this entirely
-    pipeline->execute();
     // Render 3 vertices, the triangle is hard-coded in the shader :D
     vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
 

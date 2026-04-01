@@ -55,11 +55,6 @@ ComputePipeline::~ComputePipeline() {
     vkDestroyPipeline(device, pipeline, nullptr);
 }
 
-void ComputePipeline::execute() {
-    // TODO: pass some info about the target of the pipeline as pipeline state when binding
-    vkCmdDispatch(boundCommandBuffer, std::ceil(800 / 16.0), std::ceil(600 / 16.0), 1);
-}
-
 void ComputePipeline::bindPushConstants(const void *pushConstantData, size_t size) {
     IPipeline::bindPushConstants(pushConstantData, size, VK_SHADER_STAGE_COMPUTE_BIT);
 }

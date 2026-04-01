@@ -27,6 +27,3 @@ void GraphicsPipeline::setScissor(VkRect2D *scissor) {
 void GraphicsPipeline::bind(VkCommandBuffer cmd) {
     IPipeline::bind(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS);
 }
-
-void GraphicsPipeline::execute() {
-}

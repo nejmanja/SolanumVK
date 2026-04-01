@@ -24,7 +24,5 @@ public:
 
     void bind(VkCommandBuffer cmd) override;
 
-    void execute() override;
-
 private:
 };
