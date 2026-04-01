@@ -22,17 +22,17 @@ include_directories(
 )
 
 # Add source files
-file(GLOB_RECURSE SOURCE_FILES
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/src/*.c
         ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 # Add header files
-file(GLOB_RECURSE HEADER_FILES
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/headers/*.h
         ${CMAKE_SOURCE_DIR}/headers/*.hpp
         ${CMAKE_SOURCE_DIR}/imgui/*.h)
 
-file(GLOB IMGUI_SOURCE_FILES
+file(GLOB IMGUI_SOURCE_FILES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/imgui/*.cpp
         ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
         ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
