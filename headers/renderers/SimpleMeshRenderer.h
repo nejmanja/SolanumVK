@@ -39,7 +39,7 @@ private:
     VkViewport viewport;
     VkRect2D scissor;
 
-    std::unique_ptr<MeshData> meshData;
+    std::optional<MeshData> meshData;
     GPUMesh gpuMeshData{};
 
     AllocatedImageResource *depthTarget;

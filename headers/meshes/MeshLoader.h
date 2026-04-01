@@ -10,7 +10,7 @@
 
 class MeshLoader {
 public:
-    static MeshData *loadMesh(VertexAttributes desiredAttributes, const std::filesystem::path &path);
+    static std::optional<MeshData> loadMesh(VertexAttributes desiredAttributes, const std::filesystem::path &path);
 
     MeshLoader() = delete;
 

@@ -6,7 +6,7 @@
 
 class MeshUploader {
 public:
-    static GPUMesh uploadMesh(const VulkanContext &vulkanContext, const MeshData *meshData);
+    static GPUMesh uploadMesh(const VulkanContext &vulkanContext, const MeshData &meshData);
 
     MeshUploader() = delete;
 };

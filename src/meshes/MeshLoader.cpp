@@ -86,7 +86,8 @@ std::vector<glm::vec2> MeshLoader::readUVs(fastgltf::Expected<fastgltf::Asset> &
 }
 
 
-MeshData *MeshLoader::loadMesh(const VertexAttributes desiredAttributes, const std::filesystem::path &path) {
+std::optional<MeshData> MeshLoader::loadMesh(const VertexAttributes desiredAttributes,
+                                             const std::filesystem::path &path) {
     fastgltf::Parser parser;
 
     auto dataBuffer = fastgltf::GltfDataBuffer::FromPath(path);
@@ -122,20 +123,20 @@ MeshData *MeshLoader::loadMesh(const VertexAttributes desiredAttributes, const s
                 colors = readColors(asset, primitive);
         }
 
-        auto *meshData = new MeshData(desiredAttributes);
+        auto meshData = MeshData(desiredAttributes);
 
-        meshData->setVertexCount(positions.size());
+        meshData.setVertexCount(positions.size());
         if (hasAllAttributes(desiredAttributes, VertexAttributes::Position))
-            meshData->setVertexAttributeData(VertexAttributes::Position, positions);
+            meshData.setVertexAttributeData(VertexAttributes::Position, positions);
         if (hasAllAttributes(desiredAttributes, VertexAttributes::Normal))
-            meshData->setVertexAttributeData(VertexAttributes::Normal, normals);
+            meshData.setVertexAttributeData(VertexAttributes::Normal, normals);
         if (hasAllAttributes(desiredAttributes, VertexAttributes::Color))
-            meshData->setVertexAttributeData(VertexAttributes::Color, colors);
+            meshData.setVertexAttributeData(VertexAttributes::Color, colors);
 
-        meshData->setIndices(indices);
+        meshData.setIndices(indices);
 
         return meshData;
     }
 
-    return nullptr;
+    return std::nullopt;
 }

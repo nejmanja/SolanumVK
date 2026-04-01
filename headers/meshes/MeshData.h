@@ -11,6 +11,14 @@ public:
     // Constructs a mesh with all provided attributes in binding 0
     explicit MeshData(VertexAttributes attributes);
 
+    MeshData(const MeshData &other) = delete;
+
+    MeshData(MeshData &&other) noexcept : vertexCount(other.vertexCount), attributes(other.attributes),
+                                          attributeBindings(std::move(other.attributeBindings)),
+                                          vertexBuffers(std::move(other.vertexBuffers)),
+                                          indices(std::move(other.indices)) {
+    }
+
     ~MeshData() = default;
 
     void setIndices(const std::vector<uint32_t> &indices) { this->indices = {indices}; }

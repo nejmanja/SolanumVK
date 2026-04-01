@@ -23,7 +23,7 @@ protected:
 private:
     void buildPipeline();
 
-    std::unique_ptr<MeshData> meshData;
+    std::optional<MeshData> meshData;
 
     std::unique_ptr<GraphicsPipeline> pipeline;
 };

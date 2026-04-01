@@ -43,7 +43,7 @@ void SimpleMeshRenderer::initialize() {
     scissor.extent.width = getOutputImage()->getExtent().width;
     scissor.extent.height = getOutputImage()->getExtent().height;
 
-    gpuMeshData = MeshUploader::uploadMesh(vulkanContext, meshData.get());
+    gpuMeshData = MeshUploader::uploadMesh(vulkanContext, meshData.value());
     memoryManager.registerResource(gpuMeshData);
 }
 
