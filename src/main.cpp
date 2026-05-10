@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "RenderingEngine.h"
 #include "Scene.h"
 #include "SceneNodeDescriptor.h"
@@ -17,6 +19,8 @@ int main() {
 }
 
 bool runTests() {
+    auto success = true;
+
     Scene scene{};
     const auto root = scene.addNode(SceneNodeDescriptor{
         .name = "Test Root", .transform = Transform(glm::vec3(1.0f, 2.0f, 3.0f))
@@ -30,15 +34,25 @@ bool runTests() {
 
     scene.addNode({.name = "Other root", .transform = {}});
 
-    scene.logScene();
-
     lv2child->setLocalPosition(glm::vec3(10.0f, 10.0f, 10.0f));
 
-    scene.logScene();
+    auto lv2childGlobalPos = lv2child->getGlobalPosition();
+    if (lv2childGlobalPos != glm::vec3(10.0f, 11.0f, 12.0f)) {
+        std::cout << "Position mismatch, got (" << lv2childGlobalPos.x << ", " << lv2childGlobalPos.y << ", " <<
+                lv2childGlobalPos.z << "), expected (10, 11, 12)" << std::endl;
+        success = false;
+    }
 
     child->setLocalPosition(glm::vec3(123.0f, 0.0f, 0.0f));
 
+    lv2childGlobalPos = lv2child->getGlobalPosition();
+    if (lv2childGlobalPos != glm::vec3(134.0f, 12.0f, 13.0f)) {
+        std::cout << "Position mismatch, got (" << lv2childGlobalPos.x << ", " << lv2childGlobalPos.y << ", " <<
+                lv2childGlobalPos.z << "), expected (134, 12, 13)" << std::endl;
+        success = false;
+    }
+
     scene.logScene();
 
-    return true;
+    return success;
 }

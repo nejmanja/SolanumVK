@@ -24,13 +24,14 @@ std::string SceneNode::toString() {
 void SceneNode::setLocalPosition(const glm::vec3 localPosition) {
     localTransform.setTranslation(localPosition);
 
-    if (parent != nullptr) {
-        globalTransform.setTransformMatrix(
-            parent->globalTransform.getTransformMatrix() * localTransform.getTransformMatrix());
-    } else {
-        globalTransform.setTransformMatrix(localTransform.getTransformMatrix());
-    }
+    recalculateGlobalTransform();
+    markChildrenGlobalTransformsStale();
+}
 
+void SceneNode::setLocalTransformMatrix(glm::mat4 mat) {
+    localTransform.setTransformMatrix(mat);
+
+    recalculateGlobalTransform();
     markChildrenGlobalTransformsStale();
 }
 

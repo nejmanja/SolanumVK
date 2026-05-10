@@ -22,5 +22,5 @@ GPUMesh MeshUploader::uploadMesh(const VulkanContext &vulkanContext, const MeshD
                                                              VMA_MEMORY_USAGE_CPU_TO_GPU);
     BufferAllocator::copyBufferData(vulkanContext, meshData.getIndices().data(), indexBufferSize, 0, indexBuffer);
 
-    return {vertexBuffer, indexBuffer};
+    return {vertexBuffer, indexBuffer, static_cast<uint32_t>(meshData.getIndices().size())};
 }

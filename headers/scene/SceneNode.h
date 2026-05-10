@@ -2,9 +2,11 @@
 
 #include <deque>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
+#include "GPUMesh.h"
 #include "SceneNodeDescriptor.h"
 #include "SceneNodeHandle.h"
 #include "Transform.h"
@@ -14,12 +16,14 @@ public:
     // Creates an empty node with an origin transform
     SceneNode() = default;
 
-    explicit SceneNode(SceneNodeDescriptor descriptor)
-        : name(std::move(descriptor.name)), localTransform(std::move(descriptor.transform)),
-          globalTransform(std::move(localTransform)) {
+    SceneNode(SceneNodeDescriptor descriptor)
+        : mesh(std::move(descriptor.gpuMesh)), name(std::move(descriptor.name)),
+          localTransform(std::move(descriptor.transform)), globalTransform(std::move(localTransform)) {
     }
 
-    SceneNode(SceneNodeDescriptor descriptor, SceneNode *parent) : name(std::move(descriptor.name)), parent(parent),
+
+    SceneNode(SceneNodeDescriptor descriptor, SceneNode *parent) : mesh(std::move(descriptor.gpuMesh)),
+                                                                   name(std::move(descriptor.name)), parent(parent),
                                                                    localTransform(descriptor.transform),
                                                                    globalTransform(parent->globalTransform.
                                                                        getTransformMatrix() * descriptor.transform.
@@ -34,6 +38,9 @@ public:
         return SceneNodeHandle{children.back().get()};
     }
 
+    void setMeshData(GPUMesh meshData) {
+        mesh = meshData;
+    }
 
     [[nodiscard]] const std::deque<std::unique_ptr<SceneNode> > &getChildren() const {
         return children;
@@ -43,7 +50,30 @@ public:
 
     [[nodiscard]] std::string toString();
 
+    const Transform &getLocalTransform() const { return localTransform; }
+
+    Transform &getGlobalTransform() {
+        if (globalTransformStale)
+            recalculateGlobalTransform();
+
+        return globalTransform;
+    }
+
+    glm::vec3 getGlobalPosition() {
+        return getGlobalTransform().getTranslation();
+    }
+
+    glm::vec3 getLocalPosition() const { return localTransform.getTranslation(); }
+
     void setLocalPosition(glm::vec3 localPosition);
+
+    [[nodiscard]] const std::optional<GPUMesh> &getMeshData() const { return mesh; }
+
+    [[nodiscard]] glm::mat4 getLocalTransformMatrix() { return localTransform.getTransformMatrix(); }
+
+    void setLocalTransformMatrix(glm::mat4 mat);
+
+    [[nodiscard]] glm::mat4 getGlobalTransformMatrix() { return getGlobalTransform().getTransformMatrix(); }
 
 private:
     // Mark entire subtree of transforms as stale. This may happen if a node's local transform changes,
@@ -51,6 +81,8 @@ private:
     void markChildrenGlobalTransformsStale() const;
 
     void recalculateGlobalTransform();
+
+    std::optional<GPUMesh> mesh{};
 
     std::string name{};
     // Deque to avoid pointer reallocs on resize, which would happen with a std::vector

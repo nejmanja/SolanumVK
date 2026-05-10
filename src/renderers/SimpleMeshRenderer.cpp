@@ -43,8 +43,18 @@ void SimpleMeshRenderer::initialize() {
     scissor.extent.width = getOutputImage()->getExtent().width;
     scissor.extent.height = getOutputImage()->getExtent().height;
 
-    gpuMeshData = MeshUploader::uploadMesh(vulkanContext, meshData.value());
+    auto gpuMeshData = MeshUploader::uploadMesh(vulkanContext, meshData.value());
     memoryManager.registerResource(gpuMeshData);
+
+    monkeyNode = scene.addNode({.name = "Monkey", .transform = Transform{glm::mat4{1.0f}}, .gpuMesh = gpuMeshData});
+    monkeyNode->addChild(
+        {
+            .name = "Monkey moon",
+            .transform = Transform{glm::vec3(2.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)},
+            .gpuMesh = gpuMeshData
+        });
+    BufferAllocator::copyBufferData(vulkanContext, &monkeyNode->getLocalTransform(), sizeof(glm::mat4), 0,
+                                    transformBuffer);
 }
 
 void SimpleMeshRenderer::draw(const CommandManager &cmd) {
@@ -85,18 +95,24 @@ void SimpleMeshRenderer::draw(const CommandManager &cmd) {
     vkCmdBeginRendering(cmdBuffer, &renderingInfo);
     pipeline->bind(cmdBuffer);
 
-    VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, descriptorModule->getDescriptorSet(0)};
-    pipeline->bindDescriptorSets(2, descriptorSets);
-
     pipeline->setViewport(&viewport);
     pipeline->setScissor(&scissor);
 
-    VkDeviceSize offset{0};
-    auto vertexBuffer = gpuMeshData.getVertexBuffer().buffer;
-    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(cmdBuffer, gpuMeshData.getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
+    int i = 0;
+    for (auto &node: scene.getRenderList()) {
+        VkDescriptorSet descriptorSets[2] = {sceneDescriptorSet, descriptorModule->getDescriptorSet(i)};
+        pipeline->bindDescriptorSets(2, descriptorSets);
 
-    vkCmdDrawIndexed(cmdBuffer, meshData->getIndices().size(), 1, 0, 0, 0);
+        auto mesh = node->getMeshData();
+        VkDeviceSize offset{0};
+        auto vertexBuffer = mesh->getVertexBuffer().buffer;
+        vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
+        vkCmdBindIndexBuffer(cmdBuffer, mesh->getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
+
+        vkCmdDrawIndexed(cmdBuffer, mesh->getIndexCount(), 1, 0, 0, 0);
+
+        i = (i + 1) % 2;
+    }
 
     vkCmdEndRendering(cmdBuffer);
 }
@@ -151,20 +167,27 @@ void SimpleMeshRenderer::createDescriptors() {
     rendererDescriptorMemoryManager->initialize();
 
     descriptorModule->createSet(*rendererDescriptorMemoryManager);
+    descriptorModule->createSet(*rendererDescriptorMemoryManager);
 
-    transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(Transform),
+    transformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(glm::mat4),
                                                       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU,
                                                       VMA_ALLOCATION_CREATE_MAPPED_BIT);
-    memoryManager.registerResource(transformBuffer);
+    otherTransformBuffer = BufferAllocator::allocateBuffer(vulkanContext, sizeof(glm::mat4),
+                                                           VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                                           VMA_MEMORY_USAGE_CPU_TO_GPU,
+                                                           VMA_ALLOCATION_CREATE_MAPPED_BIT);
 
-    transform = {
-        .model = glm::scale(glm::mat4{1.0f}, glm::vec3{5.0f})
-    };
-    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), 0, transformBuffer);
+
+    memoryManager.registerResource(transformBuffer);
+    memoryManager.registerResource(otherTransformBuffer);
 
     DescriptorWriter::writeBuffer(vulkanContext, descriptorModule->getDescriptorSet(0),
                                   VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                  transformBuffer.buffer, sizeof(Transform));
+                                  transformBuffer.buffer, sizeof(glm::mat4));
+
+    DescriptorWriter::writeBuffer(vulkanContext, descriptorModule->getDescriptorSet(1),
+                                  VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                  otherTransformBuffer.buffer, sizeof(glm::mat4));
 }
 
 void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescriptorLayout) {
@@ -188,11 +211,21 @@ void SimpleMeshRenderer::buildPipeline(const VkDescriptorSetLayout sceneDescript
 }
 
 void SimpleMeshRenderer::setupResources(const CommandManager &cmd) {
-    BufferAllocator::copyBufferData(vulkanContext, &transform, sizeof(Transform), 0, transformBuffer);
+    int i = 0;
+    for (auto &node: scene.getRenderList()) {
+        auto transformMatrix = node->getGlobalTransformMatrix();
+        auto &buffer = i == 0 ? transformBuffer : otherTransformBuffer;
+        BufferAllocator::copyBufferData(vulkanContext, &transformMatrix, sizeof(glm::mat4), 0,
+                                        buffer);
+        i++;
+    }
     depthTarget->resource.transition(cmd, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
     getOutputImage()->transition(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 }
 
 void SimpleMeshRenderer::prepareFrame(double deltaTime) {
-    transform.model = glm::rotate(transform.model, static_cast<float>(deltaTime), glm::vec3{0.0f, 1.0f, 0.0f});
+    for (auto &node: scene.getRenderList()) {
+        node->setLocalTransformMatrix(glm::rotate(node->getLocalTransformMatrix(),
+                                                  static_cast<float>(deltaTime), glm::vec3{0.0f, 1.0f, 0.0f}));
+    }
 }

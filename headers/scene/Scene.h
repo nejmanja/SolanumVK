@@ -11,16 +11,24 @@ public:
 
     SceneNodeHandle addNode(const SceneNodeDescriptor &descriptor) {
         rootObjects.emplace_back(std::make_unique<SceneNode>(descriptor));
-        renderListStale = true;
+        renderListStale = descriptor.gpuMesh.has_value();
 
         return SceneNodeHandle{rootObjects.back().get()};
     }
 
-    void logScene();
+    const RenderList &getRenderList() {
+        if (renderListStale) rebuildRenderList();
 
-    static void logRootObjectTree(SceneNode *root);
+        return renderList;
+    }
+
+    void logScene() const;
 
 private:
+    static void logRootObjectTree(SceneNode *root);
+
+    void rebuildRenderList();
+
     bool renderListStale{false};
     RenderList renderList{};
     std::deque<std::unique_ptr<SceneNode> > rootObjects{};

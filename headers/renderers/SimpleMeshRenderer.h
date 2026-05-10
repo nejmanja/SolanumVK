@@ -7,6 +7,7 @@
 #include "DescriptorModule.h"
 #include "VulkanContext.h"
 #include "GraphicsPipeline.h"
+#include "Scene.h"
 #include "ScopedVkMemoryManager.h"
 #include "SimpleRenderer.h"
 
@@ -40,7 +41,6 @@ private:
     VkRect2D scissor;
 
     std::optional<MeshData> meshData;
-    GPUMesh gpuMeshData{};
 
     AllocatedImageResource *depthTarget;
     VkRenderingAttachmentInfo depthAttachmentInfo;
@@ -50,11 +50,9 @@ private:
 
     ScopedVkMemoryManager memoryManager;
 
-    struct Transform {
-        glm::mat4 model;
-    };
-
-    Transform transform;
-    AllocatedBuffer transformBuffer;
+    AllocatedBuffer transformBuffer, otherTransformBuffer;
     std::optional<DescriptorModule> descriptorModule;
+
+    Scene scene{};
+    SceneNodeHandle monkeyNode{};
 };
