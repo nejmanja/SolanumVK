@@ -18,7 +18,7 @@ public:
 
     void logScene();
 
-    static void logRootObjectTree(const SceneNode *root);
+    static void logRootObjectTree(SceneNode *root);
 
 private:
     bool renderListStale{false};

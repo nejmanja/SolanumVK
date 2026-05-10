@@ -9,8 +9,8 @@ void Scene::logScene() {
     }
 }
 
-void Scene::logRootObjectTree(const SceneNode *root) {
-    std::stack<const SceneNode *> stack{};
+void Scene::logRootObjectTree(SceneNode *root) {
+    std::stack<SceneNode *> stack{};
     std::stack<std::string> prefixes{};
     stack.push(root);
     prefixes.emplace("");
@@ -22,6 +22,7 @@ void Scene::logRootObjectTree(const SceneNode *root) {
         prefixes.pop();
 
         std::cout << prefix << node->getName() << std::endl;
+        std::cout << '\t' << node->toString() << std::endl;
 
         for (auto &child: node->getChildren()) {
             prefixes.push(prefix + node->getName() + '/');

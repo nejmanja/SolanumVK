@@ -24,6 +24,9 @@ public:
         dirty = other.dirty;
     }
 
+    explicit Transform(const glm::vec3 translation) : Transform(translation, glm::vec3(0.0f), glm::vec3(1.0f)) {
+    }
+
     Transform(const glm::vec3 translation, const glm::vec3 rotation, const glm::vec3 scale) {
         this->translation = translation;
         this->rotation = glm::quat(glm::radians(rotation));
@@ -31,10 +34,8 @@ public:
         updateTransform();
     }
 
-    explicit Transform(const glm::mat4 &matrix) {
-        this->translation = matrix[3];
-        this->scale = glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]);
-        this->rotation = glm::quat_cast(matrix);
+    explicit Transform(const glm::mat4 matrix) {
+        setTransformMatrix(matrix);
     }
 
     glm::mat4 getTransformMatrix() {
@@ -43,6 +44,17 @@ public:
 
         return transformMatrix;
     }
+
+    void setTransformMatrix(const glm::mat4 matrix) {
+        this->translation = matrix[3];
+        this->scale = glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]);
+        this->rotation = glm::quat_cast(matrix);
+        this->transformMatrix = matrix;
+    }
+
+    [[nodiscard]] glm::vec3 getTranslation() const { return translation; }
+    [[nodiscard]] glm::vec3 getScale() const { return scale; }
+    [[nodiscard]] glm::quat getRotation() const { return rotation; }
 
     void setTranslation(const glm::vec3 &trans) {
         this->translation = trans;

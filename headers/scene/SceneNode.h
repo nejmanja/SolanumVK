@@ -41,7 +41,17 @@ public:
 
     [[nodiscard]] const std::string &getName() const { return name; }
 
+    [[nodiscard]] std::string toString();
+
+    void setLocalPosition(glm::vec3 localPosition);
+
 private:
+    // Mark entire subtree of transforms as stale. This may happen if a node's local transform changes,
+    // which invalidates all global transforms of the children
+    void markChildrenGlobalTransformsStale() const;
+
+    void recalculateGlobalTransform();
+
     std::string name{};
     // Deque to avoid pointer reallocs on resize, which would happen with a std::vector
     std::deque<std::unique_ptr<SceneNode> > children{};

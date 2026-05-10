@@ -18,13 +18,25 @@ int main() {
 
 bool runTests() {
     Scene scene{};
-    const auto root = scene.addNode(SceneNodeDescriptor{.name = "Test Root", .transform = {}});
-    root->addChild(SceneNodeDescriptor{.name = "Child1", .transform = {}});
-    root->addChild(SceneNodeDescriptor{.name = "Child2", .transform = {}});
-    const auto child = root->addChild(SceneNodeDescriptor{.name = "Child3", .transform = {}});
-    child->addChild({.name = "Lv2child", .transform = {}});
+    const auto root = scene.addNode(SceneNodeDescriptor{
+        .name = "Test Root", .transform = Transform(glm::vec3(1.0f, 2.0f, 3.0f))
+    });
+    root->addChild(SceneNodeDescriptor{.name = "Child1", .transform = Transform(glm::vec3(1.0f, 0.0f, 0.0f))});
+    root->addChild(SceneNodeDescriptor{.name = "Child2", .transform = Transform(glm::vec3(-1.0f, -2.0f, -3.0f))});
+    const auto child = root->addChild(SceneNodeDescriptor{
+        .name = "Child3", .transform = Transform{glm::vec3(-1.0f, -1.0f, -1.0f)}
+    });
+    auto lv2child = child->addChild({.name = "Lv2child", .transform = {}});
 
     scene.addNode({.name = "Other root", .transform = {}});
+
+    scene.logScene();
+
+    lv2child->setLocalPosition(glm::vec3(10.0f, 10.0f, 10.0f));
+
+    scene.logScene();
+
+    child->setLocalPosition(glm::vec3(123.0f, 0.0f, 0.0f));
 
     scene.logScene();
 
