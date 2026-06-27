@@ -104,12 +104,8 @@ void SimpleMeshRenderer::draw(const CommandManager &cmd) {
         pipeline->bindDescriptorSets(2, descriptorSets);
 
         auto mesh = node->getMeshData();
-        VkDeviceSize offset{0};
-        auto vertexBuffer = mesh->getVertexBuffer().buffer;
-        vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &offset);
-        vkCmdBindIndexBuffer(cmdBuffer, mesh->getIndexBuffer().buffer, 0, VK_INDEX_TYPE_UINT32);
-
-        vkCmdDrawIndexed(cmdBuffer, mesh->getIndexCount(), 1, 0, 0, 0);
+        mesh->bind(cmdBuffer);
+        mesh->draw(cmdBuffer);
 
         i = (i + 1) % 2;
     }

@@ -12,6 +12,10 @@ public:
 
     ~GPUMesh() = default;
 
+    void bind(VkCommandBuffer cmd) const;
+
+    void draw(VkCommandBuffer cmd) const;
+
     const AllocatedBuffer &getVertexBuffer() const { return vertexBuffer; }
     const AllocatedBuffer &getIndexBuffer() const { return indexBuffer; }
 
